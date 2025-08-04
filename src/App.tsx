@@ -1,25 +1,49 @@
-// import { useState } from 'react'
-import './App.css'
-import React from 'react'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import Login from './pages/Login'
-import Dashboard from './pages/Dashboard'
+
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AppSidebar } from "@/components/AppSidebar";
+import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
+import Symptoms from "./pages/Symptoms";
+import SubmitForm from "./pages/SubmitForm";
+import DataDisplay from "./pages/DataDisplay";
+import NotFound from "./pages/NotFound";
+import AuthLayout from "./layouts/AuthLayout";
+import DashboardLayout from "./layouts/DashboardLayout";
+import SurveyData from "./pages/SurveyData";
 
 function App() {
+  const queryClient = new QueryClient();
 
   return (
-    <>
-    {/* <React.StrictMode> */}
-      <BrowserRouter>
-        <Routes>
-          <Route path='/' element={<Navigate to='/login' replace />} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/dashboard' element={<Dashboard  />} />
-        </Routes>
-      </BrowserRouter>
-    {/* </React.StrictMode> */}
-    </>
-  )
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <main className="flex-1 bg-medical-50">
+            <Routes>
+              <Route element={<AuthLayout />}>
+                <Route path="/" element={<Navigate to="/login" replace />} />
+                <Route path="/login" element={<Login />} />
+                {/* <Route path="/signup" element={<SignUp />} /> */}
+              </Route>
+              <Route element={<DashboardLayout />}>
+                <Route path="/symptoms" element={<Symptoms />} />
+                <Route path="/survey-data" element={<SurveyData />} />
+                <Route path="/data-display" element={<DataDisplay />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
 }
 
-export default App
+export default App;
