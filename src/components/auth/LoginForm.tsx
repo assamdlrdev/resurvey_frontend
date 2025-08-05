@@ -1,34 +1,74 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+// import { useToast } from "@/hooks/use-toast";
 import { LogIn } from "lucide-react";
+import { loadCaptchaEnginge, LoadCanvasTemplate, LoadCanvasTemplateNoReload, validateCaptcha } from 'react-simple-captcha';
+import { toast, Toaster } from "react-hot-toast";
+import Constants from "@/config/Constants";
+import ApiService from "@/services/ApiService";
+import StorageService from "@/services/StorageService";
+import Loader from "../Loader";
 
 export default function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const navigate = useNavigate();
-  const { toast } = useToast();
+  // const { toast } = useToast();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [captcha, setCaptcha] = useState<string>('');
+
+  useEffect(() => {
+        if(location.pathname == '/login') {
+            loadCaptchaEnginge(6);
+        }
+  }, [location]);
+
+  const reset = () => {
+      setUsername('');
+      setPassword('');
+  };
+
+  const goTo = (url: string) => {
+      navigate(url);
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (email && password) {
-      toast({
-        title: "Login successful",
-        description: "Welcome back!",
-      });
-      navigate("/symptoms");
-    } else {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive",
-      });
+    if(username == '' || username == undefined || password == '' || password == undefined) {
+        toast.error("Inputs not set!");
+        
+        return;
     }
+    if(!validateCaptcha(captcha)) {
+        toast.error("Captcha does not match!");
+        return;
+    }
+    loadCaptchaEnginge(6);
+    setCaptcha('');
+    
+    
+    const data = {
+        api_key:Constants.API_SECRET,
+        user_name: username,
+        password: password
+    };
+    setLoading(true);
+    const response = await ApiService.get('login', JSON.stringify(data));
+    setLoading(false);
+
+    if(response.status !== 'y') {
+        toast.error(response.msg);
+        reset();
+        return;
+    }
+    StorageService.jwtSave(response.data);
+    toast.success(response.msg);
+    goTo('/survey-data');
   };
 
   return (
@@ -42,14 +82,14 @@ export default function LoginForm() {
         {/* ...inputs and button unchanged... */}
         <div className="space-y-2">
           <label htmlFor="email" className="text-sm font-medium text-gray-700">
-            Email
+            Username
           </label>
           <Input
-            id="email"
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            id="use_name"
+            type="text"
+            placeholder="Enter Username"
+            value={username}
+            onInput={(e) => setUsername(e.currentTarget.value)}
             required
           />
         </div>
@@ -62,7 +102,21 @@ export default function LoginForm() {
             type="password"
             placeholder="Enter your password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onInput={(e) => setPassword(e.currentTarget.value)}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <label htmlFor="captcha" className="text-sm font-medium text-gray-700">
+            Captcha
+          </label>
+          <LoadCanvasTemplate />
+          <Input
+            id="captcha"
+            type="text"
+            placeholder="Enter Username"
+            value={captcha}
+            onInput={(e) => setCaptcha(e.currentTarget.value)}
             required
           />
         </div>
@@ -70,6 +124,8 @@ export default function LoginForm() {
           <LogIn className="mr-2 h-4 w-4" /> Login
         </Button>
       </form>
+      <Loader loading={loading} />
+      <Toaster position="top-center" />
       {/* <div className="text-center">
         <button
           onClick={() => navigate("/signup")}
