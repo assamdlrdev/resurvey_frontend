@@ -15,7 +15,7 @@ const StorageService = {
     },
     getJwtCookieData: (token: any) => {
         if(!token) {
-            return {id: 0, role_id: 0};
+            return [];
         }
         const decodedToken = jwtDecode(token);
 

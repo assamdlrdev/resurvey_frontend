@@ -53,7 +53,7 @@ export default function LoginForm() {
     
     
     const data = {
-        api_key:Constants.API_SECRET,
+        // api_key:Constants.API_SECRET,
         user_name: username,
         password: password
     };

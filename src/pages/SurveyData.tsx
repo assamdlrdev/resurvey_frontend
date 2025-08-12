@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,46 +6,288 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useForm } from "react-hook-form";
-import { useToast } from "@/hooks/use-toast";
+// import { useToast } from "@/hooks/use-toast";
 import ChithaView from "@/components/ChithaView";
+import { toast, Toaster } from "react-hot-toast";
+import { useLocation } from "react-router-dom";
+import Constants from "@/config/Constants";
+import ApiService from "@/services/ApiService";
+import StorageService from "@/services/StorageService";
+import Loader from "@/components/Loader";
+import PartDagEntryForm from "@/components/PartDagEntryForm";
 
-type FormMode = "reference" | "input";
+// type FormMode = "reference" | "input";
 
-interface InputFormData {
-  title: string;
-  description: string;
-  category: string;
-  priority: string;
+// interface InputFormData {
+//   district: string;
+//   circle: string;
+//   mouza: string;
+//   village: string;
+//   lot: string;
+//   dagNo: string
+// }
+
+// const mockReferenceData = [
+//   { id: 1, title: "Sample Entry 1", category: "Type A", priority: "High", description: "This is a sample reference entry for demonstration purposes." },
+//   { id: 2, title: "Sample Entry 2", category: "Type B", priority: "Medium", description: "Another reference entry showing the data structure." },
+//   { id: 3, title: "Sample Entry 3", category: "Type A", priority: "Low", description: "Third sample entry for reference viewing." },
+// ];
+
+interface DagType {
+  dag_no: string
 }
 
-const mockReferenceData = [
-  { id: 1, title: "Sample Entry 1", category: "Type A", priority: "High", description: "This is a sample reference entry for demonstration purposes." },
-  { id: 2, title: "Sample Entry 2", category: "Type B", priority: "Medium", description: "Another reference entry showing the data structure." },
-  { id: 3, title: "Sample Entry 3", category: "Type A", priority: "Low", description: "Third sample entry for reference viewing." },
-];
+
+
 
 export default function SurveyData() {
-  const [mode, setMode] = useState<FormMode>("reference");
+  // const [mode, setMode] = useState<FormMode>("reference");
+  const [mode, setMode] = useState<string>("input");
   const [showDagDropdown, setShowDagDropdown] = useState(false);
-  const [dagNos, setDagNos] = useState<string[]>(
-    Array.from({ length: 50 }, (_, i) => `${i + 1}`)
+  const [dagNos, setDagNos] = useState<DagType[]>([]
+    // Array.from({ length: 50 }, (_, i) => `${i + 1}`)
   );
-  const [dagNo, setDagNo] = useState("");
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<InputFormData>();
-  const { toast } = useToast();
+  const [dagNo, setDagNo] = useState<string>("");
+  // const { register, handleSubmit, reset, formState: { errors } } = useForm<InputFormData>();
+  // const { toast } = useToast();
+  const location = useLocation();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [district, setDistrict] = useState<string>('');
+  const [circle, setCircle] = useState<string>('');
+  const [mouza, setMouza] = useState<string>('');
+  const [lot, setLot] = useState<string>('');
+  const [vill, setVill] = useState<string>('');
+  // const [dag, setDag] = useState<string>('');
+  const [districtData, setDistrictData] = useState<any[]>([]);
+  const [circleData, setCircleData] = useState<any[]>([]);
+  const [mouzaData, setMouzaData] = useState<any[]>([]);
+  const [lotData, setLotData] = useState<any[]>([]);
+  const [villData, setVillData] = useState<any[]>([]);
+  const [originalDagInfo, setOriginalDagInfo] = useState<any[]>([]);
 
-  const onSubmit = (data: InputFormData) => {
-    console.log("Form submitted:", data);
-    toast({
-      title: "Form submitted successfully",
-      description: "Your data has been saved.",
-    });
-    reset();
+
+  useEffect(() => {
+    if(location.pathname == '/survey-data') {
+      getDistricts();
+    }
+  }, [location]);
+
+  useEffect(() => {
+    if(district != '') {
+      getCircles(district);
+    }
+    else {
+      // toast.error('District not set');
+      // return;
+    }
+  }, [district]);
+
+  useEffect(() => {
+    if(circle != '') {
+      getMouza(circle);
+    }
+    else {
+      // toast.error('Circle not set');
+      // return;
+    }
+  }, [circle]);
+
+  useEffect(() => {
+    if(mouza != '') {
+      getLot(mouza);
+    }
+    else {
+      // toast.error('Circle not set');
+      // return;
+    }
+  }, [mouza]);
+
+  useEffect(() => {
+    if(lot != '') {
+      getVillage(lot);
+    }
+  }, [lot]);
+
+  useEffect(() => {
+    if(vill != '') {
+      getDags(vill);
+    }
+  }, [vill]);
+
+  useEffect(() => {
+    if(dagNo != '') {
+      // getAllInfo(dagNo);
+    }
+  }, [dagNo]);
+
+  const resetField = (type: string) => {
+    if(type == 'circle') {
+      setMouzaData([]);
+      setLotData([]);
+      setVillData([]);
+      setDagNos([]);
+
+      setDagNo('');
+      setVill('');
+      setLot('');
+      setMouza('');
+    }
+    else if (type == 'mouza') {
+      setLotData([]);
+      setVillData([]);
+      setDagNos([]);
+
+      setDagNo('');
+      setVill('');
+      setLot('');
+    }
+    else if (type == 'lot') {
+      setVillData([]);
+      setDagNos([]);
+
+      setDagNo('');
+       setVill('');
+    }
+    else if (type == 'vill') {
+      setDagNos([]);
+
+      setDagNo('');
+    }
+   };
+
+  const getDistricts = async () => {
+    const data = {
+      // api_key:Constants.API_SECRET
+    };
+    setLoading(true);
+    const response = await ApiService.get('get_districts', JSON.stringify(data));
+    setLoading(false);
+
+    if(response.status !== 'y') {
+      toast.error(response.msg);
+      return;
+    }
+    // const districts = StorageService.getJwtCookieData(response.data);
+    const districtsArr = Object.entries(response.data).map(([key, value]) => ({ key, value }));
+    setDistrictData(districtsArr);
+    
   };
+
+  const getCircles = async (d: any) => {
+    resetField('circle');
+    const data = {
+      // api_key:Constants.API_SECRET,
+      dist_code: d
+    };
+    setLoading(true);
+    const response = await ApiService.get('get_circles', JSON.stringify(data));
+    setLoading(false);
+
+    if(response.status !== 'y') {
+      toast.error(response.msg);
+      return;
+    }
+    // const circles = StorageService.getJwtCookieData(response.data);
+    setCircleData(response.data);
+  };
+
+  const getMouza = async (c: any) => {
+    resetField('mouza');
+    const data = {
+      // api_key:Constants.API_SECRET,
+      cir_code: c
+    };
+    setLoading(true);
+    const response = await ApiService.get('get_mouzas', JSON.stringify(data));
+    setLoading(false);
+
+    if(response.status !== 'y') {
+      toast.error(response.msg);
+      return;
+    }
+
+    setMouzaData(response.data);
+    // console.log(response);
+
+  };
+
+  const getLot = async (m: any) => {
+    resetField('lot');
+    const data = {
+      mouza_pargona_code: m
+    };
+    setLoading(true);
+    const response = await ApiService.get('get_lots', JSON.stringify(data));
+    setLoading(false);
+
+    if(response.status !== 'y') {
+      toast.error(response.msg);
+      return;
+    }
+
+    setLotData(response.data);
+
+    // console.log(response);
+  };
+ 
+  const getVillage = async(l:any) => {
+    resetField('vill');
+    const data = {
+      lot_no: l
+    };
+    setLoading(true);
+    const response = await ApiService.get('get_vills', JSON.stringify(data));
+    setLoading(false);
+
+    if(response.status !== 'y') {
+      toast.error(response.msg);
+      return;
+    }
+
+    // console.log(response.data);
+
+    setVillData(response.data);
+  };
+
+  const getDags = async(v: any) => {
+    const data = {
+      vill_townprt_code: v
+    };
+
+    setLoading(true);
+    const response = await ApiService.get('get_dags', JSON.stringify(data));
+    setLoading(false);
+
+    if(response.status !== 'y') {
+      toast.error(response.msg);
+      return;
+    }
+
+    // console.log(response.data);
+
+    setDagNos(response.data);
+  };
+
+  // const getAllInfo = async (dagNo: string) => {
+    
+
+
+  //   setOriginalDagInfo([]);
+  // };
+
+  // const onSubmit = (data: InputFormData) => {
+  //   console.log("Form submitted:", data);
+  //   toast({
+  //     title: "Form submitted successfully",
+  //     description: "Your data has been saved.",
+  //   });
+  //   reset();
+  // };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-medical-50 to-medical-100 p-4">
-      <div className="max-w-6xl mx-auto space-y-6">
+    
+      <div className="sm:max-w-3xl lg:max-w-screen-2xl mx-auto space-y-4">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-medical-900 mb-2">Survey Form</h1>
         </div>
@@ -56,93 +298,102 @@ export default function SurveyData() {
                     <select
                         id="district"
                         className="w-full border rounded px-3 py-2 mt-1"
-                        {...register("district", { required: "District is required" })}
+                        value={district}
+                        onChange={(e: any) => setDistrict(e.currentTarget.value)}
                     >
-                        <option value="">Select District</option>
-                        <option value="District A">District A</option>
-                        <option value="District B">District B</option>
-                        <option value="District C">District C</option>
+                      <option value="">Select District</option>
+                      {
+                        districtData && districtData.length > 0 && districtData.map((ddata, index) => <option key={index} value={ddata.key}>{ddata.value}</option>)
+                      }
+                       
                     </select>
-                    {errors.district && (
-                        <p className="text-sm text-destructive">{errors.district.message}</p>
-                    )}
+                    
                 </div>
                 <div>
                     <Label htmlFor="circle">Circle</Label>
                     <select
                         id="circle"
                         className="w-full border rounded px-3 py-2 mt-1"
-                        {...register("circle", { required: "Circle is required" })}
+                        value={circle}
+                        onChange={(e: any) => setCircle(e.currentTarget.value)}
                     >
-                        <option value="">Select Circle</option>
-                        <option value="Circle X">Circle X</option>
-                        <option value="Circle Y">Circle Y</option>
-                        <option value="Circle Z">Circle Z</option>
+                      <option value="">Select Circle</option>
+                      {circleData && circleData.length > 0 && circleData.map((cdata, index) => <option key={index} value={`${cdata.dist_code}-${cdata.subdiv_code}-${cdata.cir_code}`}>{`${cdata.loc_name} (${cdata.locname_eng})`}</option>)}
                     </select>
-                    {errors.circle && (
-                        <p className="text-sm text-destructive">{errors.circle.message}</p>
-                    )}
+                    
                 </div>
                 <div>
                     <Label htmlFor="mouza">Mouza</Label>
                     <select
                         id="mouza"
                         className="w-full border rounded px-3 py-2 mt-1"
-                        {...register("mouza", { required: "Mouza is required" })}
+                        value={mouza}
+                        onChange={(e: any) => setMouza(e.currentTarget.value)}
                     >
-                        <option value="">Select Mouza</option>
-                        <option value="Mouza 1">Mouza 1</option>
-                        <option value="Mouza 2">Mouza 2</option>
-                        <option value="Mouza 3">Mouza 3</option>
+                      <option value="">Select Mouza</option>
+
+                      {
+                        mouzaData && mouzaData.length > 0 && mouzaData.map((mdata, index) => <option key={index} value={`${mdata.dist_code}-${mdata.subdiv_code}-${mdata.cir_code}-${mdata.mouza_code}`}>{`${mdata.loc_name} (${mdata.locname_eng})`}</option>)
+                      }
                     </select>
-                    {errors.mouza && (
-                        <p className="text-sm text-destructive">{errors.mouza.message}</p>
-                    )}
+                    
+                </div>
+                <div>
+                    <Label htmlFor="lot">Lot</Label>
+                    <select
+                        id="lot"
+                        className="w-full border rounded px-3 py-2 mt-1"
+                        value={lot}
+                        onChange={(e: any) => setLot(e.currentTarget.value)}
+                    >
+                      <option value="">Select Lot</option>
+                      {
+                        lotData && lotData.length > 0 && lotData.map((ldata, index) => <option key={index} value={`${ldata.dist_code}-${ldata.subdiv_code}-${ldata.cir_code}-${ldata.mouza_code}-${ldata.lot_no}`}>{`${ldata.loc_name} (${ldata.locname_eng})`}</option>)
+                      }
+                    </select>
+                    
                 </div>
                 <div>
                     <Label htmlFor="village">Village</Label>
                     <select
                         id="village"
                         className="w-full border rounded px-3 py-2 mt-1"
-                        {...register("village", { required: "Village is required" })}
+                        value={vill}
+                        onChange={(e: any) => setVill(e.currentTarget.value)}
                     >
                         <option value="">Select Village</option>
-                        <option value="Village A">Village A</option>
-                        <option value="Village B">Village B</option>
-                        <option value="Village C">Village C</option>
+                      {
+                        villData && villData.length > 0 && villData.map((vdata, index) => <option key={index} value={`${vdata.dist_code}-${vdata.subdiv_code}-${vdata.cir_code}-${vdata.mouza_code}-${vdata.lot_no}-${vdata.village_code}`}>{`${vdata.loc_name} (${vdata.locname_eng})`}</option>)
+                      }
                     </select>
-                    {errors.village && (
-                        <p className="text-sm text-destructive">{errors.village.message}</p>
-                    )}
+                    
                 </div>
             </div>
             <div className="mt-4 relative">
                 <Label htmlFor="dagNo">Dag No</Label>
                 <Input
                     id="dagNo"
-                    {...register("dagNo", { required: "Dag No is required" })}
                     placeholder="Enter Dag No"
                     autoComplete="off"
                     onFocus={() => setShowDagDropdown(true)}
                     onBlur={() => setTimeout(() => setShowDagDropdown(false), 150)}
                     value={dagNo}
+                    onChange={(e: any) => setDagNo(e.currentTarget.value)}
                 />
-                {errors.dagNo && (
-                    <p className="text-sm text-destructive">{errors.dagNo.message}</p>
-                )}
+                
                 {showDagDropdown && (
                     <div className="absolute left-0 right-0 z-10 bg-white border rounded shadow mt-1 max-h-40 overflow-y-auto p-2 flex flex-wrap gap-2">
-                        {dagNos.map((dag) => (
+                        {dagNos && dagNos.length > 0 && dagNos.map((dag, index) => (
                             <button
                                 type="button"
-                                key={dag}
+                                key={index}
                                 className="text-center rounded-full bg-medical-100 hover:bg-medical-200 w-10 h-10 flex items-center justify-center font-semibold text-medical-900 shadow aspect-square"
                                 onMouseDown={() => {
-                                    setDagNo(dag);
+                                    setDagNo(dag.dag_no);
                                     setShowDagDropdown(false);
                                 }}
                             >
-                                {dag}
+                                {dag.dag_no}
                             </button>
                         ))}
                     </div>
@@ -153,22 +404,22 @@ export default function SurveyData() {
           <ToggleGroup
             type="single"
             value={mode}
-            onValueChange={(value) => value && setMode(value as FormMode)}
+            onValueChange={(val) => setMode(val)}
             className="bg-white rounded-lg p-1 shadow-sm"
           >
             <ToggleGroupItem value="reference" className="px-6 py-2">
-              Data Reference
+              Dharitry Data
             </ToggleGroupItem>
             <ToggleGroupItem value="input" className="px-6 py-2">
-              Input Form
+              Part Dag Entry
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
 
         <Card className="w-full">
           <CardHeader>
-            <CardTitle>
-              {mode === "reference" ? "Data Reference View" : "Input Form"}
+            <CardTitle className="flex justify-center">
+              {mode === "reference" ? "Dharitry Data" : "Part Dag Entry"}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -177,71 +428,13 @@ export default function SurveyData() {
                 <ChithaView />
               </div>
             ) : (
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="title">Title</Label>
-                    <Input
-                      id="title"
-                      {...register("title", { required: "Title is required" })}
-                      placeholder="Enter title"
-                    />
-                    {errors.title && (
-                      <p className="text-sm text-destructive">{errors.title.message}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Category</Label>
-                    <Input
-                      id="category"
-                      {...register("category", { required: "Category is required" })}
-                      placeholder="Enter category"
-                    />
-                    {errors.category && (
-                      <p className="text-sm text-destructive">{errors.category.message}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="priority">Priority</Label>
-                  <Input
-                    id="priority"
-                    {...register("priority", { required: "Priority is required" })}
-                    placeholder="Enter priority (High/Medium/Low)"
-                  />
-                  {errors.priority && (
-                    <p className="text-sm text-destructive">{errors.priority.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    {...register("description", { required: "Description is required" })}
-                    placeholder="Enter description"
-                    rows={4}
-                  />
-                  {errors.description && (
-                    <p className="text-sm text-destructive">{errors.description.message}</p>
-                  )}
-                </div>
-
-                <div className="flex justify-end space-x-4">
-                  <Button type="button" variant="outline" onClick={() => reset()}>
-                    Reset
-                  </Button>
-                  <Button type="submit">
-                    Submit
-                  </Button>
-                </div>
-              </form>
+              <PartDagEntryForm dagNo={dagNo} setDagNo={setDagNo} vill={vill} setVill={setVill} />
             )}
           </CardContent>
         </Card>
       </div>
+      <Toaster position="top-center" />
+      <Loader loading={loading} />
     </div>
   );
 }

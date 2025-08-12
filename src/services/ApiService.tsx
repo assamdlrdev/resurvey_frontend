@@ -29,7 +29,8 @@ const ApiService = {
     },
     get: async (endpoint: string, data: any) => {
         let parsedData = JSON.parse(data);
-        parsedData.token = await StorageService.getJwtCookie();
+        // parsedData.token = await StorageService.getJwtCookie();
+        parsedData.api_key = Constants.API_SECRET;
         try{
             const result = await fetch(`${Constants.API_BASE_URL + endpoint}`
                 ,{
@@ -37,6 +38,7 @@ const ApiService = {
                     headers: {
                         'Content-Type' : 'application/json'
                     },
+                    credentials: 'include',
                     body: JSON.stringify(parsedData)
                 }
             );
