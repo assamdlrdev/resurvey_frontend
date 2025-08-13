@@ -87,6 +87,27 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
     const [loading, setLoading] = useState<boolean>(false);
     const [finalPartDag, setFinalPartDag] = useState<string>('');
     const [possessors, setPossessors] = useState<any[]>([]);
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+
+    //Modal Inputs
+    const [posName, setPosName] = useState<string>('');
+    const [posGuardianName, setPosGuardianName] = useState<string>('');
+    const [posGuardianRelation, setPosGuardianRelation] = useState<string>('');
+    const [posPattadarRelation, setPosPattadarRelation] = useState<string>('');
+    const [posModeOfAcquisition, setPosModeOfAcquisition] = useState<string>('');
+    const [posNameMut, setPosNameMut] = useState<string>('');
+    const [posFatherNameMut, setPosFatherNameMut] = useState<string>('');
+    const [posAddressMut, setPosAddressMut] = useState<string>('');
+    // const [posTenant, setPosTenant] = useState<string>('');
+    // const [posTenantName, setPosTenantName] = useState<string>('');
+    // const [posTenantFatherName, setPosTenantFatherName] = useState<string>('');
+    // const [posTenantAddress, setPosTenantAddress] = useState<string>('');
+    const [posTenantRelation, setPosTenantRelation] = useState<string>('');
+    // const [posTenantType, setPosTenantType] = useState<string>('');
+    const [posRemark, setPosRemark] = useState<string>('');
+    const [updateButton, setUpdateButton] = useState<boolean>(false);
+    const [dharTenants, setDharTenants] = useState<any[]>([]);
+    const [posTenants, setPosTenants] = useState<any[]>([]);
 
 
     useEffect(() => {
@@ -168,6 +189,7 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
         }
 
         const partDagDetails = response.data;
+        // console.log(partDagDetails);
         if(partDagDetails.from_chitha == 1) {
             const dag_area_sqmtr = partDagDetails.dag_area_sqmtr ? partDagDetails.dag_area_sqmtr : 0;
             setAreaSm(dag_area_sqmtr);
@@ -176,6 +198,9 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
             setPattaTypeCode(partDagDetails.patta_type_code);
             setDagLandRevenue(partDagDetails.dag_revenue);
             setDagLocalTax(partDagDetails.dag_local_tax);
+            setPattadars(partDagDetails.pattadars);
+            setUpdateButton(true);
+            setPossessors(partDagDetails.possessors);
         }
         if(partDagDetails.from_bhunaksha == 1) {
             const dag_area_sqmtr = partDagDetails.dag_area_sqmtr ? partDagDetails.dag_area_sqmtr : 0;
@@ -184,6 +209,9 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
             setPattaNo(originalPattaNo);
             setPattaTypeCode(originalPattaTypeCode);
             setTriggerLandRevenue(dag_area_sqmtr);
+            setPattadars([]);
+            setUpdateButton(false);
+            setPossessors([]);
             // setDagLandRevenue(0);
             // setDagLocalTax(0);
         }
@@ -196,10 +224,10 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
             setTriggerLandRevenue('');
             setDagLandRevenue(0);
             setDagLocalTax(0);
+            setPattadars([]);
+            setUpdateButton(false);
+            setPossessors([])
         }
-
-        console.log(response);
-
     };
 
     const getData = async (dagNo: string, vill: string) => {
@@ -291,7 +319,43 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
         return;
         }
 
+        toast.success(response.msg);
+
+
         console.log(response);
+    };
+
+    const modalOpen = (e: any) => {
+        console.log(e.currentTarget.id, dagNo, vill);
+        getTenants(vill, dagNo);
+        setIsOpen(true);
+    };
+
+    const getTenants = async (vill: string, dagNo: any) => {
+        const data = {
+            vill_townprt_code: vill,
+            dag_no: dagNo
+        };
+
+        setLoading(true);
+        const response = await ApiService.get('get_tenants', JSON.stringify(data));
+        setLoading(false);
+
+        if(response.status !== 'y') {
+        toast.error(response.msg);
+        return;
+        }
+
+        console.log(response.data);
+    };
+
+    const handleUpdatePartDag = async () => {
+        console.log('update Called');
+    };
+
+    const handleTenantSelect = (val: any) => {
+        setPosTenants(val);
+        console.log(val);
     };
 
 
@@ -576,21 +640,24 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
                     )}
                     </div> */}
 
-                    <div className="flex justify-end space-x-4">
-                        {/* <Button type="button" variant="outline" onClick={() => reset()}>
-                        Reset
-                        </Button> */}
+                    {!updateButton && <div className="flex justify-end space-x-4">
                         <Button type="submit" className="">
+                        Submit
+                        </Button>
+                    </div>}
+                    {updateButton && <div className="flex justify-end space-x-4">
+                        <Button type="button" className="" onClick={handleUpdatePartDag}>
                         Update
                         </Button>
-                    </div>
+                    </div>}
+
                 </form>
                 {finalPartDag && finalPartDag!=='' && <div>
                     <div className="mt-4">
                         <Card className="w-full">
                             <CardHeader className="flex-row items-center justify-between">
                                 <CardTitle>Possessors</CardTitle>
-                                <Button type="button" className="">
+                                <Button type="button" id={finalPartDag} className="" onClick={modalOpen}>
                                     Add Possessor
                                 </Button>
                             </CardHeader>
@@ -622,7 +689,22 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
                                         <tbody>
                                             {possessors && possessors.length > 0 && possessors.map((possessor, index) => <tr key={index} className="border-b hover:bg-gray-50">
                                                 <td className="px-4 py-2">
-
+                                                    {possessor.name}
+                                                </td>
+                                                <td className="px-4 py-2">
+                                                    {possessor.guard_name}
+                                                </td>
+                                                <td className="px-4 py-2">
+                                                    {possessor.guard_relation_name}
+                                                </td>
+                                                <td className="px-4 py-2">
+                                                    {possessor.pattadar_relation_name}
+                                                </td>
+                                                <td className="px-4 py-2">
+                                                    {possessor.mode_of_acquisition_name}
+                                                </td>
+                                                <td className="px-4 py-2">
+                                                    <Button className="bg-red-500 hover:bg-red-600 text-white" id={`${possessor.dist_code}-${possessor.subdiv_code}-${possessor.cir_code}-${possessor.mouza_pargona_code}-${possessor.lot_no}-${possessor.vill_townprt_code}-${possessor.old_dag_no}-${possessor.part_dag}`}>Delete</Button>
                                                 </td>
                                             </tr>)}
                                             {(!possessors || possessors.length < 1) && <tr className="border-b hover:bg-gray-50">
@@ -635,6 +717,236 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
                                 </div>
                             </CardContent>
                         </Card>
+                    </div>
+                </div>}
+                {finalPartDag && finalPartDag!=='' && isOpen && <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          
+                    <div className="bg-white rounded-lg shadow-lg w-1/2 p-6 relative">
+                        <button
+                        onClick={() => setIsOpen(false)}
+                        className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+                        >
+                        ✕
+                        </button>
+
+                        <Card className="w-full my-4">
+                            <CardHeader className="flex-row items-center justify-between">
+                                <CardTitle className="w-full text-center">Add Possessor</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="possessor_name">Possessor Name</Label>
+                                        <Input
+                                        id="possessor_name"
+                                        type="text"
+                                        placeholder="Possessor Name"
+                                        value={posName}
+                                        onInput={(e: any) => setPosName(e.currentTarget.value)}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="possessor_guard_name">Possessor's Guardian Name</Label>
+                                        <Input
+                                        id="possessor_guard_name"
+                                        type="text"
+                                        placeholder="Possessor's Guardian Name"
+                                        value={posGuardianName}
+                                        onInput={(e: any) => setPosGuardianName(e.currentTarget.value)}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="possessor_guard_relation">Possessor's Guardian Relation</Label>
+                                        <select 
+                                            id="possessor_guard_relation"
+                                            // {...register("curr_land_use", { required: "Current Land Class Use is required" })}
+                                            className="w-full border rounded px-3 py-2 mt-1" 
+                                            value={posGuardianRelation} 
+                                            onChange={(e: any) => setPosGuardianRelation(e.currentTarget.value)}
+                                        >
+                                            <option value="">Select Relation</option>
+                                            <option value="f">পিতৃ</option>
+                                            <option value="m">মাতৃ</option>
+                                            <option value="h">পতি</option>
+                                            <option value="w">পত্নী</option>
+                                            <option value="u">অভিভাৱক</option>
+                                            
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="possessor_pattadar_relation">Possessor's Relation with Pattadar</Label>
+                                        <select 
+                                            id="possessor_pattadar_relation"
+                                            // {...register("curr_land_use", { required: "Current Land Class Use is required" })}
+                                            className="w-full border rounded px-3 py-2 mt-1" 
+                                            value={posPattadarRelation} 
+                                            onChange={(e: any) => setPosPattadarRelation(e.currentTarget.value)}
+                                        >
+                                            <option value="">Select Relation</option>
+                                            <option value="f">পিতৃ</option>
+                                            <option value="m">মাতৃ</option>
+                                            <option value="h">পতি</option>
+                                            <option value="w">পত্নী</option>
+                                            <option value="u">অভিভাৱক</option>
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="mode_of_acquisition">Mode of Acquisition by possessor</Label>
+                                        <select 
+                                            id="mode_of_acquisition"
+                                            // {...register("curr_land_use", { required: "Current Land Class Use is required" })}
+                                            className="w-full border rounded px-3 py-2 mt-1" 
+                                            value={posModeOfAcquisition} 
+                                            onChange={(e: any) => setPosModeOfAcquisition(e.currentTarget.value)}
+                                        >
+                                            <option value="">Select Mode</option>
+                                            <option value="s">Sale</option>
+                                            <option value="m">Mortgage</option>
+                                            <option value="l">Lease</option>
+                                            
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="possessor_mut_name">Proposed Possessor Name for Mutation</Label>
+                                        <Input
+                                        id="possessor_mut_name"
+                                        type="text"
+                                        placeholder="Possessor Name for Mutation"
+                                        value={posNameMut}
+                                        onInput={(e: any) => setPosNameMut(e.currentTarget.value)}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="possessor_father_mut_name">Proposed Possessor Father's Name for Mutation</Label>
+                                        <Input
+                                        id="possessor_father_mut_name"
+                                        type="text"
+                                        placeholder="Possessor Father Name for Mutation"
+                                        value={posFatherNameMut}
+                                        onInput={(e: any) => setPosFatherNameMut(e.currentTarget.value)}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="possessor_address_mut">Possessor Address for Mutation</Label>
+                                        <Input
+                                        id="possessor_address_mut"
+                                        type="text"
+                                        placeholder="Possessor Address for Mutation"
+                                        value={posAddressMut}
+                                        onInput={(e: any) => setPosAddressMut(e.currentTarget.value)}
+                                        />
+                                    </div>
+                                    {/* <div className="space-y-2">
+                                        <Label htmlFor="possessor_tenant_name">Tenant Name</Label>
+                                        <Input
+                                        id="possessor_tenant_name"
+                                        type="text"
+                                        placeholder="Possessor Tenant Name"
+                                        value={posTenantName}
+                                        onInput={(e: any) => setPosTenantName(e.currentTarget.value)}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="possessor_tenant_father_name">Tenant's Father Name</Label>
+                                        <Input
+                                        id="possessor_tenant_father_name"
+                                        type="text"
+                                        placeholder="Possessor Tenant Father Name"
+                                        value={posTenantFatherName}
+                                        onInput={(e: any) => setPosTenantFatherName(e.currentTarget.value)}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="possessor_tenant_address">Tenant's Address</Label>
+                                        <Input
+                                        id="possessor_tenant_address"
+                                        type="text"
+                                        placeholder="Possessor Tenant Address"
+                                        value={posTenantAddress}
+                                        onInput={(e: any) => setPosTenantAddress(e.currentTarget.value)}
+                                        />
+                                    </div> */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="possessor_tenant">Tenant</Label>
+                                        <Select
+                                            isMultiple
+                                            value={posTenants}
+                                            onChange={handleTenantSelect}
+                                            options={dharTenants}
+                                            primaryColor="blue"
+                                            placeholder="Tenant Name (Tenant Father) - Tenant Type"
+                                        />
+                                        {/* <select 
+                                            id="possessor_tenant"
+                                            // {...register("curr_land_use", { required: "Current Land Class Use is required" })}
+                                            className="w-full border rounded px-3 py-2 mt-1" 
+                                            value={posTenant} 
+                                            onChange={(e: any) => setPosTenant(e.currentTarget.value)}
+                                        >
+                                            <option value="">Select Tenant</option>
+                                            
+                                        </select> */}
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="possessor_tenant_relation">Relation of Possessor with Tenant</Label>
+                                        <select 
+                                            id="possessor_tenant_relation"
+                                            // {...register("curr_land_use", { required: "Current Land Class Use is required" })}
+                                            className="w-full border rounded px-3 py-2 mt-1" 
+                                            value={posTenantRelation} 
+                                            onChange={(e: any) => setPosTenantRelation(e.currentTarget.value)}
+                                        >
+                                            <option value="">Select Relation</option>
+                                            <option value="f">পিতৃ</option>
+                                            <option value="m">মাতৃ</option>
+                                            <option value="h">পতি</option>
+                                            <option value="w">পত্নী</option>
+                                            <option value="u">অভিভাৱক</option>
+                                        </select>
+                                    </div>
+                                    {/* <div className="space-y-2">
+                                        <Label htmlFor="possessor_tenant_type">Tenant Type</Label>
+                                        <select 
+                                            id="possessor_tenant_type"
+                                            // {...register("curr_land_use", { required: "Current Land Class Use is required" })}
+                                            className="w-full border rounded px-3 py-2 mt-1" 
+                                            value={posTenantType} 
+                                            onChange={(e: any) => setPosTenantType(e.currentTarget.value)}
+                                        >
+                                            <option value="00">None</option>
+                                            <option value="01">স্থায়ী ৰায়ত</option>
+                                            <option value="02">অস্থায়ী ৰায়ত</option>
+                                            <option value="03">অন্যান্য</option>
+                                            
+                                        </select>
+                                    </div> */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="possessor_remark">Remark</Label>
+                                        <Input
+                                        id="possessor_remark"
+                                        type="text"
+                                        placeholder="Remark"
+                                        value={posRemark}
+                                        onInput={(e: any) => setPosRemark(e.currentTarget.value)}
+                                        />
+                                    </div>
+
+                                </div>
+                                
+                            </CardContent>
+                        </Card>
+
+                        {/* <h2 className="text-lg font-bold mb-4">Modal Title</h2>
+                        <p className="text-gray-600 mb-6">
+                        This is a simple modal built with React + TailwindCSS.
+                        </p> */}
+
+                        <button
+                        // onClick={() => setIsOpen(false)}
+                        className="px-4 py-2 my-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                        >
+                        Submit
+                        </button>
                     </div>
                 </div>}
             </div>
