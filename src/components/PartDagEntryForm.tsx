@@ -144,6 +144,18 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
         setDagLocalTax(0);
     };
 
+    const resetPossessorAdd = () => {
+        setPosName('');
+        setPosGuardianName('');
+        setPosGuardianRelation('');
+        setPosPattadarRelation('');
+        setPosModeOfAcquisition('');
+        setPosNameMut('');
+        setPosFatherNameMut('');
+        setPosAddressMut('');
+
+    };
+
     const getDharLandRevenue = async (area_sm: string) => {
         const data = {
             vill_townprt_code: vill,
@@ -321,13 +333,17 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
 
         toast.success(response.msg);
 
+        getPartDagInfo();
 
         console.log(response);
     };
 
+    
+
     const modalOpen = (e: any) => {
         console.log(e.currentTarget.id, dagNo, vill);
-        getTenants(vill, dagNo);
+        // getTenants(vill, dagNo);
+        resetPossessorAdd();
         setIsOpen(true);
     };
 
@@ -351,11 +367,104 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
 
     const handleUpdatePartDag = async () => {
         console.log('update Called');
+        if(!finalPartDag || finalPartDag == '' || !currLandClass || currLandClass == '') {
+            toast.error('Missing Part Dag or Land Class!');
+            return;
+        }
+        if(!areaSm || areaSm == 0) {
+            toast.error('Missing Area!');
+            return;
+        }
+        if(!dagLandRevenue || dagLandRevenue == 0 || !dagLocalTax || dagLocalTax == 0) {
+            toast.error('Missing Land Revenue and Local Tax!');
+            return;
+        }
+        
+        const data = {
+            vill_townprt_code: vill,
+            dag_no: dagNo,
+            part_dag: finalPartDag,
+            land_class_code: currLandClass,
+            area_sm: areaSm,
+            dag_land_revenue: dagLandRevenue,
+            dag_local_tax: dagLocalTax,
+            pattadars: pattadars
+        };
+
+        setLoading(true);
+        const response = await ApiService.get('update_part_dag', JSON.stringify(data));
+        setLoading(false);
+
+        if(response.status !== 'y') {
+        toast.error(response.msg);
+        return;
+        }
+
+        console.log(response.data);
     };
 
     const handleTenantSelect = (val: any) => {
         setPosTenants(val);
         console.log(val);
+    };
+
+    const submitPossessor = async () => {
+        if(!posName || !posGuardianName || !posGuardianRelation || posName == '' || posGuardianName == '' || posGuardianRelation == '') {
+            toast.error('Input fields missing!');
+            return;
+        }
+
+        const data = {
+            vill_townprt_code: vill,
+            dag_no: dagNo,
+            part_dag: finalPartDag,
+            possessor_name: posName,
+            possessor_guardian_name: posGuardianName,
+            possessor_guardian_relation: posGuardianRelation,
+            possessor_pattadar_relation: posPattadarRelation,
+            possessor_mode_of_acquisition: posModeOfAcquisition,
+            possessor_name_mut: posNameMut,
+            possessor_father_name_mut: posFatherNameMut,
+            possessor_address_mut: posAddressMut,
+            possessor_remark: posRemark
+        };
+
+        setLoading(true);
+        const response = await ApiService.get('submit_possessor', JSON.stringify(data));
+        setLoading(false);
+
+        if(response.status !== 'y') {
+            toast.error(response.msg);
+            return;
+        }
+
+        console.log(response);
+
+        toast.success(response.msg);
+        getPartDagInfo();
+        setIsOpen(false);
+    };
+
+    const deletePossessor = async (e: any) => {
+        // console.log(e.currentTarget.value);
+        const data = {
+            possessor: e.currentTarget.value
+        };
+
+        setLoading(true);
+        const response = await ApiService.get('delete_possessor', JSON.stringify(data));
+        setLoading(false);
+
+        if(response.status !== 'y') {
+            toast.error(response.msg);
+            return;
+        }
+
+        console.log(response);
+        toast.success(response.msg);
+
+        getPartDagInfo();
+
     };
 
 
@@ -704,7 +813,7 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
                                                     {possessor.mode_of_acquisition_name}
                                                 </td>
                                                 <td className="px-4 py-2">
-                                                    <Button className="bg-red-500 hover:bg-red-600 text-white" id={`${possessor.dist_code}-${possessor.subdiv_code}-${possessor.cir_code}-${possessor.mouza_pargona_code}-${possessor.lot_no}-${possessor.vill_townprt_code}-${possessor.old_dag_no}-${possessor.part_dag}`}>Delete</Button>
+                                                    <Button className="bg-red-500 hover:bg-red-600 text-white" value={`${possessor.dist_code}-${possessor.subdiv_code}-${possessor.cir_code}-${possessor.mouza_pargona_code}-${possessor.lot_no}-${possessor.vill_townprt_code}-${possessor.old_dag_no}-${possessor.part_dag}-${possessor.possessor_id}`} onClick={deletePossessor}>Delete</Button>
                                                 </td>
                                             </tr>)}
                                             {(!possessors || possessors.length < 1) && <tr className="border-b hover:bg-gray-50">
@@ -807,7 +916,7 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
                                         </select>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="possessor_mut_name">Proposed Possessor Name for Mutation</Label>
+                                        <Label htmlFor="possessor_mut_name">Possessor Name for Mutation (Optional)</Label>
                                         <Input
                                         id="possessor_mut_name"
                                         type="text"
@@ -817,7 +926,7 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="possessor_father_mut_name">Proposed Possessor Father's Name for Mutation</Label>
+                                        <Label htmlFor="possessor_father_mut_name">Possessor Father's Name for Mutation (Optional)</Label>
                                         <Input
                                         id="possessor_father_mut_name"
                                         type="text"
@@ -827,7 +936,7 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="possessor_address_mut">Possessor Address for Mutation</Label>
+                                        <Label htmlFor="possessor_address_mut">Possessor Address for Mutation (Optional)</Label>
                                         <Input
                                         id="possessor_address_mut"
                                         type="text"
@@ -866,7 +975,7 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
                                         onInput={(e: any) => setPosTenantAddress(e.currentTarget.value)}
                                         />
                                     </div> */}
-                                    <div className="space-y-2">
+                                    {/* <div className="space-y-2">
                                         <Label htmlFor="possessor_tenant">Tenant</Label>
                                         <Select
                                             isMultiple
@@ -876,18 +985,9 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
                                             primaryColor="blue"
                                             placeholder="Tenant Name (Tenant Father) - Tenant Type"
                                         />
-                                        {/* <select 
-                                            id="possessor_tenant"
-                                            // {...register("curr_land_use", { required: "Current Land Class Use is required" })}
-                                            className="w-full border rounded px-3 py-2 mt-1" 
-                                            value={posTenant} 
-                                            onChange={(e: any) => setPosTenant(e.currentTarget.value)}
-                                        >
-                                            <option value="">Select Tenant</option>
-                                            
-                                        </select> */}
-                                    </div>
-                                    <div className="space-y-2">
+                                       
+                                    </div> */}
+                                    {/* <div className="space-y-2">
                                         <Label htmlFor="possessor_tenant_relation">Relation of Possessor with Tenant</Label>
                                         <select 
                                             id="possessor_tenant_relation"
@@ -903,7 +1003,7 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
                                             <option value="w">পত্নী</option>
                                             <option value="u">অভিভাৱক</option>
                                         </select>
-                                    </div>
+                                    </div> */}
                                     {/* <div className="space-y-2">
                                         <Label htmlFor="possessor_tenant_type">Tenant Type</Label>
                                         <select 
@@ -942,7 +1042,7 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
                         </p> */}
 
                         <button
-                        // onClick={() => setIsOpen(false)}
+                        onClick={submitPossessor}
                         className="px-4 py-2 my-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
                         >
                         Submit
