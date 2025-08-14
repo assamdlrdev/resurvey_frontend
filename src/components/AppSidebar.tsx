@@ -1,4 +1,4 @@
-import { Home, Users, FileText, Database, LogIn, UserPlus, Settings, Activity, BarChart3, ChevronDown } from "lucide-react";
+import { Home, Users, FileText, Database, LogIn, UserPlus, Settings, Activity, BarChart3, ChevronDown, FileTextIcon } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useState } from "react";
 
@@ -22,14 +22,12 @@ const authItems = [
 ];
 
 const mainItems = [
-  { title: "Symptoms", url: "/symptoms", icon: Activity },
-  { title: "Submit Form", url: "/submit-form", icon: FileText },
-  { title: "Data Display", url: "/data-display", icon: Database },
+  { title: "Survey Form", url: "/survey-form", icon: FileTextIcon },
 ];
 
 const analyticsItems = [
-  { title: "Reports", url: "/reports", icon: BarChart3 },
-  { title: "Analytics", url: "/analytics", icon: Activity },
+  { title: "Survey Reports", url: "/survey-reports", icon: BarChart3 },
+  // { title: "Analytics", url: "/analytics", icon: Activity },
 ];
 
 export function AppSidebar() {
@@ -70,7 +68,7 @@ export function AppSidebar() {
             >
               <item.icon className={cn(
                 "h-4 w-4 transition-colors",
-                isActive(item.url) ? "text-white" : "text-medical-600 group-hover:text-medical-700"
+                isActive(item.url) ? "text-green-800" : "text-medical-600 group-hover:text-medical-700"
               )} />
               {!isCollapsed && (
                 <span className="font-medium text-medical-600 text-sm">{item.title}</span>
@@ -132,8 +130,8 @@ export function AppSidebar() {
                 <Activity className="h-4 w-4 text-white" />
               </div>
               <div>
-                <h2 className="font-bold text-medical-900 text-lg leading-none">MedApp</h2>
-                <p className="text-xs text-medical-600 mt-0.5">Professional</p>
+                <h2 className="font-bold text-medical-900 text-lg leading-none">Resurvey</h2>
+                <p className="text-xs text-medical-600 mt-0.5"></p>
               </div>
             </div>
           ) : (
@@ -144,17 +142,13 @@ export function AppSidebar() {
         </div>
 
         {/* Navigation Groups */}
-        <div className="space-y-6">
+        <div className="">
           <SidebarGroup>
-            {renderCollapsibleGroup("Authentication", authItems, "auth")}
+            {renderCollapsibleGroup("Survey", mainItems, "main")}
           </SidebarGroup>
 
           <SidebarGroup>
-            {renderCollapsibleGroup("Main Features", mainItems, "main")}
-          </SidebarGroup>
-
-          <SidebarGroup>
-            {renderCollapsibleGroup("Analytics", analyticsItems, "analytics", false)}
+            {renderCollapsibleGroup("Reports", analyticsItems, "analytics")}
           </SidebarGroup>
 
           {/* Settings Section */}
@@ -175,7 +169,7 @@ export function AppSidebar() {
                     )}>
                       <Settings className="h-4 w-4 text-medical-600" />
                       {!isCollapsed && (
-                        <span className="font-medium text-sm">Settings</span>
+                        <span className="font-medium text-sm">Sign Out</span>
                       )}
                     </button>
                   </SidebarMenuButton>
