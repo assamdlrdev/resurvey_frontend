@@ -44,10 +44,10 @@ export default function LoginForm() {
         
         return;
     }
-    if(!validateCaptcha(captcha)) {
-        toast.error("Captcha does not match!");
-        return;
-    }
+    // if(!validateCaptcha(captcha)) {
+    //     toast.error("Captcha does not match!");
+    //     return;
+    // }
     loadCaptchaEnginge(6);
     setCaptcha('');
     
@@ -68,7 +68,7 @@ export default function LoginForm() {
     }
     StorageService.jwtSave(response.data);
     toast.success(response.msg);
-    goTo('/survey-data');
+    goTo('/survey-form');
   };
 
   return (
@@ -117,7 +117,7 @@ export default function LoginForm() {
             placeholder="Enter Username"
             value={captcha}
             onInput={(e) => setCaptcha(e.currentTarget.value)}
-            required
+            // required
           />
         </div>
         <Button type="submit" className="w-full bg-medical-500 hover:bg-medical-600 text-white">

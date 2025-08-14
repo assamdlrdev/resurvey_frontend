@@ -9,12 +9,12 @@ import { AppSidebar } from "@/components/AppSidebar";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import Symptoms from "./pages/Symptoms";
-import SubmitForm from "./pages/SubmitForm";
+import SurveyForm from "./pages/SurveyForm";
 import DataDisplay from "./pages/DataDisplay";
 import NotFound from "./pages/NotFound";
 import AuthLayout from "./layouts/AuthLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
-import SurveyData from "./pages/SurveyData";
+import SurveyData from "./pages/SurveyForm";
 
 function App() {
   const queryClient = new QueryClient();
@@ -33,9 +33,8 @@ function App() {
                 {/* <Route path="/signup" element={<SignUp />} /> */}
               </Route>
               <Route element={<DashboardLayout />}>
-                <Route path="/symptoms" element={<Symptoms />} />
-                <Route path="/survey-data" element={<SurveyData />} />
-                <Route path="/data-display" element={<DataDisplay />} />
+                <Route path="/survey-form" element={<SurveyForm />} />
+                <Route path="/survey-reports" element={<DataDisplay />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
