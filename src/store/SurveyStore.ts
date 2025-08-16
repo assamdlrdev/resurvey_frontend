@@ -65,8 +65,8 @@ interface DagState {
 
 export const useDagStore = create<DagState>((set) => ({
     isLoading: false,
-    vill: null,
-    dagNo: null,
+    vill: '',
+    dagNo: '',
 
     partDags: [],
     landClasses: [],
@@ -106,6 +106,6 @@ export const useDagStore = create<DagState>((set) => ({
             set({ isLoading: false });
         }
     },
-    resetDagData: () => set({ vill: null, dagNo: null, partDags: [], landClasses: [], pattaTypes: [], pattadars: [], dharDagData: null }),
+    resetDagData: () => set({ vill: '', dagNo: '', partDags: [], landClasses: [], pattaTypes: [], pattadars: [], dharDagData: null }),
     setDagNo: (dagNo: string) => set({ dagNo: dagNo })
 }));

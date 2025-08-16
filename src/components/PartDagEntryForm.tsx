@@ -400,7 +400,7 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
         return;
         }
 
-        console.log(response.data);
+        toast.success(response.msg);
     };
 
     const handleTenantSelect = (val: any) => {

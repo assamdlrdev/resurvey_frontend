@@ -98,7 +98,7 @@ export default function SurveyData() {
   }, [vill]);
 
   useEffect(() => {
-    if (dagNo) {
+    if (dagNo && vill) {
       getData(dagNo, vill);
     }
   }, [dagNo]);
@@ -136,9 +136,24 @@ export default function SurveyData() {
 
       setDagNo('');
     }
+    else if(type == 'dist') {
+      setCircleData([]);
+      setMouzaData([]);
+      setLotData([]);
+      setVillData([]);
+      setDagNos([]);
+
+      setDagNo('');
+      setVill('');
+      setLot('');
+      setMouza('');
+      setCircle('');
+
+    }
   };
 
   const getDistricts = async () => {
+    resetField('dist');
     const data = {
       // api_key:Constants.API_SECRET
     };
