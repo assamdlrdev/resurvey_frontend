@@ -14,6 +14,11 @@ interface PartDag {
     name: string;
     id: string;
     dag_area_sqmtr: number;
+    old_dag_no: string;
+    current_land_class: string;
+    patta_type: string;
+    patta_no: string;
+    from_bhunaksha: number;
 }
 
 interface LandClass {
@@ -61,9 +66,10 @@ interface DagState {
     getData: (dagNo: string, vill: string) => Promise<void>;
     resetDagData: () => void;
     setDagNo: (dagNo: string) => void;
+    getCreatedPartDags: () => PartDag[];
 }
 
-export const useDagStore = create<DagState>((set) => ({
+export const useDagStore = create<DagState>((set,get) => ({
     isLoading: false,
     vill: '',
     dagNo: '',
@@ -73,6 +79,9 @@ export const useDagStore = create<DagState>((set) => ({
     pattaTypes: [],
     pattadars: [],
     dharDagData: null,
+    getCreatedPartDags: () => {
+        return get().partDags.filter(dag => dag.from_bhunaksha !== 1);
+    },
 
     getData: async (dagNo: string, vill: string) => {
         set({ vill: vill, dagNo: dagNo, isLoading: true });
