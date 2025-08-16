@@ -403,6 +403,38 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
         toast.success(response.msg);
     };
 
+    const handlePartDagDelete = async () => {
+        if(!finalPartDag || finalPartDag == '' || !vill || vill == '' || !dagNo || dagNo == '') {
+            toast.error('Missing Part Dag and location!');
+            return;
+        }
+
+        const data = {
+            vill_townprt_code: vill,
+            dag_no: dagNo,
+            part_dag: finalPartDag
+        }
+
+        setLoading(true);
+        const response = await ApiService.get('delete_part_dag', JSON.stringify(data));
+        setLoading(false);
+
+        if(response.status !== 'y') {
+            toast.error(response.msg);
+            return;
+        }
+
+        toast.success(response.msg);
+        setFinalPartDag('');
+        setPartDag('');
+        setUpdateButton(false);
+
+        setTimeout(() => {
+            getData(dagNo, vill);
+        }, 500);
+        
+    };
+
     const handleTenantSelect = (val: any) => {
         setPosTenants(val);
         console.log(val);
@@ -758,6 +790,7 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
                         <Button type="button" className="" onClick={handleUpdatePartDag}>
                         Update
                         </Button>
+                        <Button type="button" className="bg-red-600 hover:bg-red-700 text-white" onClick={handlePartDagDelete}>Delete</Button>
                     </div>}
 
                 </form>
@@ -791,6 +824,9 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
                                                     Particulars of transaction/mode of acquisition by Possessor
                                                 </th>
                                                 <th className="px-4 py-3">
+                                                    Remarks
+                                                </th>
+                                                <th className="px-4 py-3">
                                                     Action
                                                 </th>
                                             </tr>
@@ -811,6 +847,9 @@ const PartDagEntryForm: React.FC<Props> = ({dagNo, setDagNo, vill, setVill}) => 
                                                 </td>
                                                 <td className="px-4 py-2">
                                                     {possessor.mode_of_acquisition_name}
+                                                </td>
+                                                <td className="px-4 py-2">
+                                                    {possessor.remarks}
                                                 </td>
                                                 <td className="px-4 py-2">
                                                     <Button className="bg-red-500 hover:bg-red-600 text-white" value={`${possessor.dist_code}-${possessor.subdiv_code}-${possessor.cir_code}-${possessor.mouza_pargona_code}-${possessor.lot_no}-${possessor.vill_townprt_code}-${possessor.old_dag_no}-${possessor.part_dag}-${possessor.possessor_id}`} onClick={deletePossessor}>Delete</Button>
