@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 // import { useToast } from "@/hooks/use-toast";
 import ChithaView from "@/components/ChithaView";
 import { toast, Toaster } from "react-hot-toast";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Constants from "@/config/Constants";
 import ApiService from "@/services/ApiService";
 import StorageService from "@/services/StorageService";
@@ -33,6 +33,7 @@ export default function SurveyData() {
   );
   // const [dagNo, setDagNo] = useState<string>("");
   const location = useLocation();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState<boolean>(false);
   const [district, setDistrict] = useState<string>('');
   const [circle, setCircle] = useState<string>('');
@@ -48,7 +49,10 @@ export default function SurveyData() {
 
 
   useEffect(() => {
-    if (location.pathname == '/survey-form') {
+    if(!StorageService.getJwtCookie()) {
+      goTo('/login');
+    }
+    if (location.pathname == '/survey-form' && StorageService.getJwtCookie()) {
       resetDagData();
       getDistricts();
     }
@@ -103,6 +107,10 @@ export default function SurveyData() {
       getData(dagNo, vill);
     }
   }, [dagNo]);
+
+  const goTo = (url: string) => {
+      navigate(url);
+  };
 
   const resetField = (type: string) => {
     if (type == 'circle') {
