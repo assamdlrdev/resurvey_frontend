@@ -50,6 +50,7 @@ export default function SurveyData() {
 
   useEffect(() => {
     if (location.pathname == '/survey-form') {
+      resetDagData();
       getDistricts();
     }
   }, [location]);
@@ -92,7 +93,6 @@ export default function SurveyData() {
 
   useEffect(() => {
     if (vill) {
-      resetDagData();
       setDagNo('');
       setShowDagDropdown(false);
       getDags(vill);
