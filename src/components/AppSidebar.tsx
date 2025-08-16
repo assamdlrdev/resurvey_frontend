@@ -1,5 +1,5 @@
 import { Home, Users, FileText, Database, LogIn, UserPlus, Settings, Activity, BarChart3, ChevronDown, FileTextIcon } from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 import {
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import StorageService from "@/services/StorageService";
 
 const authItems = [
   { title: "Login", url: "/login", icon: LogIn },
@@ -39,6 +40,11 @@ export function AppSidebar() {
     main: true,
     analytics: false,
   });
+  const navigate = useNavigate();
+
+  const goTo = (url: string) => {
+      navigate(url);
+  };
 
   const isActive = (path: string) => currentPath === path;
   const isCollapsed = state === "collapsed";
@@ -113,6 +119,12 @@ export function AppSidebar() {
     </Collapsible>
   );
 
+  const logout = async() => {
+    StorageService.jwtRemove();
+    goTo('/login');
+
+  };
+
   return (
     <Sidebar className={cn(
       "border-r border-medical-200 bg-white shadow-sm transition-all duration-300",
@@ -169,7 +181,7 @@ export function AppSidebar() {
                     )}>
                       <Settings className="h-4 w-4 text-medical-600" />
                       {!isCollapsed && (
-                        <span className="font-medium text-sm">Sign Out</span>
+                        <span className="font-medium text-sm" onClick={logout}>Sign Out</span>
                       )}
                     </button>
                   </SidebarMenuButton>

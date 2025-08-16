@@ -260,12 +260,13 @@ export default function SurveyData() {
     if (response.status !== 'y') {
       toast.error(response.msg);
       return;
-    } else if (response.data.length == 'N') {
-      setDagNos([]);
-    } else {
-      setDagNos(response.data);
     }
-
+    if(response.data == 'N') {
+      toast.error('No Data!');
+      setDagNos([]);
+      return;
+    }
+    setDagNos(response.data);
   };
 
 
