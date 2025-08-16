@@ -6,7 +6,6 @@ export default function ChithaView() {
   useEffect(() => {
     // This effect can be used to fetch or update data when the component mounts
     // For now, we will just log the dagData to see if it's available
-    console.log("ChithaView mounted with dagData:", dharDagData);
   }, [dharDagData]);
   return (
     <div className="p-4 bg-white shadow rounded-lg max-w-3xl mx-auto mt-4">

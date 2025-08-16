@@ -16,6 +16,7 @@ import StorageService from "@/services/StorageService";
 import Loader from "@/components/Loader";
 import PartDagEntryForm from "@/components/PartDagEntryForm";
 import { useDagStore } from "@/store/SurveyStore";
+import PartDagsView from "@/components/PartDagsView";
 
 interface DagType {
   dag_no: string
@@ -25,7 +26,7 @@ interface DagType {
 
 
 export default function SurveyData() {
-  const {dagNo, setDagNo, getData, resetDagData } = useDagStore();
+  const { dagNo, setDagNo, getData, resetDagData, getCreatedPartDags } = useDagStore();
   const [mode, setMode] = useState<string>("reference");
   const [showDagDropdown, setShowDagDropdown] = useState(false);
   const [dagNos, setDagNos] = useState<DagType[]>([]
@@ -136,7 +137,7 @@ export default function SurveyData() {
 
       setDagNo('');
     }
-    else if(type == 'dist') {
+    else if (type == 'dist') {
       setCircleData([]);
       setMouzaData([]);
       setLotData([]);
@@ -372,7 +373,7 @@ export default function SurveyData() {
                   <button
                     type="button"
                     key={index}
-                    className="text-center rounded-full bg-medical-100 hover:bg-medical-200 w-10 h-10 flex items-center justify-center font-semibold text-medical-900 shadow aspect-square"
+                    className="text-center rounded-full bg-medical-100 hover:bg-green-400 w-10 h-10 flex items-center justify-center font-semibold text-medical-900 shadow aspect-square"
                     onMouseDown={() => {
                       setDagNo(dag.dag_no);
                       setShowDagDropdown(false);
@@ -398,28 +399,40 @@ export default function SurveyData() {
             <ToggleGroupItem value="input" className="px-6 py-2">
               Part Dag Entry
             </ToggleGroupItem>
+            <ToggleGroupItem value="part_dags" className="px-6 py-2">
+              Existing Part Dags  (<span className="text-gray-500">{getCreatedPartDags().length}</span>)
+            </ToggleGroupItem>
           </ToggleGroup>
         </div>
 
         <Card className="w-full">
           <CardHeader>
             <CardTitle className="flex justify-center">
-              {mode === "reference" ? "Dharitry Data" : "Part Dag Entry"}
+              {mode === "reference"
+                ? "Dharitry Data"
+                : mode === "input"
+                  ? "Part Dag Entry"
+                  : "Existing Part Dags"}
             </CardTitle>
           </CardHeader>
+
           <CardContent>
-            {mode === "reference" ? (
-              <div className="space-y-4">
-                <ChithaView />
-              </div>
-            ) : (
-              <PartDagEntryForm dagNo={dagNo} setDagNo={setDagNo} vill={vill} setVill={setVill} />
+            {mode === "reference" && <ChithaView />}
+            {mode === "input" && (
+              <PartDagEntryForm
+                dagNo={dagNo}
+                setDagNo={setDagNo}
+                vill={vill}
+                setVill={setVill}
+              />
             )}
+            {mode === "part_dags" && <PartDagsView />}
           </CardContent>
         </Card>
+
+        <Toaster position="top-center" />
+        <Loader loading={loading} />
       </div>
-      <Toaster position="top-center" />
-      <Loader loading={loading} />
     </div>
   );
 }
