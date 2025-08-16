@@ -53,6 +53,7 @@ export default function SurveyData() {
       goTo('/login');
     }
     if (location.pathname == '/survey-form' && StorageService.getJwtCookie()) {
+      resetDagData();
       getDistricts();
     }
   }, [location]);
@@ -95,7 +96,6 @@ export default function SurveyData() {
 
   useEffect(() => {
     if (vill) {
-      resetDagData();
       setDagNo('');
       setShowDagDropdown(false);
       getDags(vill);
