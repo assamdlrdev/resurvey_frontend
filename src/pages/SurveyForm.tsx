@@ -26,7 +26,7 @@ interface DagType {
 
 
 export default function SurveyData() {
-  const { dagNo, setDagNo, getData, resetDagData, getCreatedPartDags } = useDagStore();
+  const { dagNo, setDagNo, getData, resetDagData, getCreatedPartDags, setLoading, isLoading } = useDagStore();
   const [mode, setMode] = useState<string>("reference");
   const [showDagDropdown, setShowDagDropdown] = useState(false);
   const [dagNos, setDagNos] = useState<DagType[]>([]
@@ -34,7 +34,6 @@ export default function SurveyData() {
   // const [dagNo, setDagNo] = useState<string>("");
   const location = useLocation();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState<boolean>(false);
   const [district, setDistrict] = useState<string>('');
   const [circle, setCircle] = useState<string>('');
   const [mouza, setMouza] = useState<string>('');
@@ -111,6 +110,11 @@ export default function SurveyData() {
   const goTo = (url: string) => {
       navigate(url);
   };
+
+  const dagNoUpdated = (new_dag_no: string) => {
+    setDagNo(new_dag_no);
+    setMode('reference');
+  }
 
   const resetField = (type: string) => {
     if (type == 'circle') {
@@ -373,7 +377,7 @@ export default function SurveyData() {
               onFocus={() => setShowDagDropdown(true)}
               onBlur={() => setTimeout(() => setShowDagDropdown(false), 150)}
               value={dagNo}
-              onChange={(e: any) => setDagNo(e.currentTarget.value)}
+              onChange={(e: any) =>dagNoUpdated(e.currentTarget.value)}
             />
 
             {showDagDropdown && (
@@ -384,7 +388,7 @@ export default function SurveyData() {
                     key={index}
                     className="text-center rounded-full bg-medical-100 hover:bg-green-400 w-10 h-10 flex items-center justify-center font-semibold text-medical-900 shadow aspect-square"
                     onMouseDown={() => {
-                      setDagNo(dag.dag_no);
+                      dagNoUpdated(dag.dag_no);
                       setShowDagDropdown(false);
                     }}
                   >
@@ -440,7 +444,7 @@ export default function SurveyData() {
         </Card>
 
         <Toaster position="top-center" />
-        <Loader loading={loading} />
+        <Loader loading={isLoading} />
       </div>
     </div>
   );

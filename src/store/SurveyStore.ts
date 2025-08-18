@@ -7,6 +7,8 @@ interface Pattadar {
     pdar_father_name: string;
     pdar_add1: string;
     pdar_add2: string;
+    value: string;
+    label: string;
 }
 
 interface PartDag {
@@ -16,6 +18,7 @@ interface PartDag {
     dag_area_sqmtr: number;
     old_dag_no: string;
     current_land_class: string;
+    current_land_class_ass: string;
     patta_type: string;
     patta_no: string;
     from_bhunaksha: number;
@@ -24,6 +27,15 @@ interface PartDag {
 interface LandClass {
     class_code: string;
     land_type: string;
+}
+
+interface LandGroup {
+    id: string;
+    name: string;
+    name_ass: string;
+    sort_id: number;
+    land_class_code: string;
+    landclass_category_id:string;
 }
 
 interface PattaType {
@@ -60,24 +72,26 @@ interface DagState {
     dagNo: string | null;
     partDags: PartDag[];
     landClasses: LandClass[];
+    landGroups: LandGroup[];
     pattaTypes: PattaType[];
-    pattadars: Pattadar[];
+    dharPattadars: Pattadar[];
     dharDagData: DharitreeData | null;
     getData: (dagNo: string, vill: string) => Promise<void>;
     resetDagData: () => void;
     setDagNo: (dagNo: string) => void;
     getCreatedPartDags: () => PartDag[];
+    setLoading:(loading: boolean) => void; 
 }
 
 export const useDagStore = create<DagState>((set,get) => ({
     isLoading: false,
     vill: '',
     dagNo: '',
-
     partDags: [],
     landClasses: [],
+    landGroups: [],
     pattaTypes: [],
-    pattadars: [],
+    dharPattadars: [],
     dharDagData: null,
     getCreatedPartDags: () => {
         return get().partDags.filter(dag => dag.from_bhunaksha !== 1);
@@ -106,8 +120,9 @@ export const useDagStore = create<DagState>((set,get) => ({
                 partDags: resp.part_dags || [],
                 landClasses: resp.land_classes || [],
                 pattaTypes: resp.patta_types || [],
-                pattadars: resp.pattadars || [],
+                dharPattadars: resp.pattadars || [],
                 dharDagData: resp.dharitree_data || null,
+                landGroups: resp.land_groups || []
             });
         } catch (error) {
             console.error(error);
@@ -115,6 +130,7 @@ export const useDagStore = create<DagState>((set,get) => ({
             set({ isLoading: false });
         }
     },
-    resetDagData: () => set({ vill: '', dagNo: '', partDags: [], landClasses: [], pattaTypes: [], pattadars: [], dharDagData: null }),
-    setDagNo: (dagNo: string) => set({ dagNo: dagNo })
+    resetDagData: () => set({ vill: '', dagNo: '', partDags: [], landClasses: [], pattaTypes: [], dharPattadars: [], dharDagData: null }),
+    setDagNo: (dagNo: string) => set({ dagNo: dagNo }),
+    setLoading:(loading: boolean) => set({isLoading:loading})
 }));
