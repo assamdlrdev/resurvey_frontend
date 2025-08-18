@@ -48,10 +48,7 @@ export default function SurveyData() {
 
 
   useEffect(() => {
-    if(!StorageService.getJwtCookie()) {
-      goTo('/login');
-    }
-    if (location.pathname == '/survey-form' && StorageService.getJwtCookie()) {
+    if (location.pathname == '/survey-form') {
       resetDagData();
       getDistricts();
     }

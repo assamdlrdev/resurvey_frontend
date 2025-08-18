@@ -1,6 +1,7 @@
 import { Home, Users, FileText, Database, LogIn, UserPlus, Settings, Activity, BarChart3, ChevronDown, FileTextIcon } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 import {
   Sidebar,
@@ -181,7 +182,15 @@ export function AppSidebar() {
                     )}>
                       <Settings className="h-4 w-4 text-medical-600" />
                       {!isCollapsed && (
-                        <span className="font-medium text-sm" onClick={logout}>Sign Out</span>
+                        <ConfirmDialog
+                                trigger={<span className="font-medium text-sm">Sign Out</span>}
+                                title="Logout"
+                                description="Are you sure you want to logout of the current session?"
+                                confirmText="Yes"
+                                cancelText="No"
+                                onConfirm={logout}
+                            />
+                        // <span className="font-medium text-sm" onClick={logout}>Sign Out</span>
                       )}
                     </button>
                   </SidebarMenuButton>

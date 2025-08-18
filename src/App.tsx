@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import AuthLayout from "./layouts/AuthLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
 import SurveyData from "./pages/SurveyForm";
+import SurveyorLayout from "./layouts/SurveyorLayout";
 
 function App() {
   const queryClient = new QueryClient();
@@ -32,9 +33,11 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 {/* <Route path="/signup" element={<SignUp />} /> */}
               </Route>
-              <Route element={<DashboardLayout />}>
-                <Route path="/survey-form" element={<SurveyForm />} />
-                <Route path="/survey-reports" element={<DataDisplay />} />
+              <Route element={<SurveyorLayout />}>
+                <Route element={<DashboardLayout />}>
+                  <Route path="/survey-form" element={<SurveyForm />} />
+                  <Route path="/survey-reports" element={<DataDisplay />} />
+                </Route>
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
