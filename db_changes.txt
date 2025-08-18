@@ -1,0 +1,1 @@
+1.new tables - chitha_basic_splitted_dags,resurvey_villages,splitted_dags_possessors

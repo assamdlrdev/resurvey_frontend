@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useDagStore } from "@/store/SurveyStore";
 
 export default function ChithaView() {
-  const {dagNo, dharDagData, pattadars, isLoading } = useDagStore();
+  const {dagNo, dharDagData, dharPattadars, isLoading } = useDagStore();
   useEffect(() => {
     // This effect can be used to fetch or update data when the component mounts
     // For now, we will just log the dagData to see if it's available
@@ -50,8 +50,8 @@ export default function ChithaView() {
             পট্টাদাৰৰ নাম, পিতাৰ নাম আৰু ঠিকনা
           </h2>
           <div className="space-y-4">
-            {pattadars && pattadars.length > 0 ? (
-              pattadars.map((pattadar, index) => (
+            {dharPattadars && dharPattadars.length > 0 ? (
+              dharPattadars.map((pattadar, index) => (
                 <div
                   key={index}
                   className="p-4 bg-gray-50 border rounded-lg shadow-sm hover:shadow-md transition"

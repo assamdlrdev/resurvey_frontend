@@ -34,7 +34,7 @@ export default function PartDagsView() {
                   <td className="p-2">{dag.part_dag}</td>
                   <td className="p-2">{dag.dag_area_sqmtr}</td>
                   <td className="p-2">{dag.old_dag_no}</td>
-                  <td className="p-2">{dag.current_land_class}</td>
+                  <td className="p-2">{dag.current_land_class_ass}</td>
                   <td className="p-2">{dag.patta_type}</td>
                   <td className="p-2">{dag.patta_no}</td>
                 </tr>
@@ -55,7 +55,7 @@ export default function PartDagsView() {
                   Area: {dag.dag_area_sqmtr} sqm
                 </p>
                 <p className="text-sm text-gray-700">Old Dag No: {dag.old_dag_no}</p>
-                <p className="text-sm text-gray-700">Land Class: {dag.current_land_class}</p>
+                <p className="text-sm text-gray-700">Land Class: {dag.current_land_class_ass}</p>
                 <p className="text-sm text-gray-700">Patta Type: {dag.patta_type}</p>
                 <p className="text-sm text-gray-700">Patta No: {dag.patta_no}</p>
               </div>

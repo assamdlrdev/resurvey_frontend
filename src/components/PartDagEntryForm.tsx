@@ -12,6 +12,7 @@ import { toast, Toaster } from "react-hot-toast";
 import Loader from "./Loader";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useDagStore } from "@/store/SurveyStore";
 
 
 interface Props {
@@ -55,6 +56,7 @@ interface ErrorType {
 
 const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) => {
     const { register, handleSubmit, reset, formState: { errors } } = useForm<InputFormData>();
+    const {isLoading,getData, setLoading, partDags, landClasses, dharDagData, landGroups, pattaTypes, dharPattadars}  = useDagStore();
     const [partDag, setPartDag] = useState<string>('');
     const [currLandClass, setCurrLandClass] = useState<string | number>('');
     const [areaSm, setAreaSm] = useState<number>(0);
@@ -63,29 +65,15 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
     const [areaLc, setAreaLc] = useState<number>(0.00);
     const [dist, setDist] = useState<string>('');
     const [areaGanda, setAreaGanda] = useState<number>(0.00);
-    const [originalLandClass, setOriginalLandClass] = useState<string>('');
     const [pattaNo, setPattaNo] = useState<string>('');
     const [pattaTypeCode, setPattaTypeCode] = useState<string>('');
     const [dagLandRevenue, setDagLandRevenue] = useState<number>(0);
     const [dagLocalTax, setDagLocalTax] = useState<number>(0);
     const [pattadars, setPattadars] = useState(null);
-    const [originalPattaNo, setOriginalPattaNo] = useState<string>('');
-    const [originalPattaTypeCode, setOriginalPattaTypeCode] = useState<string>('');
     const [triggerLandRevenue, setTriggerLandRevenue] = useState<string>('');
     const [errorTag, setErrorTag] = useState<ErrorType[]>([]);
 
 
-
-    const [dharPattadars, setDharPattadars] = useState<OptionType[]>([
-        // { value: "fox", label: "🦊 Fox" },
-        // { value: "Butterfly", label: "🦋 Butterfly" },
-        // { value: "Honeybee", label: "🐝 Honeybee" }
-    ]);
-    const [dharLandClasses, setDharLandClasses] = useState<any[]>([]);
-    const [dharPattaTypes, setDharPattaTypes] = useState<any[]>([]);
-    const [bhunakshaPartDags, setBhunakshaPartDags] = useState<any[]>([]);
-    const [dharDagData, setDharDagData] = useState<DagDataType[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
     const [finalPartDag, setFinalPartDag] = useState<string>('');
     const [possessors, setPossessors] = useState<any[]>([]);
     const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -99,12 +87,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
     const [posNameMut, setPosNameMut] = useState<string>('');
     const [posFatherNameMut, setPosFatherNameMut] = useState<string>('');
     const [posAddressMut, setPosAddressMut] = useState<string>('');
-    // const [posTenant, setPosTenant] = useState<string>('');
-    // const [posTenantName, setPosTenantName] = useState<string>('');
-    // const [posTenantFatherName, setPosTenantFatherName] = useState<string>('');
-    // const [posTenantAddress, setPosTenantAddress] = useState<string>('');
     const [posTenantRelation, setPosTenantRelation] = useState<string>('');
-    // const [posTenantType, setPosTenantType] = useState<string>('');
     const [posRemark, setPosRemark] = useState<string>('');
     const [updateButton, setUpdateButton] = useState<boolean>(false);
     const [dharTenants, setDharTenants] = useState<any[]>([]);
@@ -113,7 +96,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
 
     useEffect(() => {
         if (dagNo != '' && vill != '') {
-            getData(dagNo, vill);
+            setPattaNo(dharDagData.patta_no);
         }
     }, [dagNo, vill]);
 
@@ -137,10 +120,10 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
     }, []);
 
     const resetFields = () => {
-        setCurrLandClass(originalLandClass);
+        // setCurrLandClass(originalLandClass);
         setAreaSm(0);
-        setPattaNo(originalPattaNo);
-        setPattaTypeCode(originalPattaTypeCode);
+        // setPattaNo(originalPattaNo);
+        // setPattaTypeCode(originalPattaTypeCode);
         setDagLandRevenue(0);
         setDagLocalTax(0);
     };
@@ -217,9 +200,9 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         if (partDagDetails.from_bhunaksha == 1) {
             const dag_area_sqmtr = partDagDetails.dag_area_sqmtr ? partDagDetails.dag_area_sqmtr : 0;
             setAreaSm(dag_area_sqmtr);
-            setCurrLandClass(originalLandClass);
-            setPattaNo(originalPattaNo);
-            setPattaTypeCode(originalPattaTypeCode);
+            // setCurrLandClass(originalLandClass);
+            setPattaNo(dharDagData.patta_no);
+            setPattaTypeCode(dharDagData.patta_type_code);
             setTriggerLandRevenue(dag_area_sqmtr);
             setPattadars([]);
             setUpdateButton(false);
@@ -230,9 +213,9 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         if (partDagDetails.from_chitha == 0 && partDagDetails.from_bhunaksha == 0) {
             const dag_area_sqmtr = partDagDetails.dag_area_sqmtr ? partDagDetails.dag_area_sqmtr : 0;
             setAreaSm(dag_area_sqmtr);
-            setCurrLandClass(originalLandClass);
-            setPattaNo(originalPattaNo);
-            setPattaTypeCode(originalPattaTypeCode);
+            // setCurrLandClass(originalLandClass);
+            setPattaNo(dharDagData.patta_no);
+            setPattaTypeCode(dharDagData.patta_type_code);
             setTriggerLandRevenue('');
             setDagLandRevenue(0);
             setDagLocalTax(0);
@@ -242,39 +225,40 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         }
     };
 
-    const getData = async (dagNo: string, vill: string) => {
-        setDist(vill.split('-')[0]);
-        const data = {
-            vill_townprt_code: vill,
-            dag_no: dagNo
-        };
+    // const getData = async (dagNo: string, vill: string) => {
+    //     setDist(vill.split('-')[0]);
+    //     const data = {
+    //         vill_townprt_code: vill,
+    //         dag_no: dagNo
+    //     };
 
-        setLoading(true);
-        const response = await ApiService.get('get_dag_data', JSON.stringify(data));
-        setLoading(false);
+    //     setLoading(true);
+    //     const response = await ApiService.get('get_dag_data', JSON.stringify(data));
+    //     setLoading(false);
 
-        if (response.status !== 'y') {
-            toast.error(response.msg);
-            return;
-        }
+    //     if (response.status !== 'y') {
+    //         toast.error(response.msg);
+    //         return;
+    //     }
 
-        const resp = response.data;
-        // console.log(resp);
+    //     const resp = response.data;
+    //     // console.log(resp);
 
-        setBhunakshaPartDags(resp.part_dags);
-        setDharLandClasses(resp.land_classes);
-        setDharPattaTypes(resp.patta_types);
-        setDharPattadars(resp.pattadars);
-        setDharDagData(resp.dharitree_data);
-        setOriginalLandClass(resp.dharitree_data.land_class_code);
-        setOriginalPattaNo(resp.dharitree_data.patta_no);
-        setOriginalPattaTypeCode(resp.dharitree_data.patta_type_code);
-        setCurrLandClass(resp.dharitree_data.land_class_code);
-        setPattaNo(resp.dharitree_data.patta_no);
-        setPattaTypeCode(resp.dharitree_data.patta_type_code);
+    //     setBhunakshaPartDags(resp.part_dags);
+    //     setlandClasses(resp.land_classes);
+    //     setDharLandGroups(resp.land_groups);
+    //     setDharPattaTypes(resp.patta_types);
+    //     setDharPattadars(resp.pattadars);
+    //     setDharDagData(resp.dharitree_data);
+    //     setOriginalLandClass(resp.dharitree_data.land_class_code);
+    //     setOriginalPattaNo(resp.dharitree_data.patta_no);
+    //     setOriginalPattaTypeCode(resp.dharitree_data.patta_type_code);
+    //     setCurrLandClass(resp.dharitree_data.land_class_code);
+    //     setPattaNo(resp.dharitree_data.patta_no);
+    //     setPattaTypeCode(resp.dharitree_data.patta_type_code);
 
-        // console.log(response);
-    };
+    //     // console.log(response);
+    // };
 
     const handlePattadarSelect = (val: any) => {
         setPattadars(val);
@@ -335,7 +319,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
 
         getPartDagInfo();
 
-        console.log(response);
+        getData(dagNo,vill);
     };
 
 
@@ -517,7 +501,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="part_dag">Part Dag</Label>
-                                <MyCombobox partDag={partDag} setPartDag={setPartDag} bhunakshaPartDags={bhunakshaPartDags} setFinalPartDag={setFinalPartDag} />
+                                <MyCombobox partDag={partDag} setPartDag={setPartDag} bhunakshaPartDags={partDags} setFinalPartDag={setFinalPartDag} />
                                 {/* {errors.part_dag && (
                             <p className="text-sm text-destructive">{errors.part_dag.message}</p>
                             )} */}
@@ -527,12 +511,12 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                 <select
                                     id="o_land_class"
                                     className="w-full border rounded px-3 py-2 mt-1"
-                                    value={originalLandClass}
-                                    onChange={(e: any) => setOriginalLandClass(e.currentTarget.value)}
+                                    value={dharDagData.land_class_code}
+                                    // onChange={(e: any) => setOriginalLandClass(e.currentTarget.value)}
                                     disabled
                                 >
                                     <option value="">Select Land Class</option>
-                                    {dharLandClasses && dharLandClasses.length > 0 && dharLandClasses.map((dharLandClass, index) => <option key={index} value={dharLandClass.class_code}>{dharLandClass.land_type}</option>)}
+                                    {landClasses && landClasses.length > 0 && landClasses.map((dharLandClass, index) => <option key={index} value={dharLandClass.class_code}>{dharLandClass.land_type}</option>)}
                                 </select>
                             </div>
                             <div className="space-y-2">
@@ -544,8 +528,8 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                     value={currLandClass}
                                     onChange={(e: any) => setCurrLandClass(e.currentTarget.value)}
                                 >
-                                    <option value="">Select Current Land Class use</option>
-                                    {dharLandClasses && dharLandClasses.length > 0 && dharLandClasses.map((dharLandClass, index) => <option key={index} value={dharLandClass.class_code}>{dharLandClass.land_type}</option>)}
+                                    <option value="">--Select--</option>
+                                    {landGroups && landGroups.length > 0 && landGroups.map((dharLandGroup, index) => <option key={index} value={dharLandGroup.land_class_code}>{dharLandGroup.name_ass} ({dharLandGroup.name})</option>)}
                                 </select>
                                 {/* {errors.curr_land_use && (
                             <p className="text-sm text-destructive">{errors.curr_land_use.message}</p>
@@ -563,70 +547,9 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                     // onInput={(e: any) => setAreaSm(e.currentTarget.value)}
                                     onInput={handleAreaSm}
                                 />
-                                {/* {errors.area_sm && (
-                            <p className="text-sm text-destructive">{errors.area_sm.message}</p>
-                            )} */}
                             </div>
 
-                            {/* <div className="space-y-2">
-                            <Label htmlFor="area_b">Area in Bigha</Label>
-                            <Input
-                            id="area_b"
-                            type="number"
-                            {...register("area_b", { required: "Bigha is a required field" })}
-                            placeholder="Enter Area Bigha"
-                            value={areaBigha}
-                            onInput={(e: any) => setAreaBigha(e.currentTarget.value)}
-                            />
-                            {errors.area_b && (
-                            <p className="text-sm text-destructive">{errors.area_b.message}</p>
-                            )}
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="area_k">Area in Katha</Label>
-                            <Input
-                            id="area_k"
-                            type="number"
-                            {...register("area_k", { required: "Katha is a required field" })}
-                            placeholder="Enter Area Katha"
-                            value={areaKatha}
-                            onInput={(e: any) => setAreaKatha(e.currentTarget.value)}
-                            />
-                            {errors.area_k && (
-                            <p className="text-sm text-destructive">{errors.area_k.message}</p>
-                            )}
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="area_b">Area in Lessa</Label>
-                            <Input
-                            id="area_lc"
-                            type="number"
-                            {...register("area_lc", { required: "Lessa is a required field" })}
-                            placeholder="Enter Area Lessa"
-                            value={areaLc}
-                            onInput={(e: any) => setAreaLc(e.currentTarget.value)}
-                            />
-                            {errors.area_lc && (
-                            <p className="text-sm text-destructive">{errors.area_lc.message}</p>
-                            )}
-                        </div> */}
-
-                            {/* {(dist == '21' || dist == '22' || dist == '23') && <div className="space-y-2">
-                            <Label htmlFor="area_g">Area in Ganda</Label>
-                            <Input
-                            id="area_g"
-                            type="number"
-                            {...register("area_g", { required: "Ganda is a required field" })}
-                            placeholder="Enter Area Ganda"
-                            value={areaGanda}
-                            onInput={(e: any) => setAreaGanda(e.currentTarget.value)}
-                            />
-                            {errors.area_g && (
-                            <p className="text-sm text-destructive">{errors.area_g.message}</p>
-                            )}
-                        </div>} */}
+                           
 
                             <div className="space-y-2">
                                 <Label htmlFor="patta_no">Patta No. (Existing)</Label>
@@ -634,8 +557,8 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                     id="patta_no"
                                     type="text"
                                     placeholder="Enter Patta No"
-                                    value={originalPattaNo}
-                                    onInput={(e: any) => setOriginalPattaNo(e.currentTarget.value)}
+                                    value={dharDagData.patta_no}
+                                    // onInput={(e: any) => setOriginalPattaNo(e.currentTarget.value)}
                                     disabled
                                 />
                             </div>
@@ -644,12 +567,12 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                 <select
                                     id="patta_type_code"
                                     className="w-full border rounded px-3 py-2 mt-1"
-                                    value={originalPattaTypeCode}
-                                    onChange={(e: any) => setOriginalPattaTypeCode(e.currentTarget.value)}
+                                    value={dharDagData.patta_type_code}
+                                    // onChange={(e: any) => setOriginalPattaTypeCode(e.currentTarget.value)}
                                     disabled
                                 >
                                     <option value="">Select Patta Type</option>
-                                    {dharPattaTypes && dharPattaTypes.length > 0 && dharPattaTypes.map((dharPattaType, index) => <option key={index} value={dharPattaType.type_code}>{dharPattaType.patta_type}</option>)}
+                                    {pattaTypes && pattaTypes.length > 0 && pattaTypes.map((dharPattaType, index) => <option key={index} value={dharPattaType.type_code}>{dharPattaType.patta_type}</option>)}
 
                                 </select>
                             </div>
@@ -675,12 +598,12 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                     id="patta_type_code"
                                     // {...register("patta_type_code", { required: "Patta Type is a required field!" })}
                                     className="w-full border rounded px-3 py-2 mt-1"
-                                    value={pattaTypeCode}
-                                    onChange={(e: any) => setPattaTypeCode(e.currentTarget.value)}
+                                    value={dharDagData.patta_type_code}
+                                    // onChange={(e: any) => setPattaTypeCode(e.currentTarget.value)}
                                     disabled
                                 >
                                     <option value="">Select Patta Type</option>
-                                    {dharPattaTypes && dharPattaTypes.length > 0 && dharPattaTypes.map((dharPattaType, index) => <option key={index} value={dharPattaType.type_code}>{dharPattaType.patta_type}</option>)}
+                                    {pattaTypes && pattaTypes.length > 0 && pattaTypes.map((dharPattaType, index) => <option key={index} value={dharPattaType.type_code}>{dharPattaType.patta_type}</option>)}
 
                                 </select>
                                 {/* {errors.patta_type_code && (
@@ -734,52 +657,12 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                     primaryColor="blue"
 
                                 />
-                                {/* <select 
-                                id="pattadars"
-                                {...register("pattadars", { required: "Pattadars is a required field!" })}
-                                // className="w-full border rounded px-3 py-2 mt-1" 
-                                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                value={pattadars} 
-                                onChange={(e: any) => setPattadars(e.currentTarget.value)}
-                                multiple
-                            >
-                                <option value="">Select Pattadars</option>
-                                <option value="">Select Pattadars</option>
-                                <option value="">Select Pattadars</option>
-
                                 
-                            </select> */}
-                                {/* {errors.pattadars && (
-                            <p className="text-sm text-destructive">{errors.pattadars.message}</p>
-                            )} */}
                             </div>
                         </div>
 
 
-                        {/* <div className="space-y-2">
-                    <Label htmlFor="priority">Priority</Label>
-                    <Input
-                        id="priority"
-                        // {...register("priority", { required: "Priority is required" })}
-                        placeholder="Enter priority (High/Medium/Low)"
-                    />
-                    {errors.priority && (
-                        <p className="text-sm text-destructive">{errors.priority.message}</p>
-                    )}
-                    </div>
-
-                    <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                        id="description"
-                        {...register("description", { required: "Description is required" })}
-                        placeholder="Enter description"
-                        rows={4}
-                    />
-                    {errors.description && (
-                        <p className="text-sm text-destructive">{errors.description.message}</p>
-                    )}
-                    </div> */}
+                        
 
                         {!updateButton && <div className="flex justify-end space-x-4">
                             <Button type="submit" className="">
@@ -992,81 +875,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                                 onInput={(e: any) => setPosAddressMut(e.currentTarget.value)}
                                             />
                                         </div>
-                                        {/* <div className="space-y-2">
-                                        <Label htmlFor="possessor_tenant_name">Tenant Name</Label>
-                                        <Input
-                                        id="possessor_tenant_name"
-                                        type="text"
-                                        placeholder="Possessor Tenant Name"
-                                        value={posTenantName}
-                                        onInput={(e: any) => setPosTenantName(e.currentTarget.value)}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="possessor_tenant_father_name">Tenant's Father Name</Label>
-                                        <Input
-                                        id="possessor_tenant_father_name"
-                                        type="text"
-                                        placeholder="Possessor Tenant Father Name"
-                                        value={posTenantFatherName}
-                                        onInput={(e: any) => setPosTenantFatherName(e.currentTarget.value)}
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="possessor_tenant_address">Tenant's Address</Label>
-                                        <Input
-                                        id="possessor_tenant_address"
-                                        type="text"
-                                        placeholder="Possessor Tenant Address"
-                                        value={posTenantAddress}
-                                        onInput={(e: any) => setPosTenantAddress(e.currentTarget.value)}
-                                        />
-                                    </div> */}
-                                        {/* <div className="space-y-2">
-                                        <Label htmlFor="possessor_tenant">Tenant</Label>
-                                        <Select
-                                            isMultiple
-                                            value={posTenants}
-                                            onChange={handleTenantSelect}
-                                            options={dharTenants}
-                                            primaryColor="blue"
-                                            placeholder="Tenant Name (Tenant Father) - Tenant Type"
-                                        />
-                                       
-                                    </div> */}
-                                        {/* <div className="space-y-2">
-                                        <Label htmlFor="possessor_tenant_relation">Relation of Possessor with Tenant</Label>
-                                        <select 
-                                            id="possessor_tenant_relation"
-                                            // {...register("curr_land_use", { required: "Current Land Class Use is required" })}
-                                            className="w-full border rounded px-3 py-2 mt-1" 
-                                            value={posTenantRelation} 
-                                            onChange={(e: any) => setPosTenantRelation(e.currentTarget.value)}
-                                        >
-                                            <option value="">Select Relation</option>
-                                            <option value="f">পিতৃ</option>
-                                            <option value="m">মাতৃ</option>
-                                            <option value="h">পতি</option>
-                                            <option value="w">পত্নী</option>
-                                            <option value="u">অভিভাৱক</option>
-                                        </select>
-                                    </div> */}
-                                        {/* <div className="space-y-2">
-                                        <Label htmlFor="possessor_tenant_type">Tenant Type</Label>
-                                        <select 
-                                            id="possessor_tenant_type"
-                                            // {...register("curr_land_use", { required: "Current Land Class Use is required" })}
-                                            className="w-full border rounded px-3 py-2 mt-1" 
-                                            value={posTenantType} 
-                                            onChange={(e: any) => setPosTenantType(e.currentTarget.value)}
-                                        >
-                                            <option value="00">None</option>
-                                            <option value="01">স্থায়ী ৰায়ত</option>
-                                            <option value="02">অস্থায়ী ৰায়ত</option>
-                                            <option value="03">অন্যান্য</option>
-                                            
-                                        </select>
-                                    </div> */}
+                                        
                                         <div className="space-y-2">
                                             <Label htmlFor="possessor_remark">Remark</Label>
                                             <Input
@@ -1083,10 +892,6 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                 </CardContent>
                             </Card>
 
-                            {/* <h2 className="text-lg font-bold mb-4">Modal Title</h2>
-                        <p className="text-gray-600 mb-6">
-                        This is a simple modal built with React + TailwindCSS.
-                        </p> */}
 
                             <button
                                 onClick={submitPossessor}
@@ -1101,7 +906,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                     <p className="font-bold text-lg">No data available</p>
                 </div>)}
             <Toaster position="top-center" />
-            <Loader loading={loading} />
+            <Loader loading={isLoading} />
         </>
     );
 };
