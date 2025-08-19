@@ -120,12 +120,15 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
     }, []);
 
     const resetFields = () => {
-        // setCurrLandClass(originalLandClass);
+        setCurrLandClass('');
         setAreaSm(0);
-        // setPattaNo(originalPattaNo);
-        // setPattaTypeCode(originalPattaTypeCode);
+        setPattaNo(dharDagData.patta_no);
+        setPattaTypeCode(dharDagData.patta_type_code);
         setDagLandRevenue(0);
         setDagLocalTax(0);
+        setPattadars([]);
+        setUpdateButton(false);
+        
     };
 
     const resetPossessorAdd = () => {
@@ -200,7 +203,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         if (partDagDetails.from_bhunaksha == 1) {
             const dag_area_sqmtr = partDagDetails.dag_area_sqmtr ? partDagDetails.dag_area_sqmtr : 0;
             setAreaSm(dag_area_sqmtr);
-            // setCurrLandClass(originalLandClass);
+            setCurrLandClass('');
             setPattaNo(dharDagData.patta_no);
             setPattaTypeCode(dharDagData.patta_type_code);
             setTriggerLandRevenue(dag_area_sqmtr);
@@ -213,7 +216,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         if (partDagDetails.from_chitha == 0 && partDagDetails.from_bhunaksha == 0) {
             const dag_area_sqmtr = partDagDetails.dag_area_sqmtr ? partDagDetails.dag_area_sqmtr : 0;
             setAreaSm(dag_area_sqmtr);
-            // setCurrLandClass(originalLandClass);
+            setCurrLandClass('');
             setPattaNo(dharDagData.patta_no);
             setPattaTypeCode(dharDagData.patta_type_code);
             setTriggerLandRevenue('');
@@ -278,6 +281,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
 
 
     const onSubmit = async (data: InputFormData) => {
+        console.log(currLandClass, finalPartDag);
         if (!finalPartDag || finalPartDag == '' || !currLandClass || currLandClass == '') {
             toast.error('Missing Part Dag or Land Class!');
             return;
@@ -412,6 +416,8 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         setFinalPartDag('');
         setPartDag('');
         setUpdateButton(false);
+
+
 
         setTimeout(() => {
             getData(dagNo, vill);
@@ -666,7 +672,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
 
                         {!updateButton && <div className="flex justify-end space-x-4">
                             <Button type="submit" className="">
-                                Submit
+                                Create
                             </Button>
                         </div>}
                         {updateButton && <div className="flex justify-end space-x-4">
