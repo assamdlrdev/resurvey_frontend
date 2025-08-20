@@ -13,6 +13,7 @@ import Loader from "./Loader";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useDagStore } from "@/store/SurveyStore";
+import { useMasterDataStore } from "@/store/SurveyStore";
 
 
 interface Props {
@@ -56,7 +57,9 @@ interface ErrorType {
 
 const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) => {
     const { register, handleSubmit, reset, formState: { errors } } = useForm<InputFormData>();
-    const {isLoading,getData, setLoading, partDags, landClasses, dharDagData, landGroups, pattaTypes, dharPattadars}  = useDagStore();
+    const {isLoading,getData, setLoading, partDags,dharDagData, dharPattadars}  = useDagStore();
+    const {landClasses, landGroups, pattaTypes} = useMasterDataStore();
+
     const [partDag, setPartDag] = useState<string>('');
     const [currLandClass, setCurrLandClass] = useState<string | number>('');
     const [areaSm, setAreaSm] = useState<number>(0);

@@ -1,6 +1,8 @@
 import { create } from "zustand";
+
 import ApiService from "@/services/ApiService"; // adjust path
 import { toast, Toaster } from "react-hot-toast";
+import { persist } from "zustand/middleware"
 
 interface Pattadar {
     pdar_name: string;
@@ -10,6 +12,26 @@ interface Pattadar {
     value: string;
     label: string;
 }
+
+export interface Tenant {
+    tenant_id: number;
+    tenant_name: string;            // NOT NULL
+    tenants_father?: string;        // nullable
+    tenants_add1?: string;
+    tenants_add2?: string;
+    tenants_add3?: string;
+    type_of_tenant?: string;        // varchar(2)
+    khatian_no?: number;            // smallint
+    revenue_tenant?: number;        // numeric
+    crop_rate?: string;
+    user_code: string;              // NOT NULL, varchar(5)
+    date_entry: string;             // ISO timestamp
+    operation: string;              // char(1), NOT NULL
+    status?: string;
+    year_no?: string;               // char(4)
+    relation?: string;              // char(1)
+}
+
 
 interface PartDag {
     part_dag: string;
@@ -35,7 +57,7 @@ interface LandGroup {
     name_ass: string;
     sort_id: number;
     land_class_code: string;
-    landclass_category_id:string;
+    landclass_category_id: string;
 }
 
 interface PattaType {
@@ -71,19 +93,17 @@ interface DagState {
     vill: string | null;
     dagNo: string | null;
     partDags: PartDag[];
-    landClasses: LandClass[];
-    landGroups: LandGroup[];
-    pattaTypes: PattaType[];
     dharPattadars: Pattadar[];
+    dharTenants: Tenant[];
     dharDagData: DharitreeData | null;
     getData: (dagNo: string, vill: string) => Promise<void>;
     resetDagData: () => void;
     setDagNo: (dagNo: string) => void;
     getCreatedPartDags: () => PartDag[];
-    setLoading:(loading: boolean) => void; 
+    setLoading: (loading: boolean) => void;
 }
 
-export const useDagStore = create<DagState>((set,get) => ({
+export const useDagStore = create<DagState>((set, get) => ({
     isLoading: false,
     vill: '',
     dagNo: '',
@@ -92,6 +112,7 @@ export const useDagStore = create<DagState>((set,get) => ({
     landGroups: [],
     pattaTypes: [],
     dharPattadars: [],
+    dharTenants:[],
     dharDagData: null,
     getCreatedPartDags: () => {
         return get().partDags.filter(dag => dag.from_bhunaksha !== 1);
@@ -101,12 +122,13 @@ export const useDagStore = create<DagState>((set,get) => ({
         set({ vill: vill, dagNo: dagNo, isLoading: true });
 
         try {
+
             const data = {
                 vill_townprt_code: vill,
                 dag_no: dagNo,
             };
 
-            const response = await ApiService.get("get_dag_data", JSON.stringify(data));
+            const response = await ApiService.get("get-dag-data", JSON.stringify(data));
             set({ isLoading: false });
 
             if (response.status !== "y") {
@@ -118,11 +140,9 @@ export const useDagStore = create<DagState>((set,get) => ({
 
             set({
                 partDags: resp.part_dags || [],
-                landClasses: resp.land_classes || [],
-                pattaTypes: resp.patta_types || [],
-                dharPattadars: resp.pattadars || [],
-                dharDagData: resp.dharitree_data || null,
-                landGroups: resp.land_groups || []
+                dharPattadars: resp.dhar_pattadars || [],
+                dharTenants: resp.dhar_tenants || [],
+                dharDagData: resp.dhar_dag || null,
             });
         } catch (error) {
             console.error(error);
@@ -130,7 +150,66 @@ export const useDagStore = create<DagState>((set,get) => ({
             set({ isLoading: false });
         }
     },
-    resetDagData: () => set({ vill: '', dagNo: '', partDags: [], landClasses: [], pattaTypes: [], dharPattadars: [], dharDagData: null }),
+    resetDagData: () => set({ vill: '', dagNo: '', partDags: [], dharPattadars: [], dharDagData: null }),
     setDagNo: (dagNo: string) => set({ dagNo: dagNo }),
-    setLoading:(loading: boolean) => set({isLoading:loading})
+    setLoading: (loading: boolean) => set({ isLoading: loading })
 }));
+
+interface MasterDataState {
+    isLoadingMaster: boolean,
+    distCode: string | null,
+    landClasses: LandClass[];
+    landGroups: LandGroup[];
+    pattaTypes: PattaType[];
+    getMasterData: (distCode: string) => Promise<void>;
+}
+
+export const useMasterDataStore = create<MasterDataState>()(
+    persist(
+        (set, get) => ({
+            isLoadingMaster: false,
+            distCode: '',
+            landClasses: [],
+            landGroups: [],
+            pattaTypes: [],
+            clearMasterStore: () =>
+                set({
+                    landClasses: [],
+                    landGroups: [],
+                    pattaTypes: [],
+                }),
+            getMasterData: async (distCode: string) => {
+                set({ distCode: distCode, isLoadingMaster: true });
+
+                try {
+                    const data = {
+                        dist_code: distCode
+                    };
+
+                    const response = await ApiService.get("get-master-data", JSON.stringify(data));
+                    set({ isLoadingMaster: false });
+
+                    if (response.status !== "y") {
+                        toast.error(response.msg);
+                        return;
+                    }
+
+                    const resp = response.data;
+
+                    set({
+                        landClasses: resp.land_classes || [],
+                        landGroups: resp.land_groups || [],
+                        pattaTypes: resp.patta_types || [],
+                    });
+                } catch (error) {
+                    console.error(error);
+                    toast.error("Failed to fetch master data");
+                    set({ isLoadingMaster: false });
+                }
+            },
+        }),
+        {
+            name: 'master-data-storage', // key in localStorage
+        }
+    )
+);

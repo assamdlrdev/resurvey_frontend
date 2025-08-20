@@ -17,6 +17,7 @@ import Loader from "@/components/Loader";
 import PartDagEntryForm from "@/components/PartDagEntryForm";
 import { useDagStore } from "@/store/SurveyStore";
 import PartDagsView from "@/components/PartDagsView";
+import {useMasterDataStore} from "@/store/SurveyStore";
 
 interface DagType {
   dag_no: string
@@ -27,6 +28,7 @@ interface DagType {
 
 export default function SurveyData() {
   const { dagNo, setDagNo, getData, resetDagData, getCreatedPartDags, setLoading, isLoading } = useDagStore();
+  const {getMasterData} = useMasterDataStore();
   const [mode, setMode] = useState<string>("reference");
   const [showDagDropdown, setShowDagDropdown] = useState(false);
   const [dagNos, setDagNos] = useState<DagType[]>([]
@@ -56,6 +58,7 @@ export default function SurveyData() {
 
   useEffect(() => {
     if (district != '') {
+      getMasterData(district);
       getCircles(district);
     }
     else {
@@ -406,7 +409,7 @@ export default function SurveyData() {
             <ToggleGroupItem value="reference" className="px-6 py-2">
               Dharitry Data
             </ToggleGroupItem>
-            <ToggleGroupItem value="input" className="px-6 py-2">
+            <ToggleGroupItem disabled={!dagNo} value="input" className="px-6 py-2">
               Part Dag Entry
             </ToggleGroupItem>
             <ToggleGroupItem value="part_dags" className="px-6 py-2">
