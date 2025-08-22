@@ -1,1 +1,22 @@
 1.new tables - chitha_basic_splitted_dags,resurvey_villages,splitted_dags_possessors
+
+
+add these cols to chitha_tenant.
+
+ALTER TABLE public.chitha_tenant
+    ADD COLUMN duration character varying(100) COLLATE pg_catalog."default",
+    ADD COLUMN paid_cash_kind text COLLATE pg_catalog."default",
+    ADD COLUMN payable_cash_kind text COLLATE pg_catalog."default",
+    ADD COLUMN special_conditions text COLLATE pg_catalog."default",
+    ADD COLUMN tenant_status text COLLATE pg_catalog."default",
+    ADD COLUMN remarks text COLLATE pg_catalog."default",
+    ADD COLUMN bigha smallint,
+    ADD COLUMN katha smallint,
+    ADD COLUMN lessa numeric,
+    ADD COLUMN ganda numeric,
+    ADD COLUMN kranti smallint,
+    ADD COLUMN uuid bigint,
+    ADD COLUMN updated_date timestamp without time zone,
+    ADD COLUMN old_khatian_no integer,
+    ADD COLUMN p_flag character varying(1) COLLATE pg_catalog."default";
+

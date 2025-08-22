@@ -8,12 +8,13 @@ import Select from 'react-tailwindcss-select';
 import { Combobox } from "@headlessui/react";
 import MyCombobox from "./ComboBox";
 import ApiService from "@/services/ApiService";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import Loader from "./Loader";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useDagStore } from "@/store/SurveyStore";
 import { useMasterDataStore } from "@/store/SurveyStore";
+import { Plus, Trash2, Users } from "lucide-react";
 
 
 interface Props {
@@ -57,8 +58,8 @@ interface ErrorType {
 
 const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) => {
     const { register, handleSubmit, reset, formState: { errors } } = useForm<InputFormData>();
-    const {isLoading,getData, setLoading, partDags,dharDagData, dharPattadars}  = useDagStore();
-    const {landClasses, landGroups, pattaTypes} = useMasterDataStore();
+    const { isLoading, getData, setLoading, partDags, dharDagData, dharPattadars, dharTenants } = useDagStore();
+    const { landClasses, landGroups, pattaTypes } = useMasterDataStore();
 
     const [partDag, setPartDag] = useState<string>('');
     const [currLandClass, setCurrLandClass] = useState<string | number>('');
@@ -73,6 +74,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
     const [dagLandRevenue, setDagLandRevenue] = useState<number>(0);
     const [dagLocalTax, setDagLocalTax] = useState<number>(0);
     const [pattadars, setPattadars] = useState(null);
+    const [tenants, setTenants] = useState(null);
     const [triggerLandRevenue, setTriggerLandRevenue] = useState<string>('');
     const [errorTag, setErrorTag] = useState<ErrorType[]>([]);
 
@@ -92,14 +94,15 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
     const [posAddressMut, setPosAddressMut] = useState<string>('');
     const [posTenantRelation, setPosTenantRelation] = useState<string>('');
     const [posRemark, setPosRemark] = useState<string>('');
+    const [posGender, setPosGender] = useState<string>('male');
+    const [posDob, setPosDob] = useState<string>('');
     const [updateButton, setUpdateButton] = useState<boolean>(false);
-    const [dharTenants, setDharTenants] = useState<any[]>([]);
-    const [posTenants, setPosTenants] = useState<any[]>([]);
 
 
     useEffect(() => {
         if (dagNo != '' && vill != '') {
             setPattaNo(dharDagData.patta_no);
+            setPattadars(dharPattadars);
         }
     }, [dagNo, vill]);
 
@@ -118,9 +121,8 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         }
     }, [triggerLandRevenue, currLandClass]);
 
-    useEffect(() => {
-
-    }, []);
+    const showPattadars = updateButton ? pattadars : dharPattadars;
+    const showTenants = updateButton ? tenants : dharTenants;
 
     const resetFields = () => {
         setCurrLandClass('');
@@ -131,7 +133,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         setDagLocalTax(0);
         setPattadars([]);
         setUpdateButton(false);
-        
+
     };
 
     const resetPossessorAdd = () => {
@@ -200,6 +202,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
             setDagLandRevenue(partDagDetails.dag_revenue);
             setDagLocalTax(partDagDetails.dag_local_tax);
             setPattadars(partDagDetails.pattadars);
+            setTenants(partDagDetails.tenants);
             setUpdateButton(true);
             setPossessors(partDagDetails.possessors);
         }
@@ -231,44 +234,9 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         }
     };
 
-    // const getData = async (dagNo: string, vill: string) => {
-    //     setDist(vill.split('-')[0]);
-    //     const data = {
-    //         vill_townprt_code: vill,
-    //         dag_no: dagNo
-    //     };
-
-    //     setLoading(true);
-    //     const response = await ApiService.get('get_dag_data', JSON.stringify(data));
-    //     setLoading(false);
-
-    //     if (response.status !== 'y') {
-    //         toast.error(response.msg);
-    //         return;
-    //     }
-
-    //     const resp = response.data;
-    //     // console.log(resp);
-
-    //     setBhunakshaPartDags(resp.part_dags);
-    //     setlandClasses(resp.land_classes);
-    //     setDharLandGroups(resp.land_groups);
-    //     setDharPattaTypes(resp.patta_types);
-    //     setDharPattadars(resp.pattadars);
-    //     setDharDagData(resp.dharitree_data);
-    //     setOriginalLandClass(resp.dharitree_data.land_class_code);
-    //     setOriginalPattaNo(resp.dharitree_data.patta_no);
-    //     setOriginalPattaTypeCode(resp.dharitree_data.patta_type_code);
-    //     setCurrLandClass(resp.dharitree_data.land_class_code);
-    //     setPattaNo(resp.dharitree_data.patta_no);
-    //     setPattaTypeCode(resp.dharitree_data.patta_type_code);
-
-    //     // console.log(response);
-    // };
 
     const handlePattadarSelect = (val: any) => {
         setPattadars(val);
-        console.log(val);
     };
 
     const handleAreaSm = (e: any) => {
@@ -284,7 +252,6 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
 
 
     const onSubmit = async (data: InputFormData) => {
-        console.log(currLandClass, finalPartDag);
         if (!finalPartDag || finalPartDag == '' || !currLandClass || currLandClass == '') {
             toast.error('Missing Part Dag or Land Class!');
             return;
@@ -310,7 +277,8 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
             area_sm: areaSm,
             dag_land_revenue: dagLandRevenue,
             dag_local_tax: dagLocalTax,
-            pattadars: pattadars
+            pattadars: dharPattadars,
+            tenants: dharTenants
         };
 
         setLoading(true);
@@ -326,38 +294,19 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
 
         getPartDagInfo();
 
-        getData(dagNo,vill);
+        getData(dagNo, vill);
     };
 
 
 
     const modalOpen = (e: any) => {
         console.log(e.currentTarget.id, dagNo, vill);
-        // getTenants(vill, dagNo);
         resetPossessorAdd();
         setIsOpen(true);
     };
 
-    const getTenants = async (vill: string, dagNo: any) => {
-        const data = {
-            vill_townprt_code: vill,
-            dag_no: dagNo
-        };
-
-        setLoading(true);
-        const response = await ApiService.get('get_tenants', JSON.stringify(data));
-        setLoading(false);
-
-        if (response.status !== 'y') {
-            toast.error(response.msg);
-            return;
-        }
-
-        console.log(response.data);
-    };
 
     const handleUpdatePartDag = async () => {
-        console.log('update Called');
         if (!finalPartDag || finalPartDag == '' || !currLandClass || currLandClass == '') {
             toast.error('Missing Part Dag or Land Class!');
             return;
@@ -379,7 +328,8 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
             area_sm: areaSm,
             dag_land_revenue: dagLandRevenue,
             dag_local_tax: dagLocalTax,
-            pattadars: pattadars
+            pattadars: dharPattadars,
+            tenants: dharTenants
         };
 
         setLoading(true);
@@ -392,6 +342,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         }
 
         toast.success(response.msg);
+        getPartDagInfo();
     };
 
     const handlePartDagDelete = async () => {
@@ -428,10 +379,6 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
 
     };
 
-    const handleTenantSelect = (val: any) => {
-        setPosTenants(val);
-        console.log(val);
-    };
 
     const submitPossessor = async () => {
         if (!posName || !posGuardianName || !posGuardianRelation || posName == '' || posGuardianName == '' || posGuardianRelation == '') {
@@ -451,7 +398,9 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
             possessor_name_mut: posNameMut,
             possessor_father_name_mut: posFatherNameMut,
             possessor_address_mut: posAddressMut,
-            possessor_remark: posRemark
+            possessor_remark: posRemark,
+            possessor_gender: posGender,
+            possessor_dob: posDob
         };
 
         setLoading(true);
@@ -462,8 +411,6 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
             toast.error(response.msg);
             return;
         }
-
-        console.log(response);
 
         toast.success(response.msg);
         getPartDagInfo();
@@ -558,10 +505,10 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                 />
                             </div>
 
-                           
+
 
                             <div className="space-y-2">
-                                <Label htmlFor="patta_no">Patta No. (Existing)</Label>
+                                <Label htmlFor="patta_no">Patta No. (Old)</Label>
                                 <Input
                                     id="patta_no"
                                     type="text"
@@ -572,7 +519,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="patta_type_code">Patta Type (Existing)</Label>
+                                <Label htmlFor="patta_type_code">Patta Type (Old)</Label>
                                 <select
                                     id="patta_type_code"
                                     className="w-full border rounded px-3 py-2 mt-1"
@@ -587,7 +534,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="patta_no">Patta No. (Current)</Label>
+                                <Label htmlFor="patta_no">Patta No. (New)</Label>
                                 <Input
                                     id="patta_no"
                                     type="text"
@@ -602,7 +549,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                             )} */}
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="patta_type_code">Patta Type (Current)</Label>
+                                <Label htmlFor="patta_type_code">Patta Type (New)</Label>
                                 <select
                                     id="patta_type_code"
                                     // {...register("patta_type_code", { required: "Patta Type is a required field!" })}
@@ -653,26 +600,6 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                             </div>
 
                         </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="pattadars">Pattadars</Label>
-
-                                <Select
-                                    isMultiple
-                                    value={pattadars}
-                                    onChange={handlePattadarSelect}
-                                    options={dharPattadars}
-                                    primaryColor="blue"
-
-                                />
-                                
-                            </div>
-                        </div>
-
-
-                        
-
                         {!updateButton && <div className="flex justify-end space-x-4">
                             <Button type="submit" className="">
                                 Create
@@ -690,83 +617,209 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                 cancelText="No, keep it"
                                 onConfirm={handlePartDagDelete}
                             />
-                            {/* <Button type="button" className="bg-red-600 hover:bg-red-700 text-white" onClick={handlePartDagDelete}>Delete</Button> */}
                         </div>}
 
                     </form>
-                    {finalPartDag && finalPartDag !== '' && <div>
-                        <div className="mt-4">
-                            <Card className="w-full">
-                                <CardHeader className="flex-row items-center justify-between">
-                                    <CardTitle>Possessors</CardTitle>
-                                    <Button type="button" id={finalPartDag} className="" onClick={modalOpen}>
+                    {/* Pattadars */}
+                    <div className="mt-6">
+                        <Card className="w-full shadow-sm border border-gray-200 rounded-xl">
+                            <CardHeader className="border-b border-gray-100">
+                                <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                                    🧾 Pattadars
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full text-sm text-gray-800">
+                                        <thead className="bg-gray-50 text-gray-600 uppercase tracking-wide">
+                                            <tr>
+                                                <th className="px-4 py-3 text-left font-medium flex justify-start">পট্টাদাৰৰ নাম</th>
+                                                <th className="px-4 py-3 text-left font-medium text-center">পিতাৰ নাম</th>
+                                                <th className="px-4 py-3 text-left font-medium flex justify-end">ঠিকনা</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100">
+                                            {showPattadars?.length ? (
+                                                showPattadars.map((p, i) => (
+                                                    <tr key={i} className="hover:bg-indigo-50 transition-colors">
+                                                        <td className="px-4 py-3 flex justify-start">{p.pdar_name}</td>
+                                                        <td className="px-4 py-3">{p.pdar_father_name || "N/A"}</td>
+                                                        <td className="px-4 py-3 flex justify-end">
+                                                            {p.pdar_add1}
+                                                            {p.pdar_add2 ? `, ${p.pdar_add2}` : ""}
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan={3} className="px-4 py-10 text-center text-gray-500">
+                                                        📭 No pattadars found
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Tenants */}
+                    <div className="mt-8">
+                        <Card className="w-full shadow-sm border border-gray-200 rounded-xl">
+                            <CardHeader className="border-b border-gray-100">
+                                <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                                    <Users className="h-5 w-5 text-indigo-500" />
+                                    ৰায়ত/ আধিয়াৰৰ তথ্য
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full text-sm text-gray-800">
+                                        <thead className="bg-gray-50 text-gray-600 uppercase tracking-wide">
+                                            <tr>
+                                                <th className="px-4 py-3 text-left font-medium flex justify-start">Tenant Name</th>
+                                                <th className="px-4 py-3 text-left font-medium">Father&apos;s Name</th>
+                                                <th className="px-4 py-3 text-left font-medium">Address</th>
+                                                <th className="px-4 py-3 text-left font-medium">Khatian No</th>
+                                                <th className="px-4 py-3 text-left font-medium">Tenant Status</th>
+                                                <th className="px-4 py-3 text-left font-medium">Revenue Tenant</th>
+                                                <th className="px-4 py-3 text-left font-medium flex justify-end">Remarks</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-100">
+                                            {showTenants?.length ? (
+                                                showTenants.map((t) => (
+                                                    <tr key={t.tenant_id} className="hover:bg-indigo-50 transition-colors">
+                                                        <td className="px-4 py-3 flex justify-start">{t.tenant_name}</td>
+                                                        <td className="px-4 py-3">{t.tenants_father}</td>
+                                                        <td className="px-4 py-3">{t.tenants_add1}{t.tenants_add2 ? `, ${t.tenants_add2}` : ""}</td>
+                                                        <td className="px-4 py-3">{t.khatian_no}</td>
+                                                        <td className="px-4 py-3">{t.tenant_status}</td>
+                                                        <td className="px-4 py-3">{t.revenue_tenant}</td>
+                                                        <td className="px-4 py-3 flex justify-end">{t.remarks}</td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan={7} className="px-4 py-10 text-center text-gray-500">
+                                                        📭 No Tenant Data
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Possessors */}
+                    {finalPartDag && (
+                        <div className="mt-6">
+                            <Card className="w-full shadow-sm border border-gray-200 rounded-xl">
+                                <CardHeader className="flex flex-row items-center justify-between border-b border-gray-100">
+                                    <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                                        <Users className="h-5 w-5 text-indigo-500" />
+                                        Possessors
+                                    </CardTitle>
+                                    <Button
+                                        type="button"
+                                        id={finalPartDag}
+                                        onClick={modalOpen}
+                                        className="bg-indigo-500 hover:bg-indigo-600 text-white shadow-sm rounded-lg flex items-center gap-1"
+                                    >
+                                        <Plus className="h-4 w-4" />
                                         Add Possessor
                                     </Button>
                                 </CardHeader>
-                                <CardContent>
+                                <CardContent className="p-0">
                                     <div className="overflow-x-auto">
-                                        <table className="min-w-full text-sm text-left text-gray-700">
-                                            <thead className="bg-gray-100 text-gray-700 uppercase text-xs">
+                                        <table className="min-w-full text-sm text-gray-800">
+                                            <thead className="bg-gray-50 text-gray-600 uppercase tracking-wide">
                                                 <tr>
-                                                    <th className="px-4 py-3">
-                                                        Possessor Name
-                                                    </th>
-                                                    <th className="px-4 py-3">
-                                                        Possessor Guardian's Name
-                                                    </th>
-                                                    <th className="px-4 py-3">
-                                                        Possessor Relation with Guardian
-                                                    </th>
-                                                    <th className="px-4 py-3">
-                                                        Possessor Relation with Pattadar
-                                                    </th>
-                                                    <th className="px-4 py-3">
-                                                        Particulars of transaction/mode of acquisition by Possessor
-                                                    </th>
-                                                    <th className="px-4 py-3">
-                                                        Remarks
-                                                    </th>
-                                                    <th className="px-4 py-3">
-                                                        Action
-                                                    </th>
+                                                    <th className="px-4 py-3 text-left font-medium flex justify-start">Possessor Name</th>
+                                                    <th className="px-4 py-3 text-left font-medium">Guardian&apos;s Name</th>
+                                                    <th className="px-4 py-3 text-left font-medium">Remarks</th>
+                                                    <th className="px-4 py-3 text-left font-medium flex justify-end">Action</th>
                                                 </tr>
                                             </thead>
-                                            <tbody>
-                                                {possessors && possessors.length > 0 && possessors.map((possessor, index) => <tr key={index} className="border-b hover:bg-gray-50">
-                                                    <td className="px-4 py-2">
-                                                        {possessor.name}
-                                                    </td>
-                                                    <td className="px-4 py-2">
-                                                        {possessor.guard_name}
-                                                    </td>
-                                                    <td className="px-4 py-2">
-                                                        {possessor.guard_relation_name}
-                                                    </td>
-                                                    <td className="px-4 py-2">
-                                                        {possessor.pattadar_relation_name}
-                                                    </td>
-                                                    <td className="px-4 py-2">
-                                                        {possessor.mode_of_acquisition_name}
-                                                    </td>
-                                                    <td className="px-4 py-2">
-                                                        {possessor.remarks}
-                                                    </td>
-                                                    <td className="px-4 py-2">
-                                                        <Button className="bg-red-500 hover:bg-red-600 text-white" value={`${possessor.dist_code}-${possessor.subdiv_code}-${possessor.cir_code}-${possessor.mouza_pargona_code}-${possessor.lot_no}-${possessor.vill_townprt_code}-${possessor.old_dag_no}-${possessor.part_dag}-${possessor.possessor_id}`} onClick={deletePossessor}>Delete</Button>
-                                                    </td>
-                                                </tr>)}
-                                                {(!possessors || possessors.length < 1) && <tr className="border-b hover:bg-gray-50">
-                                                    <td className="px-4 py-2">
-                                                        No data available
-                                                    </td>
-                                                </tr>}
+                                            <tbody className="divide-y divide-gray-100">
+                                                {possessors?.length ? (
+                                                    possessors.map((p, i) => (
+                                                        <tr key={i} className="hover:bg-indigo-50 transition-colors">
+                                                            <td className="px-4 py-3 flex justify-start">{p.name}</td>
+                                                            <td className="px-4 py-3">{p.guard_name}</td>
+                                                            <td className="px-4 py-3">{p.remarks}</td>
+                                                            <td className="px-4 py-3">
+                                                                <div className="flex justify-end gap-2">
+                                                                    <Button
+                                                                        className="bg-blue-500 hover:bg-blue-600 text-white rounded-md px-3 py-1 flex items-center gap-1"
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            toast.dismiss(); // Dismiss all existing toasts
+                                                                            toast(
+                                                                                (t) => (
+                                                                                    <div className="text-left">
+                                                                                        <div className="flex justify-between items-center mb-2">
+                                                                                            <span className="font-bold">Possessor Details</span>
+                                                                                            <button
+                                                                                                className="ml-2 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300"
+                                                                                                onClick={() => toast.dismiss(t.id)}
+                                                                                            >
+                                                                                                Close
+                                                                                            </button>
+                                                                                        </div>
+                                                                                        <div><strong>Name:</strong> {p.name}</div>
+                                                                                        <div><strong>Guardian Name:</strong> {p.guard_name}</div>
+                                                                                        <div><strong>Guardian Relation:</strong> {p.guard_relation_name}</div>
+                                                                                        {/* <div><strong>Pattadar Relation:</strong> {p.pattadar_relation}</div> */}
+                                                                                        <div><strong>Mode of Acquisition:</strong> {p.mode_of_acquisition_name}</div>
+                                                                                        <div><strong>Possessor Name for Mutation:</strong> {p.mut_possessor_name}</div>
+                                                                                        <div><strong>Possessor Father's Name for Mutation:</strong> {p.mut_possessor_father_name}</div>
+                                                                                        <div><strong>Address for Mutation:</strong> {p.mut_possessor_address}</div>
+                                                                                        <div><strong>Gender:</strong> {p.gender}</div>
+                                                                                        <div><strong>Date of Birth:</strong> {p.dob}</div>
+                                                                                        <div><strong>Remark:</strong> {p.remarks}</div>
+                                                                                    </div>
+                                                                                ),
+                                                                                {
+                                                                                    duration: 30000,
+                                                                                    position: "top-center",
+                                                                                    style: { minWidth: "350px", maxWidth: "90vw", fontSize: "14px" }
+                                                                                }
+                                                                            );
+                                                                        }}
+                                                                    >
+                                                                        Details
+                                                                    </Button>
+                                                                    <Button
+                                                                        className="bg-red-500 hover:bg-red-600 text-white rounded-md px-3 py-1 flex items-center gap-1"
+                                                                        value={`${p.dist_code}-${p.subdiv_code}-${p.cir_code}-${p.mouza_pargona_code}-${p.lot_no}-${p.vill_townprt_code}-${p.old_dag_no}-${p.part_dag}-${p.possessor_id}`}
+                                                                        onClick={deletePossessor}
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4" />
+                                                                        Delete
+                                                                    </Button>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                ) : (
+                                                    <tr>
+                                                        <td colSpan={4} className="px-4 py-10 text-center text-gray-500">
+                                                            📭 No possessors found
+                                                        </td>
+                                                    </tr>
+                                                )}
                                             </tbody>
                                         </table>
                                     </div>
                                 </CardContent>
                             </Card>
                         </div>
-                    </div>}
+                    )}
+
                     {finalPartDag && finalPartDag !== '' && isOpen && <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
 
                         <div className="bg-white rounded-lg shadow-lg w-1/2 p-6 relative">
@@ -782,7 +835,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                     <CardTitle className="w-full text-center">Add Possessor</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
                                             <Label htmlFor="possessor_name">Possessor Name</Label>
                                             <Input
@@ -821,7 +874,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
 
                                             </select>
                                         </div>
-                                        <div className="space-y-2">
+                                        {/* <div className="space-y-2">
                                             <Label htmlFor="possessor_pattadar_relation">Possessor's Relation with Pattadar</Label>
                                             <select
                                                 id="possessor_pattadar_relation"
@@ -837,7 +890,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                                 <option value="w">পত্নী</option>
                                                 <option value="u">অভিভাৱক</option>
                                             </select>
-                                        </div>
+                                        </div> */}
                                         <div className="space-y-2">
                                             <Label htmlFor="mode_of_acquisition">Mode of Acquisition by possessor</Label>
                                             <select
@@ -884,7 +937,31 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                                 onInput={(e: any) => setPosAddressMut(e.currentTarget.value)}
                                             />
                                         </div>
-                                        
+
+                                        {/* add here for gender and dob */}
+                                        <div className="space-y-2">
+                                            <Label htmlFor="possessor_gender">Gender</Label>
+                                            <select
+                                                id="possessor_gender"
+                                                value={posGender}
+                                                onChange={(e) => setPosGender(e.currentTarget.value)}
+                                                className="w-full border rounded px-3 py-2 mt-1"
+                                            >
+                                                <option value="">--Select--</option>
+                                                <option value="male">Male</option>
+                                                <option value="female">Female</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="possessor_dob">Date of Birth</Label>
+                                            <Input
+                                                id="possessor_dob"
+                                                type="date"
+                                                value={posDob}
+                                                onInput={(e: any) => setPosDob(e.currentTarget.value)}
+                                            />
+                                        </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="possessor_remark">Remark</Label>
                                             <Input
@@ -908,13 +985,19 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                             >
                                 Submit
                             </button>
+                            <button
+                                onClick={() => setIsOpen(false)}
+                                className="px-4 ml-3 py-2 my-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                            >
+                                Close
+                            </button>
                         </div>
                     </div>}
                 </div>
                 ) : (<div className="flex items-center justify-center p-7">
                     <p className="font-bold text-lg">No data available</p>
                 </div>)}
-            <Toaster position="top-center" />
+            {/* <Toaster position="top-center" /> */}
             <Loader loading={isLoading} />
         </>
     );

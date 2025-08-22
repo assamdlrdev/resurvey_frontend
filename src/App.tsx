@@ -2,20 +2,16 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AppSidebar } from "@/components/AppSidebar";
 import Login from "./pages/Login";
-import SignUp from "./pages/SignUp";
-import Symptoms from "./pages/Symptoms";
 import SurveyForm from "./pages/SurveyForm";
-import DataDisplay from "./pages/DataDisplay";
+import SurveyReports from "./pages/reports/ResurveyReports";
 import NotFound from "./pages/NotFound";
 import AuthLayout from "./layouts/AuthLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
-import SurveyData from "./pages/SurveyForm";
 import SurveyorLayout from "./layouts/SurveyorLayout";
+import SurveyDashboard from "./pages/SurveyDashboard";
 
 function App() {
   const queryClient = new QueryClient();
@@ -36,7 +32,8 @@ function App() {
               <Route element={<SurveyorLayout />}>
                 <Route element={<DashboardLayout />}>
                   <Route path="/survey-form" element={<SurveyForm />} />
-                  <Route path="/survey-reports" element={<DataDisplay />} />
+                  <Route path="/survey-reports" element={<SurveyReports />} />
+                  <Route path="/survey-dashboard" element={<SurveyDashboard />} />
                 </Route>
               </Route>
               <Route path="*" element={<NotFound />} />
