@@ -302,7 +302,7 @@ export default function SurveyData() {
               >
                 <option value="">Select District</option>
                 {
-                  districtData && districtData.length > 0 && districtData.map((ddata, index) => <option key={index} value={ddata.key}>{ddata.value}</option>)
+                  districtData && districtData.length > 0 && districtData.map((ddata, index) => <option key={index} value={ddata.key}>{ddata.value} - {ddata.key}</option>)
                 }
 
               </select>
@@ -317,7 +317,7 @@ export default function SurveyData() {
                 onChange={(e: any) => setCircle(e.currentTarget.value)}
               >
                 <option value="">Select Circle</option>
-                {circleData && circleData.length > 0 && circleData.map((cdata, index) => <option key={index} value={`${cdata.dist_code}-${cdata.subdiv_code}-${cdata.cir_code}`}>{`${cdata.loc_name} (${cdata.locname_eng})`}</option>)}
+                {circleData && circleData.length > 0 && circleData.map((cdata, index) => <option key={index} value={`${cdata.dist_code}-${cdata.subdiv_code}-${cdata.cir_code}`}>{`${cdata.loc_name} (${cdata.locname_eng})`} - {cdata.cir_code}</option>)}
               </select>
 
             </div>
@@ -332,7 +332,7 @@ export default function SurveyData() {
                 <option value="">Select Mouza</option>
 
                 {
-                  mouzaData && mouzaData.length > 0 && mouzaData.map((mdata, index) => <option key={index} value={`${mdata.dist_code}-${mdata.subdiv_code}-${mdata.cir_code}-${mdata.mouza_code}`}>{`${mdata.loc_name} (${mdata.locname_eng})`}</option>)
+                  mouzaData && mouzaData.length > 0 && mouzaData.map((mdata, index) => <option key={index} value={`${mdata.dist_code}-${mdata.subdiv_code}-${mdata.cir_code}-${mdata.mouza_code}`}>{`${mdata.loc_name} (${mdata.locname_eng})`} - {mdata.mouza_code}</option>)
                 }
               </select>
 
@@ -347,7 +347,7 @@ export default function SurveyData() {
               >
                 <option value="">Select Lot</option>
                 {
-                  lotData && lotData.length > 0 && lotData.map((ldata, index) => <option key={index} value={`${ldata.dist_code}-${ldata.subdiv_code}-${ldata.cir_code}-${ldata.mouza_code}-${ldata.lot_no}`}>{`${ldata.loc_name} (${ldata.locname_eng})`}</option>)
+                  lotData && lotData.length > 0 && lotData.map((ldata, index) => <option key={index} value={`${ldata.dist_code}-${ldata.subdiv_code}-${ldata.cir_code}-${ldata.mouza_code}-${ldata.lot_no}`}>{`${ldata.loc_name} (${ldata.locname_eng})`} - {ldata.lot_no}</option>)
                 }
               </select>
 
@@ -362,7 +362,7 @@ export default function SurveyData() {
               >
                 <option value="">Select Village</option>
                 {
-                  villData && villData.length > 0 && villData.map((vdata, index) => <option key={index} value={`${vdata.dist_code}-${vdata.subdiv_code}-${vdata.cir_code}-${vdata.mouza_code}-${vdata.lot_no}-${vdata.village_code}`}>{`${vdata.loc_name} (${vdata.locname_eng})`}</option>)
+                  villData && villData.length > 0 && villData.map((vdata, index) => <option key={index} value={`${vdata.dist_code}-${vdata.subdiv_code}-${vdata.cir_code}-${vdata.mouza_code}-${vdata.lot_no}-${vdata.village_code}`}>{`${vdata.loc_name} (${vdata.locname_eng})`} - {vdata.village_code}</option>)
                 }
               </select>
 

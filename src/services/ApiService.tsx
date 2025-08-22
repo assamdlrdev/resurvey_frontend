@@ -27,21 +27,19 @@ const ApiService = {
             };
         }
     },
-    get: async (endpoint: string, data: any) => {
-        let parsedData = JSON.parse(data);
-        // parsedData.token = await StorageService.getJwtCookie();
-        parsedData.api_key = Constants.API_SECRET;
+    get: async (endpoint: string, data: any | null = null) => {
+        const token = await StorageService.getJwtCookie();
+        let parsedData = data ? JSON.parse(data) : {};
         try{
-            const result = await fetch(`${Constants.API_BASE_URL + endpoint}`
-                ,{
-                    method: 'POST',
-                    headers: {
-                        'Content-Type' : 'application/json'
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify(parsedData)
-                }
-            );
+            const result = await fetch(`${Constants.API_BASE_URL + endpoint}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                credentials: 'include',
+                body: JSON.stringify(parsedData)
+            });
             const response = await result.json();
             return response;
         }

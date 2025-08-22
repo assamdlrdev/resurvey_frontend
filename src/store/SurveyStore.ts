@@ -13,23 +13,49 @@ interface Pattadar {
     label: string;
 }
 
-export interface Tenant {
-    tenant_id: number;
-    tenant_name: string;            // NOT NULL
-    tenants_father?: string;        // nullable
-    tenants_add1?: string;
-    tenants_add2?: string;
-    tenants_add3?: string;
-    type_of_tenant?: string;        // varchar(2)
-    khatian_no?: number;            // smallint
-    revenue_tenant?: number;        // numeric
-    crop_rate?: string;
-    user_code: string;              // NOT NULL, varchar(5)
-    date_entry: string;             // ISO timestamp
-    operation: string;              // char(1), NOT NULL
-    status?: string;
-    year_no?: string;               // char(4)
-    relation?: string;              // char(1)
+interface Tenant {
+  dist_code: string;
+  subdiv_code: string;
+  cir_code: string;
+  mouza_pargona_code: string;
+  lot_no: string;
+  vill_townprt_code: string;
+  dag_no: string;
+
+  tenant_name: string;
+  tenants_father: string;
+  tenants_add1: string;
+  tenants_add2?: string | null;
+  tenants_add3?: string | null;
+
+  type_of_tenant: string;
+  khatian_no: string;
+  revenue_tenant: string; // looks numeric but API returns as string
+  crop_rate?: string | null;
+
+  user_code: string;
+  date_entry: string; // ISO date string
+  operation: string;
+  tenant_id: string;
+
+  duration?: string | null;
+  paid_cash_kind: string;
+  payable_cash_kind: string;
+  special_conditions: string;
+  status?: string | null;
+  tenant_status: string;
+  remarks: string;
+
+  bigha: string;
+  katha: string;
+  lessa: string;
+  ganda: string;
+  kranti: string;
+
+  uuid: string;
+  updated_date?: string | null;
+  old_khatian_no?: string | null;
+  p_flag?: string | null;
 }
 
 
