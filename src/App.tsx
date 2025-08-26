@@ -21,7 +21,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
+        <BrowserRouter basename="/resurvey">
           <main className="flex-1 bg-medical-50">
             <Routes>
               <Route element={<AuthLayout />}>
