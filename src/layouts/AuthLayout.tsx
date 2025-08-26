@@ -2,6 +2,7 @@
 
 import { Outlet } from "react-router-dom";
 import { Brain, Shield, ActivitySquare, SplitIcon, Link } from "lucide-react";
+import BASE_URL from "@/config/Constants";
 
 export default function AuthLayout() {
     return (
@@ -10,7 +11,7 @@ export default function AuthLayout() {
                 <div className="hidden lg:flex w-full lg:w-1/2 bg-gradient-to-br from-medical-50 to-medical-100 p-8 lg:p-16 flex-col justify-center relative overflow-hidden">
                     <div className="absolute inset-0 z-0">
                         <img
-                            src="/auth.jpg"
+                            src={`${BASE_URL}/auth.jpg`}
                             alt="Medical Technology"
                             className="w-full h-full object-cover opacity-10"
                         />
@@ -58,7 +59,7 @@ export default function AuthLayout() {
                 <div className="w-full lg:w-1/2 p-8 lg:p-16 flex items-center justify-center bg-white relative overflow-hidden min-h-screen lg:min-h-0">
                     <div className="absolute inset-0 z-0">
                         <img
-                            src="/code.jpeg"
+                            src={`${BASE_URL}/code.jpeg`}
                             alt="Technology Background"
                             className="w-full h-full object-cover opacity-5"
                         />
