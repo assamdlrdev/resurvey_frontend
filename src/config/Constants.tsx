@@ -1,5 +1,5 @@
 const Constants: any = {
-    BASE_URL : 'http://172.16.3.214/resurvey',
+    BASE_URL : 'http://172.16.3.214/resurvey/',
     APP_NAME : 'Resurvey',
     COVER: 'cover.jpg',
     API_BASE_URL : 'http://172.16.3.214/chithaapi/index.php/',
