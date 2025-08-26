@@ -343,6 +343,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
 
         toast.success(response.msg);
         getPartDagInfo();
+        getData(dagNo, vill);
     };
 
     const handlePartDagDelete = async () => {
