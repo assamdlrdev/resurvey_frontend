@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { UserPlus, User, Mail, Lock, Calendar, Brain, Shield, ActivitySquare } from "lucide-react";
-
+import BASE_URL from "@/config/Constants";
 export default function SignUpForm() {
   const [formData, setFormData] = useState({
     name: "",
