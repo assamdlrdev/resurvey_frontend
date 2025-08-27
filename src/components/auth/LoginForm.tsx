@@ -22,7 +22,7 @@ export default function LoginForm() {
   const [captcha, setCaptcha] = useState<string>('');
 
   useEffect(() => {
-        if(location.pathname == '/login') {
+        if(location.pathname == '/login' || location.pathname == '/resurvey/login') {
             loadCaptchaEnginge(6);
         }
   }, [location]);
@@ -114,7 +114,7 @@ export default function LoginForm() {
           <Input
             id="captcha"
             type="text"
-            placeholder="Enter Username"
+            placeholder="Enter the captcha"
             value={captcha}
             onInput={(e) => setCaptcha(e.currentTarget.value)}
             // required
