@@ -10,140 +10,269 @@ export default function ChithaView() {
     // For now, we will just log the dagData to see if it's available
   }, [dharDagData]);
   return (
-    <div className="p-6 bg-white max-w-6xl mx-auto mt-4 rounded-lg shadow-sm">
+    <div className="sm:p-6 bg-white max-w-6xl mx-auto mt-4 rounded-lg shadow-sm overflow-hidden">
       {isLoading ? (
-      <div className="text-center text-gray-500 text-lg">Loading...</div>
+        <div className="text-center text-gray-500 text-base sm:text-lg">Loading...</div>
       ) : dagNo ? (
-      <>
-        {/* Dag Data Section */}
-        <div>
-        <h2 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">
-          🗂️ দাগৰ তথ্য
-        </h2>
-        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-base text-gray-700">
-          <div>
-          <dt className="font-medium">দাগ নং:</dt>
-          <dd>{dharDagData?.dag_no || "N/A"}</dd>
-          </div>
-          <div>
-          <dt className="font-medium">কালি (বি-ক-লে):</dt>
-          <dd>
-            {dharDagData
-            ? `${dharDagData.dag_area_b}-${dharDagData.dag_area_k}-${dharDagData.dag_area_lc}`
-            : "N/A"}
-          </dd>
-          </div>
-          <div>
-          <dt className="font-medium">মাটিৰ শ্ৰেণী:</dt>
-          <dd>{dharDagData?.land_type || "N/A"}</dd>
-          </div>
-          <div>
-          <dt className="font-medium">পট্টাৰ নং:</dt>
-          <dd>{dharDagData?.patta_no || "N/A"}</dd>
-          </div>
-          <div>
-          <dt className="font-medium">পট্টাৰ প্ৰকাৰ:</dt>
-          <dd>{dharDagData?.patta_type || "N/A"}</dd>
-          </div>
-          <div>
-          <dt className="font-medium">ৰাজহ (টকা):</dt>
-          <dd>{dharDagData?.dag_revenue || "N/A"}</dd>
-          </div>
-          <div>
-          <dt className="font-medium">স্হানীয় কৰ (টকা):</dt>
-          <dd>{dharDagData?.dag_local_tax || "N/A"}</dd>
-          </div>
-        </dl>
-        </div>
+        <>
+          {/* Dag Details Section */}
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-800 pb-2 mb-2">
+              🗂️ দাগৰ তথ্য
+            </h2>
+            {/* Table for larger screens */}
+            <div className="hidden sm:block overflow-x-auto w-full rounded-lg border border-gray-200 bg-white shadow">
+              <table className="w-full table-auto text-sm md:text-base text-gray-800">
+                <tbody className="divide-y divide-gray-100">
+                  <tr>
+                    <td className="px-4 py-3 font-semibold text-medical-700">দাগ নং:</td>
+                    <td className="px-4 py-3">{dharDagData?.dag_no || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-semibold text-medical-700">কালি (বি-ক-লে):</td>
+                    <td className="px-4 py-3">
+                      {dharDagData
+                        ? `${dharDagData.dag_area_b}-${dharDagData.dag_area_k}-${dharDagData.dag_area_lc}`
+                        : "N/A"}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-semibold text-medical-700">মাটিৰ শ্ৰেণী:</td>
+                    <td className="px-4 py-3">{dharDagData?.land_type || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-semibold text-medical-700">পট্টাৰ নং:</td>
+                    <td className="px-4 py-3">{dharDagData?.patta_no || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-semibold text-medical-700">পট্টাৰ প্ৰকাৰ:</td>
+                    <td className="px-4 py-3">{dharDagData?.patta_type || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-semibold text-medical-700">ৰাজহ (টকা):</td>
+                    <td className="px-4 py-3">{dharDagData?.dag_revenue || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td className="px-4 py-3 font-semibold text-medical-700">স্হানীয় কৰ (টকা):</td>
+                    <td className="px-4 py-3">{dharDagData?.dag_local_tax || "N/A"}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-        {/* Pattadar Section */}
-        <div className="mt-8">
-        <h2 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-3 flex items-center gap-2">
-          <Users className="h-5 w-5 text-indigo-500" />
-          পট্টাদাৰৰ তথ্য
-        </h2>
-        <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <table className="min-w-full text-base text-gray-800">
-          <thead className="bg-gray-50 text-gray-600 text-sm uppercase tracking-wide">
-            <tr>
-            <th className="px-4 py-3 text-left font-medium">পট্টাদাৰৰ নাম</th>
-            <th className="px-4 py-3 text-left font-medium">পিতাৰ নাম</th>
-            <th className="px-4 py-3 text-left font-medium">ঠিকনা</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {dharPattadars?.length ? (
-            dharPattadars.map((p, i) => (
-              <tr key={i} className="odd:bg-white even:bg-gray-50 hover:bg-indigo-50 transition-colors">
-              <td className="px-4 py-3">{p?.pdar_name || "N/A"}</td>
-              <td className="px-4 py-3">{p?.pdar_father_name || "N/A"}</td>
-              <td className="px-4 py-3">
-                {p?.pdar_add1 || "N/A"}{p?.pdar_add2 ? `, ${p.pdar_add2}` : ""}
-              </td>
-              </tr>
-            ))
-            ) : (
-            <tr>
-              <td colSpan={3} className="px-4 py-10 text-center text-gray-500 text-lg">
-              📭 No Pattadar Data
-              </td>
-            </tr>
-            )}
-          </tbody>
-          </table>
-        </div>
-        </div>
+            {/* Card view for mobile */}
+            <div className="sm:hidden space-y-4">
+              <div className="bg-white shadow rounded-lg p-2 border space-y-2">
+                <div className="flex justify-between">
+                  <span className="font-semibold text-medical-700">দাগ নং:</span>
+                  <span>{dharDagData?.dag_no || "N/A"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-semibold text-medical-700">কালি (বি-ক-লে):</span>
+                  <span>
+                    {dharDagData
+                      ? `${dharDagData.dag_area_b}-${dharDagData.dag_area_k}-${dharDagData.dag_area_lc}`
+                      : "N/A"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-semibold text-medical-700">মাটিৰ শ্ৰেণী:</span>
+                  <span>{dharDagData?.land_type || "N/A"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-semibold text-medical-700">পট্টাৰ নং:</span>
+                  <span>{dharDagData?.patta_no || "N/A"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-semibold text-medical-700">পট্টাৰ প্ৰকাৰ:</span>
+                  <span>{dharDagData?.patta_type || "N/A"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-semibold text-medical-700">ৰাজহ (টকা):</span>
+                  <span>{dharDagData?.dag_revenue || "N/A"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="font-semibold text-medical-700">স্হানীয় কৰ (টকা):</span>
+                  <span>{dharDagData?.dag_local_tax || "N/A"}</span>
+                </div>
+              </div>
+            </div>
 
-        {/* Tenant Section */}
-        <div className="mt-8">
-        <h2 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-3 flex items-center gap-2">
-          <Users className="h-5 w-5 text-indigo-500" />
-          ৰায়ত/ আধিয়াৰৰ তথ্য
-        </h2>
-        <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <table className="min-w-full text-base text-gray-800">
-          <thead className="bg-gray-50 text-gray-600 text-sm uppercase tracking-wide">
-            <tr>
-            <th className="px-4 py-3 text-left font-medium">Tenant Name</th>
-            <th className="px-4 py-3 text-left font-medium">Father&apos;s Name</th>
-            <th className="px-4 py-3 text-left font-medium">Address</th>
-            <th className="px-4 py-3 text-left font-medium">Khatian No</th>
-            <th className="px-4 py-3 text-left font-medium">Tenant Status</th>
-            <th className="px-4 py-3 text-left font-medium">Revenue Tenant</th>
-            <th className="px-4 py-3 text-left font-medium">Remarks</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {dharTenants?.length ? (
-            dharTenants.map((t) => (
-              <tr key={t.tenant_id} className="odd:bg-white even:bg-gray-50 hover:bg-indigo-50 transition-colors">
-              <td className="px-4 py-3">{t.tenant_name}</td>
-              <td className="px-4 py-3">{t.tenants_father}</td>
-              <td className="px-4 py-3">
-                {t.tenants_add1}{t.tenants_add2 ? `, ${t.tenants_add2}` : ""}
-              </td>
-              <td className="px-4 py-3">{t.khatian_no}</td>
-              <td className="px-4 py-3">{t.tenant_status}</td>
-              <td className="px-4 py-3">{t.revenue_tenant}</td>
-              <td className="px-4 py-3">{t.remarks}</td>
-              </tr>
-            ))
-            ) : (
-            <tr>
-              <td colSpan={7} className="px-4 py-10 text-center text-gray-500 text-lg">
-              📭 No Tenant Data
-              </td>
-            </tr>
-            )}
-          </tbody>
-          </table>
-        </div>
-        </div>
-      </>
+          {/* Pattadar Section */}
+          <div className="mt-8 sm:mt-12">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-800 pb-2 mb-2 flex items-center gap-2">
+              <Users className="h-5 w-5 text-indigo-500" />
+              পট্টাদাৰৰ তথ্য
+            </h2>
+
+            {/* Table for larger screens */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="min-w-full border rounded-lg bg-white">
+                <thead>
+                  <tr className="bg-medical-50">
+                    <th className="px-2 py-2 border text-start">পট্টাদাৰৰ নাম</th>
+                    <th className="px-2 py-2 border text-center">পিতাৰ নাম</th>
+                    <th className="px-2 py-2 border text-center">ঠিকনা</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dharPattadars?.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="text-center py-4 text-medical-500">
+                        📭 No Pattadar Data
+                      </td>
+                    </tr>
+                  ) : (
+                    dharPattadars.map((p, i) => (
+                      <tr key={i} className="hover:bg-medical-50">
+                        <td className="px-2 py-2 border text-start">
+                          {p?.pdar_name || "N/A"}
+                        </td>
+                        <td className="px-2 py-2 border text-center">
+                          {p?.pdar_father_name || "N/A"}
+                        </td>
+                        <td className="px-2 py-2 border text-center">
+                          {p?.pdar_add1 || "N/A"}
+                          {p?.pdar_add2 ? `, ${p.pdar_add2}` : ""}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+
+            {/* Card view for mobile */}
+            <div className="sm:hidden space-y-4">
+              {dharPattadars?.length ? (
+                dharPattadars.map((p, i) => (
+                  <div
+                    key={i}
+                    className="bg-white shadow rounded-lg p-2 border space-y-2"
+                  >
+                    <div className="flex justify-between">
+                      <span className="font-semibold text-medical-700">পট্টাদাৰৰ নাম:</span>
+                      <span>{p?.pdar_name || "N/A"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-semibold text-medical-700">পিতাৰ নাম:</span>
+                      <span>{p?.pdar_father_name || "N/A"}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-semibold text-medical-700">ঠিকনা:</span>
+                      <span>{p?.pdar_add1 || "N/A"}{p?.pdar_add2 ? `, ${p.pdar_add2}` : ""}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-gray-500 py-6 bg-white shadow rounded-lg border">
+                  📭 No Pattadar Data
+                </div>
+              )}
+            </div>
+
+          </div>
+
+          {/* Tenant Section */}
+          <div className="mt-8 sm:mt-12">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-800 pb-2 mb-2 flex items-center gap-2">
+              <Users className="h-5 w-5 text-indigo-500" />
+              ৰায়ত/ আধিয়াৰৰ তথ্য
+            </h2>
+
+            {/* Table for larger screens */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="min-w-full border rounded-lg bg-white">
+                <thead>
+                  <tr className="bg-medical-50">
+                    <th className="px-2 py-2 border text-start">Tenant Name</th>
+                    <th className="px-2 py-2 border text-center">Father&apos;s Name</th>
+                    <th className="px-2 py-2 border text-center">Address</th>
+                    <th className="px-2 py-2 border text-center">Khatian No</th>
+                    <th className="px-2 py-2 border text-center">Tenant Status</th>
+                    <th className="px-2 py-2 border text-center">Revenue Tenant</th>
+                    <th className="px-2 py-2 border text-center">Remarks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dharTenants?.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="text-center py-4 text-medical-500">
+                        📭 No Tenant Data
+                      </td>
+                    </tr>
+                  ) : (
+                    dharTenants.map((t) => (
+                      <tr key={t.tenant_id} className="hover:bg-medical-50">
+                        <td className="px-2 py-2 border text-start">{t.tenant_name || "N/A"}</td>
+                        <td className="px-2 py-2 border text-center">{t.tenants_father || "N/A"}</td>
+                        <td className="px-2 py-2 border text-center">
+                          {t.tenants_add1 || "N/A"}{t.tenants_add2 ? `, ${t.tenants_add2}` : ""}
+                        </td>
+                        <td className="px-2 py-2 border text-center">{t.khatian_no || "-"}</td>
+                        <td className="px-2 py-2 border text-center">{t.tenant_status || "-"}</td>
+                        <td className="px-2 py-2 border text-center">{t.revenue_tenant || "-"}</td>
+                        <td className="px-2 py-2 border text-center">{t.remarks || "-"}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+
+            {/* Card view for mobile */}
+            <div className="sm:hidden space-y-4">
+              {dharTenants?.length ? (
+                dharTenants.map((t) => (
+                  <div
+                    key={t.tenant_id}
+                    className="bg-white shadow rounded-lg p-2 border space-y-2"
+                  >
+                    <div className="flex justify-between">
+                      <span className="font-semibold text-medical-700">Tenant Name:</span>
+                      <span>{t.tenant_name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-semibold text-medical-700">Father&apos;s Name:</span>
+                      <span>{t.tenants_father}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-semibold text-medical-700">Address:</span>
+                      <span>{t.tenants_add1}{t.tenants_add2 ? `, ${t.tenants_add2}` : ""}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-semibold text-medical-700">Khatian No:</span>
+                      <span>{t.khatian_no}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-semibold text-medical-700">Tenant Status:</span>
+                      <span>{t.tenant_status}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-semibold text-medical-700">Revenue Tenant:</span>
+                      <span>{t.revenue_tenant}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-semibold text-medical-700">Remarks:</span>
+                      <span>{t.remarks}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-gray-500 py-6 bg-white shadow rounded-lg border">
+                  📭 No Tenant Data
+                </div>
+              )}
+            </div>
+
+          </div>
+
+        </>
       ) : (
-      <div className="text-center text-gray-500 text-lg">
-        Please select a Dag to view details.
-      </div>
+        <div className="text-center text-gray-500 text-base sm:text-lg">
+          Please select a Dag to view details.
+        </div>
       )}
     </div>
   );

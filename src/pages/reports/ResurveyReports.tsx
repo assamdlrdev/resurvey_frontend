@@ -86,7 +86,8 @@ export default function ResurveyReports() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="overflow-x-auto">
+                  {/* Table for medium+ screens */}
+                  <div className="hidden md:block overflow-x-auto">
                     <table className="min-w-full border rounded-lg bg-white">
                       <thead>
                         <tr className="bg-medical-50">
@@ -121,10 +122,10 @@ export default function ResurveyReports() {
                               <td className="px-2 py-2 border text-center">
                                 {dag.date_entry
                                   ? new Date(dag.date_entry).toLocaleDateString("en-IN", {
-                                      year: "numeric",
-                                      month: "short",
-                                      day: "numeric",
-                                    })
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  })
                                   : "-"}
                               </td>
                               <td className="px-2 py-2 border text-end">{dag.user_code}</td>
@@ -134,6 +135,68 @@ export default function ResurveyReports() {
                       </tbody>
                     </table>
                   </div>
+
+                  {/* Card view for small screens */}
+                  <div className="block md:hidden space-y-4">
+                    {chitha_basic_splitted_dags.length === 0 ? (
+                      <div className="text-center py-4 text-medical-500 bg-white rounded-lg shadow">
+                        No DAGs found.
+                      </div>
+                    ) : (
+                      chitha_basic_splitted_dags.map((dag, idx) => (
+                        <div
+                          key={idx}
+                          className="bg-white shadow rounded-lg p-4 border space-y-2"
+                        >
+                          <div className="flex justify-between">
+                            <span className="font-semibold text-medical-700">Dag No:</span>
+                            <span>{dag.dag_no}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="font-semibold text-medical-700">Old Dag No:</span>
+                            <span>{dag.old_dag_no || "-"}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="font-semibold text-medical-700">Patta No:</span>
+                            <span>{dag.patta_no}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="font-semibold text-medical-700">Patta Type:</span>
+                            <span>{dag.patta_type}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="font-semibold text-medical-700">Land Class:</span>
+                            <span>{dag.land_class || "-"}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="font-semibold text-medical-700">Circle:</span>
+                            <span>{dag.circle_name}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="font-semibold text-medical-700">Village:</span>
+                            <span>{dag.village_name}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="font-semibold text-medical-700">Entry Date:</span>
+                            <span>
+                              {dag.date_entry
+                                ? new Date(dag.date_entry).toLocaleDateString("en-IN", {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                })
+                                : "-"}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="font-semibold text-medical-700">User:</span>
+                            <span>{dag.user_code}</span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
                 </CardContent>
               </Card>
             );
