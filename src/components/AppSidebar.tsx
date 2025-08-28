@@ -33,7 +33,7 @@ const analyticsItems = [
 ];
 
 export function AppSidebar() {
-  const { state } = useSidebar();
+  const { state, isMobile, toggleSidebar } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
@@ -44,7 +44,7 @@ export function AppSidebar() {
   const navigate = useNavigate();
 
   const goTo = (url: string) => {
-      navigate(url);
+    navigate(url);
   };
 
   const isActive = (path: string) => currentPath === path;
@@ -63,11 +63,16 @@ export function AppSidebar() {
         <SidebarMenuItem key={item.title}>
           <SidebarMenuButton asChild>
             <NavLink
+              onClick={() => {
+                if (isMobile && !isCollapsed) {
+                  toggleSidebar();
+                }
+              }}
               to={item.url}
-              className={({ isActive }) =>
+              className={
                 cn(
                   "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group",
-                  isActive
+                  isActive(item.url)
                     ? "bg-medical-600 text-white shadow-sm"
                     : "text-medical-700 hover:bg-medical-100 hover:text-medical-800"
                 )
@@ -75,10 +80,10 @@ export function AppSidebar() {
             >
               <item.icon className={cn(
                 "h-4 w-4 transition-colors",
-                isActive(item.url) ? "text-green-800" : "text-medical-600 group-hover:text-medical-700"
+                isActive(item.url) ? "text-white" : "text-medical-600 group-hover:text-medical-700"
               )} />
               {!isCollapsed && (
-                <span className="font-medium text-medical-600 text-sm">{item.title}</span>
+                <span className={cn("font-medium text-sm", isActive(item.url) ? "text-white " : "text-medical-600")}>{item.title}</span>
               )}
             </NavLink>
           </SidebarMenuButton>
@@ -120,7 +125,7 @@ export function AppSidebar() {
     </Collapsible>
   );
 
-  const logout = async() => {
+  const logout = async () => {
     StorageService.jwtRemove();
     goTo('/login');
 
@@ -131,7 +136,7 @@ export function AppSidebar() {
       "border-r border-medical-200 bg-white shadow-sm transition-all duration-300",
       isCollapsed ? "w-16" : "w-64"
     )}>
-      <SidebarContent className="py-4">
+      <SidebarContent className="py-4 bg-white">
         {/* Logo/Brand Section */}
         <div className={cn(
           "px-4 pb-4 mb-4 border-b border-medical-100",
@@ -140,7 +145,7 @@ export function AppSidebar() {
           {!isCollapsed ? (
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-br from-medical-500 to-medical-600 rounded-lg flex items-center justify-center">
-                <Activity className="h-4 w-4 text-white" />
+                {/* <Activity className="h-4 w-4 text-white" /> */}
               </div>
               <div>
                 <h2 className="font-bold text-medical-900 text-lg leading-none">Resurvey</h2>
@@ -183,13 +188,13 @@ export function AppSidebar() {
                       <Settings className="h-4 w-4 text-medical-600" />
                       {!isCollapsed && (
                         <ConfirmDialog
-                                trigger={<span className="font-medium text-sm">Sign Out</span>}
-                                title="Logout"
-                                description="Are you sure you want to logout of the current session?"
-                                confirmText="Yes"
-                                cancelText="No"
-                                onConfirm={logout}
-                            />
+                          trigger={<span className="font-medium text-sm">Sign Out</span>}
+                          title="Logout"
+                          description="Are you sure you want to logout of the current session?"
+                          confirmText="Yes"
+                          cancelText="No"
+                          onConfirm={logout}
+                        />
                         // <span className="font-medium text-sm" onClick={logout}>Sign Out</span>
                       )}
                     </button>
