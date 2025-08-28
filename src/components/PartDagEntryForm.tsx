@@ -630,37 +630,70 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-0">
-                                <div className="overflow-x-auto">
-                                    <table className="min-w-full text-sm text-gray-800">
-                                        <thead className="bg-gray-50 text-gray-600 uppercase tracking-wide">
-                                            <tr>
-                                                <th className="px-4 py-3 text-left font-medium flex justify-start">পট্টাদাৰৰ নাম</th>
-                                                <th className="px-4 py-3 text-left font-medium text-center">পিতাৰ নাম</th>
-                                                <th className="px-4 py-3 text-left font-medium flex justify-end">ঠিকনা</th>
+                                {/* Table View for sm+ */}
+                                <div className="hidden md:block overflow-x-auto">
+                                    <table className="min-w-full border rounded-lg bg-white text-sm md:text-base text-gray-800">
+                                        <thead>
+                                            <tr className="bg-medical-50">
+                                                <th className="px-2 py-2 border text-start font-medium">পট্টাদাৰৰ নাম</th>
+                                                <th className="px-2 py-2 border text-center font-medium">পিতাৰ নাম</th>
+                                                <th className="px-2 py-2 border text-center font-medium">ঠিকনা</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-100">
+                                        <tbody>
                                             {showPattadars?.length ? (
                                                 showPattadars.map((p, i) => (
-                                                    <tr key={i} className="hover:bg-indigo-50 transition-colors">
-                                                        <td className="px-4 py-3 flex justify-start">{p.pdar_name}</td>
-                                                        <td className="px-4 py-3">{p.pdar_father_name || "N/A"}</td>
-                                                        <td className="px-4 py-3 flex justify-end">
-                                                            {p.pdar_add1}
-                                                            {p.pdar_add2 ? `, ${p.pdar_add2}` : ""}
+                                                    <tr key={i} className="hover:bg-medical-50">
+                                                        <td className="px-2 py-2 border text-start">{p.pdar_name || "N/A"}</td>
+                                                        <td className="px-2 py-2 border text-center">{p.pdar_father_name || "N/A"}</td>
+                                                        <td className="px-2 py-2 border text-center">
+                                                            {p.pdar_add1 || "N/A"}{p.pdar_add2 ? `, ${p.pdar_add2}` : ""}
                                                         </td>
                                                     </tr>
                                                 ))
                                             ) : (
                                                 <tr>
-                                                    <td colSpan={3} className="px-4 py-10 text-center text-gray-500">
-                                                        📭 No pattadars found
+                                                    <td colSpan={3} className="py-6 text-center text-medical-500">
+                                                        📭 No Pattadars Found
                                                     </td>
                                                 </tr>
                                             )}
                                         </tbody>
                                     </table>
                                 </div>
+
+
+                                <div className="sm:hidden space-y-4">
+                                    {showPattadars?.length ? (
+                                        showPattadars.map((p, i) => (
+                                            <div
+                                                key={i}
+                                                className="bg-white shadow rounded-lg p-2 border space-y-2"
+                                            >
+                                                <div className="flex justify-between">
+                                                    <span className="font-semibold text-medical-700">পট্টাদাৰৰ নাম:</span>
+                                                    <span>{p?.pdar_name || "N/A"}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="font-semibold text-medical-700">পিতাৰ নাম:</span>
+                                                    <span>{p?.pdar_father_name || "N/A"}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="font-semibold text-medical-700">ঠিকনা:</span>
+                                                    <span>
+                                                        {p?.pdar_add1 || "N/A"}
+                                                        {p?.pdar_add2 ? `, ${p.pdar_add2}` : ""}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center text-gray-500 py-6 bg-white shadow rounded-lg border">
+                                            📭 No Pattadar Data
+                                        </div>
+                                    )}
+                                </div>
+
                             </CardContent>
                         </Card>
                     </div>
@@ -675,35 +708,38 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-0">
-                                <div className="overflow-x-auto">
-                                    <table className="min-w-full text-sm text-gray-800">
-                                        <thead className="bg-gray-50 text-gray-600 uppercase tracking-wide">
-                                            <tr>
-                                                <th className="px-4 py-3 text-left font-medium flex justify-start">Tenant Name</th>
-                                                <th className="px-4 py-3 text-left font-medium">Father&apos;s Name</th>
-                                                <th className="px-4 py-3 text-left font-medium">Address</th>
-                                                <th className="px-4 py-3 text-left font-medium">Khatian No</th>
-                                                <th className="px-4 py-3 text-left font-medium">Tenant Status</th>
-                                                <th className="px-4 py-3 text-left font-medium">Revenue Tenant</th>
-                                                <th className="px-4 py-3 text-left font-medium flex justify-end">Remarks</th>
+                                {/* Table View for sm+ */}
+                                <div className="hidden md:block overflow-x-auto">
+                                    <table className="min-w-full border rounded-lg bg-white text-sm md:text-base text-gray-800">
+                                        <thead>
+                                            <tr className="bg-medical-50">
+                                                <th className="px-2 py-2 border text-start font-medium">Tenant Name</th>
+                                                <th className="px-2 py-2 border text-start font-medium">Father&apos;s Name</th>
+                                                <th className="px-2 py-2 border text-start font-medium">Address</th>
+                                                <th className="px-2 py-2 border text-center font-medium">Khatian No</th>
+                                                <th className="px-2 py-2 border text-center font-medium">Tenant Status</th>
+                                                <th className="px-2 py-2 border text-center font-medium">Revenue Tenant</th>
+                                                <th className="px-2 py-2 border text-center font-medium">Remarks</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-100">
+                                        <tbody>
                                             {showTenants?.length ? (
                                                 showTenants.map((t) => (
-                                                    <tr key={t.tenant_id} className="hover:bg-indigo-50 transition-colors">
-                                                        <td className="px-4 py-3 flex justify-start">{t.tenant_name}</td>
-                                                        <td className="px-4 py-3">{t.tenants_father}</td>
-                                                        <td className="px-4 py-3">{t.tenants_add1}{t.tenants_add2 ? `, ${t.tenants_add2}` : ""}</td>
-                                                        <td className="px-4 py-3">{t.khatian_no}</td>
-                                                        <td className="px-4 py-3">{t.tenant_status}</td>
-                                                        <td className="px-4 py-3">{t.revenue_tenant}</td>
-                                                        <td className="px-4 py-3 flex justify-end">{t.remarks}</td>
+                                                    <tr key={t.tenant_id} className="hover:bg-medical-50">
+                                                        <td className="px-2 py-2 border text-start">{t.tenant_name || "N/A"}</td>
+                                                        <td className="px-2 py-2 border text-start">{t.tenants_father || "N/A"}</td>
+                                                        <td className="px-2 py-2 border text-start">
+                                                            {t.tenants_add1 || "N/A"}{t.tenants_add2 ? `, ${t.tenants_add2}` : ""}
+                                                        </td>
+                                                        <td className="px-2 py-2 border text-center">{t.khatian_no || "N/A"}</td>
+                                                        <td className="px-2 py-2 border text-center">{t.tenant_status || "N/A"}</td>
+                                                        <td className="px-2 py-2 border text-center">{t.revenue_tenant || "N/A"}</td>
+                                                        <td className="px-2 py-2 border text-center">{t.remarks || "N/A"}</td>
                                                     </tr>
                                                 ))
                                             ) : (
                                                 <tr>
-                                                    <td colSpan={7} className="px-4 py-10 text-center text-gray-500">
+                                                    <td colSpan={7} className="py-6 text-center text-medical-500">
                                                         📭 No Tenant Data
                                                     </td>
                                                 </tr>
@@ -711,6 +747,55 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                         </tbody>
                                     </table>
                                 </div>
+
+
+                                <div className="sm:hidden space-y-4">
+                                    {showTenants?.length ? (
+                                        showTenants.map((t) => (
+                                            <div
+                                                key={t.tenant_id}
+                                                className="bg-white shadow rounded-lg p-2 border space-y-2"
+                                            >
+                                                <div className="flex justify-between">
+                                                    <span className="font-semibold text-medical-700">Tenant Name:</span>
+                                                    <span>{t?.tenant_name || "N/A"}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="font-semibold text-medical-700">Father&apos;s Name:</span>
+                                                    <span>{t?.tenants_father || "N/A"}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="font-semibold text-medical-700">Address:</span>
+                                                    <span>
+                                                        {t?.tenants_add1 || "N/A"}
+                                                        {t?.tenants_add2 ? `, ${t.tenants_add2}` : ""}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="font-semibold text-medical-700">Khatian No:</span>
+                                                    <span>{t?.khatian_no || "N/A"}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="font-semibold text-medical-700">Status:</span>
+                                                    <span>{t?.tenant_status || "N/A"}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="font-semibold text-medical-700">Revenue Tenant:</span>
+                                                    <span>{t?.revenue_tenant || "N/A"}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span className="font-semibold text-medical-700">Remarks:</span>
+                                                    <span>{t?.remarks || "N/A"}</span>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center text-gray-500 py-6 bg-white shadow rounded-lg border">
+                                            📭 No Tenant Data
+                                        </div>
+                                    )}
+                                </div>
+
                             </CardContent>
                         </Card>
                     </div>
@@ -719,46 +804,52 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                     {finalPartDag && (
                         <div className="mt-6">
                             <Card className="w-full shadow-sm border border-gray-200 rounded-xl">
-                                <CardHeader className="flex flex-row items-center justify-between border-b border-gray-100">
-                                    <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                                <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-gray-100">
+                                    {/* Title */}
+                                    <CardTitle className="text-base sm:text-lg font-semibold text-gray-800 flex items-center gap-2">
                                         <Users className="h-5 w-5 text-indigo-500" />
-                                        Possessors
+                                        <span>Possessors</span>
                                     </CardTitle>
+
+                                    {/* Button */}
                                     <Button
                                         type="button"
                                         id={finalPartDag}
                                         onClick={modalOpen}
-                                        className="bg-indigo-500 hover:bg-indigo-600 text-white shadow-sm rounded-lg flex items-center gap-1"
+                                        className="w-full sm:w-auto bg-indigo-500 hover:bg-indigo-600 text-white shadow-sm rounded-lg flex items-center justify-center gap-2 px-4 py-2 transition-all"
                                     >
                                         <Plus className="h-4 w-4" />
-                                        Add Possessor
+                                        <span>Add Possessor</span>
                                     </Button>
                                 </CardHeader>
+
                                 <CardContent className="p-0">
-                                    <div className="overflow-x-auto">
-                                        <table className="min-w-full text-sm text-gray-800">
-                                            <thead className="bg-gray-50 text-gray-600 uppercase tracking-wide">
-                                                <tr>
-                                                    <th className="px-4 py-3 text-left font-medium flex justify-start">Possessor Name</th>
-                                                    <th className="px-4 py-3 text-left font-medium">Guardian&apos;s Name</th>
-                                                    <th className="px-4 py-3 text-left font-medium">Remarks</th>
-                                                    <th className="px-4 py-3 text-left font-medium flex justify-end">Action</th>
+                                    {/* Table View (md and up) */}
+                                    <div className="hidden md:block overflow-x-auto">
+                                        <table className="min-w-full border rounded-lg bg-white text-sm md:text-base text-gray-800">
+                                            <thead>
+                                                <tr className="bg-medical-50">
+                                                    <th className="px-2 py-2 border text-start font-medium">Possessor Name</th>
+                                                    <th className="px-2 py-2 border text-start font-medium">Guardian&apos;s Name</th>
+                                                    <th className="px-2 py-2 border text-start font-medium">Remarks</th>
+                                                    <th className="px-2 py-2 border text-end font-medium">Action</th>
                                                 </tr>
                                             </thead>
-                                            <tbody className="divide-y divide-gray-100">
+                                            <tbody>
                                                 {possessors?.length ? (
                                                     possessors.map((p, i) => (
-                                                        <tr key={i} className="hover:bg-indigo-50 transition-colors">
-                                                            <td className="px-4 py-3 flex justify-start">{p.name}</td>
-                                                            <td className="px-4 py-3">{p.guard_name}</td>
-                                                            <td className="px-4 py-3">{p.remarks}</td>
-                                                            <td className="px-4 py-3">
+                                                        <tr key={i} className="hover:bg-medical-50 transition-colors">
+                                                            <td className="px-2 py-2 border text-start">{p.name || "N/A"}</td>
+                                                            <td className="px-2 py-2 border text-start">{p.guard_name || "N/A"}</td>
+                                                            <td className="px-2 py-2 border text-start">{p.remarks || "N/A"}</td>
+                                                            <td className="px-2 py-2 border">
                                                                 <div className="flex justify-end gap-2">
+                                                                    {/* Details Button */}
                                                                     <Button
                                                                         className="bg-blue-500 hover:bg-blue-600 text-white rounded-md px-3 py-1 flex items-center gap-1"
                                                                         type="button"
                                                                         onClick={() => {
-                                                                            toast.dismiss(); // Dismiss all existing toasts
+                                                                            toast.dismiss();
                                                                             toast(
                                                                                 (t) => (
                                                                                     <div className="text-left">
@@ -774,10 +865,9 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                                                                         <div><strong>Name:</strong> {p.name}</div>
                                                                                         <div><strong>Guardian Name:</strong> {p.guard_name}</div>
                                                                                         <div><strong>Guardian Relation:</strong> {p.guard_relation_name}</div>
-                                                                                        {/* <div><strong>Pattadar Relation:</strong> {p.pattadar_relation}</div> */}
                                                                                         <div><strong>Mode of Acquisition:</strong> {p.mode_of_acquisition_name}</div>
                                                                                         <div><strong>Possessor Name for Mutation:</strong> {p.mut_possessor_name}</div>
-                                                                                        <div><strong>Possessor Father's Name for Mutation:</strong> {p.mut_possessor_father_name}</div>
+                                                                                        <div><strong>Possessor Father&apos;s Name for Mutation:</strong> {p.mut_possessor_father_name}</div>
                                                                                         <div><strong>Address for Mutation:</strong> {p.mut_possessor_address}</div>
                                                                                         <div><strong>Gender:</strong> {p.gender}</div>
                                                                                         <div><strong>Date of Birth:</strong> {p.dob}</div>
@@ -787,13 +877,15 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                                                                 {
                                                                                     duration: 30000,
                                                                                     position: "top-center",
-                                                                                    style: { minWidth: "350px", maxWidth: "90vw", fontSize: "14px" }
+                                                                                    style: { minWidth: "350px", maxWidth: "90vw", fontSize: "14px" },
                                                                                 }
                                                                             );
                                                                         }}
                                                                     >
                                                                         Details
                                                                     </Button>
+
+                                                                    {/* Delete Button */}
                                                                     <Button
                                                                         className="bg-red-500 hover:bg-red-600 text-white rounded-md px-3 py-1 flex items-center gap-1"
                                                                         value={`${p.dist_code}-${p.subdiv_code}-${p.cir_code}-${p.mouza_pargona_code}-${p.lot_no}-${p.vill_townprt_code}-${p.old_dag_no}-${p.part_dag}-${p.possessor_id}`}
@@ -808,7 +900,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                                     ))
                                                 ) : (
                                                     <tr>
-                                                        <td colSpan={4} className="px-4 py-10 text-center text-gray-500">
+                                                        <td colSpan={4} className="py-6 text-center text-medical-500">
                                                             📭 No possessors found
                                                         </td>
                                                     </tr>
@@ -816,184 +908,239 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                             </tbody>
                                         </table>
                                     </div>
+
+
+                                    {/* Card View (Mobile) */}
+                                    <div className="md:hidden p-4 space-y-3">
+                                        {possessors?.length ? (
+                                            possessors.map((p, i) => (
+                                                <div key={i} className="border rounded-lg p-3 shadow-sm bg-white space-y-1">
+                                                    <p><span className="font-semibold">Possessor:</span> {p.name}</p>
+                                                    <p><span className="font-semibold">Guardian:</span> {p.guard_name}</p>
+                                                    <p><span className="font-semibold">Remarks:</span> {p.remarks || "N/A"}</p>
+
+                                                    <div className="flex justify-end gap-2 pt-2">
+                                                        {/* Details Button */}
+                                                        <Button
+                                                            className="bg-blue-500 hover:bg-blue-600 text-white rounded-md px-3 py-1 flex items-center gap-1"
+                                                            type="button"
+                                                            onClick={() => {
+                                                                toast.dismiss();
+                                                                toast(
+                                                                    (t) => (
+                                                                        <div className="text-left">
+                                                                            <div className="flex justify-between items-center mb-2">
+                                                                                <span className="font-bold">Possessor Details</span>
+                                                                                <button
+                                                                                    className="ml-2 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300"
+                                                                                    onClick={() => toast.dismiss(t.id)}
+                                                                                >
+                                                                                    Close
+                                                                                </button>
+                                                                            </div>
+                                                                            <div><strong>Name:</strong> {p.name}</div>
+                                                                            <div><strong>Guardian Name:</strong> {p.guard_name}</div>
+                                                                            <div><strong>Guardian Relation:</strong> {p.guard_relation_name}</div>
+                                                                            <div><strong>Mode of Acquisition:</strong> {p.mode_of_acquisition_name}</div>
+                                                                            <div><strong>Possessor Name for Mutation:</strong> {p.mut_possessor_name}</div>
+                                                                            <div><strong>Possessor Father's Name for Mutation:</strong> {p.mut_possessor_father_name}</div>
+                                                                            <div><strong>Address for Mutation:</strong> {p.mut_possessor_address}</div>
+                                                                            <div><strong>Gender:</strong> {p.gender}</div>
+                                                                            <div><strong>Date of Birth:</strong> {p.dob}</div>
+                                                                            <div><strong>Remark:</strong> {p.remarks}</div>
+                                                                        </div>
+                                                                    ),
+                                                                    {
+                                                                        duration: 30000,
+                                                                        position: "top-center",
+                                                                        style: { minWidth: "350px", maxWidth: "90vw", fontSize: "14px" }
+                                                                    }
+                                                                );
+                                                            }}
+                                                        >
+                                                            Details
+                                                        </Button>
+                                                        {/* Delete Button */}
+                                                        <Button
+                                                            className="bg-red-500 hover:bg-red-600 text-white rounded-md px-3 py-1 flex items-center gap-1"
+                                                            value={`${p.dist_code}-${p.subdiv_code}-${p.cir_code}-${p.mouza_pargona_code}-${p.lot_no}-${p.vill_townprt_code}-${p.old_dag_no}-${p.part_dag}-${p.possessor_id}`}
+                                                            onClick={deletePossessor}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                            Delete
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-center text-gray-500">📭 No possessors found</p>
+                                        )}
+                                    </div>
                                 </CardContent>
                             </Card>
                         </div>
                     )}
 
-                    {finalPartDag && finalPartDag !== '' && isOpen && <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    {finalPartDag && finalPartDag !== '' && isOpen && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                            <div className="bg-white rounded-lg shadow-lg w-full max-w-lg md:max-w-2xl p-6 relative overflow-y-auto max-h-[90vh]">
+                                <button
+                                    onClick={() => setIsOpen(false)}
+                                    className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+                                >
+                                    ✕
+                                </button>
 
-                        <div className="bg-white rounded-lg shadow-lg w-1/2 p-6 relative">
-                            <button
-                                onClick={() => setIsOpen(false)}
-                                className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-                            >
-                                ✕
-                            </button>
+                                <Card className="w-full my-4">
+                                    <CardHeader className="flex-row items-center justify-between">
+                                        <CardTitle className="w-full text-center">Add Possessor</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="possessor_name">Possessor Name</Label>
+                                                <Input
+                                                    id="possessor_name"
+                                                    type="text"
+                                                    placeholder="Possessor Name"
+                                                    value={posName}
+                                                    onInput={(e: any) => setPosName(e.currentTarget.value)}
+                                                />
+                                            </div>
 
-                            <Card className="w-full my-4">
-                                <CardHeader className="flex-row items-center justify-between">
-                                    <CardTitle className="w-full text-center">Add Possessor</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="possessor_name">Possessor Name</Label>
-                                            <Input
-                                                id="possessor_name"
-                                                type="text"
-                                                placeholder="Possessor Name"
-                                                value={posName}
-                                                onInput={(e: any) => setPosName(e.currentTarget.value)}
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="possessor_guard_name">Possessor's Guardian Name</Label>
-                                            <Input
-                                                id="possessor_guard_name"
-                                                type="text"
-                                                placeholder="Possessor's Guardian Name"
-                                                value={posGuardianName}
-                                                onInput={(e: any) => setPosGuardianName(e.currentTarget.value)}
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="possessor_guard_relation">Possessor's Guardian Relation</Label>
-                                            <select
-                                                id="possessor_guard_relation"
-                                                // {...register("curr_land_use", { required: "Current Land Class Use is required" })}
-                                                className="w-full border rounded px-3 py-2 mt-1"
-                                                value={posGuardianRelation}
-                                                onChange={(e: any) => setPosGuardianRelation(e.currentTarget.value)}
-                                            >
-                                                <option value="">Select Relation</option>
-                                                <option value="f">পিতৃ</option>
-                                                <option value="m">মাতৃ</option>
-                                                <option value="h">পতি</option>
-                                                <option value="w">পত্নী</option>
-                                                <option value="u">অভিভাৱক</option>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="possessor_guard_name">Possessor's Guardian Name</Label>
+                                                <Input
+                                                    id="possessor_guard_name"
+                                                    type="text"
+                                                    placeholder="Possessor's Guardian Name"
+                                                    value={posGuardianName}
+                                                    onInput={(e: any) => setPosGuardianName(e.currentTarget.value)}
+                                                />
+                                            </div>
 
-                                            </select>
-                                        </div>
-                                        {/* <div className="space-y-2">
-                                            <Label htmlFor="possessor_pattadar_relation">Possessor's Relation with Pattadar</Label>
-                                            <select
-                                                id="possessor_pattadar_relation"
-                                                // {...register("curr_land_use", { required: "Current Land Class Use is required" })}
-                                                className="w-full border rounded px-3 py-2 mt-1"
-                                                value={posPattadarRelation}
-                                                onChange={(e: any) => setPosPattadarRelation(e.currentTarget.value)}
-                                            >
-                                                <option value="">Select Relation</option>
-                                                <option value="f">পিতৃ</option>
-                                                <option value="m">মাতৃ</option>
-                                                <option value="h">পতি</option>
-                                                <option value="w">পত্নী</option>
-                                                <option value="u">অভিভাৱক</option>
-                                            </select>
-                                        </div> */}
-                                        <div className="space-y-2">
-                                            <Label htmlFor="mode_of_acquisition">Mode of Acquisition by possessor</Label>
-                                            <select
-                                                id="mode_of_acquisition"
-                                                // {...register("curr_land_use", { required: "Current Land Class Use is required" })}
-                                                className="w-full border rounded px-3 py-2 mt-1"
-                                                value={posModeOfAcquisition}
-                                                onChange={(e: any) => setPosModeOfAcquisition(e.currentTarget.value)}
-                                            >
-                                                <option value="">Select Mode</option>
-                                                <option value="s">Sale</option>
-                                                <option value="m">Mortgage</option>
-                                                <option value="l">Lease</option>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="possessor_guard_relation">Possessor's Guardian Relation</Label>
+                                                <select
+                                                    id="possessor_guard_relation"
+                                                    className="w-full border rounded px-3 py-2 mt-1"
+                                                    value={posGuardianRelation}
+                                                    onChange={(e: any) => setPosGuardianRelation(e.currentTarget.value)}
+                                                >
+                                                    <option value="">Select Relation</option>
+                                                    <option value="f">পিতৃ</option>
+                                                    <option value="m">মাতৃ</option>
+                                                    <option value="h">পতি</option>
+                                                    <option value="w">পত্নী</option>
+                                                    <option value="u">অভিভাৱক</option>
+                                                </select>
+                                            </div>
 
-                                            </select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="possessor_mut_name">Possessor Name for Mutation (Optional)</Label>
-                                            <Input
-                                                id="possessor_mut_name"
-                                                type="text"
-                                                placeholder="Possessor Name for Mutation"
-                                                value={posNameMut}
-                                                onInput={(e: any) => setPosNameMut(e.currentTarget.value)}
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="possessor_father_mut_name">Possessor Father's Name for Mutation (Optional)</Label>
-                                            <Input
-                                                id="possessor_father_mut_name"
-                                                type="text"
-                                                placeholder="Possessor Father Name for Mutation"
-                                                value={posFatherNameMut}
-                                                onInput={(e: any) => setPosFatherNameMut(e.currentTarget.value)}
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="possessor_address_mut">Possessor Address for Mutation (Optional)</Label>
-                                            <Input
-                                                id="possessor_address_mut"
-                                                type="text"
-                                                placeholder="Possessor Address for Mutation"
-                                                value={posAddressMut}
-                                                onInput={(e: any) => setPosAddressMut(e.currentTarget.value)}
-                                            />
-                                        </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="mode_of_acquisition">Mode of Acquisition by possessor</Label>
+                                                <select
+                                                    id="mode_of_acquisition"
+                                                    className="w-full border rounded px-3 py-2 mt-1"
+                                                    value={posModeOfAcquisition}
+                                                    onChange={(e: any) => setPosModeOfAcquisition(e.currentTarget.value)}
+                                                >
+                                                    <option value="">Select Mode</option>
+                                                    <option value="s">Sale</option>
+                                                    <option value="m">Mortgage</option>
+                                                    <option value="l">Lease</option>
+                                                </select>
+                                            </div>
 
-                                        {/* add here for gender and dob */}
-                                        <div className="space-y-2">
-                                            <Label htmlFor="possessor_gender">Gender</Label>
-                                            <select
-                                                id="possessor_gender"
-                                                value={posGender}
-                                                onChange={(e) => setPosGender(e.currentTarget.value)}
-                                                className="w-full border rounded px-3 py-2 mt-1"
-                                            >
-                                                <option value="">--Select--</option>
-                                                <option value="male">Male</option>
-                                                <option value="female">Female</option>
-                                                <option value="other">Other</option>
-                                            </select>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="possessor_mut_name">Possessor Name for Mutation (Optional)</Label>
+                                                <Input
+                                                    id="possessor_mut_name"
+                                                    type="text"
+                                                    placeholder="Possessor Name for Mutation"
+                                                    value={posNameMut}
+                                                    onInput={(e: any) => setPosNameMut(e.currentTarget.value)}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="possessor_father_mut_name">Possessor Father's Name for Mutation (Optional)</Label>
+                                                <Input
+                                                    id="possessor_father_mut_name"
+                                                    type="text"
+                                                    placeholder="Possessor Father Name for Mutation"
+                                                    value={posFatherNameMut}
+                                                    onInput={(e: any) => setPosFatherNameMut(e.currentTarget.value)}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="possessor_address_mut">Possessor Address for Mutation (Optional)</Label>
+                                                <Input
+                                                    id="possessor_address_mut"
+                                                    type="text"
+                                                    placeholder="Possessor Address for Mutation"
+                                                    value={posAddressMut}
+                                                    onInput={(e: any) => setPosAddressMut(e.currentTarget.value)}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="possessor_gender">Gender</Label>
+                                                <select
+                                                    id="possessor_gender"
+                                                    value={posGender}
+                                                    onChange={(e) => setPosGender(e.currentTarget.value)}
+                                                    className="w-full border rounded px-3 py-2 mt-1"
+                                                >
+                                                    <option value="">--Select--</option>
+                                                    <option value="male">Male</option>
+                                                    <option value="female">Female</option>
+                                                    <option value="other">Other</option>
+                                                </select>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="possessor_dob">Date of Birth</Label>
+                                                <Input
+                                                    id="possessor_dob"
+                                                    type="date"
+                                                    value={posDob}
+                                                    onInput={(e: any) => setPosDob(e.currentTarget.value)}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2 md:col-span-2">
+                                                <Label htmlFor="possessor_remark">Remark</Label>
+                                                <Input
+                                                    id="possessor_remark"
+                                                    type="text"
+                                                    placeholder="Remark"
+                                                    value={posRemark}
+                                                    onInput={(e: any) => setPosRemark(e.currentTarget.value)}
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="possessor_dob">Date of Birth</Label>
-                                            <Input
-                                                id="possessor_dob"
-                                                type="date"
-                                                value={posDob}
-                                                onInput={(e: any) => setPosDob(e.currentTarget.value)}
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="possessor_remark">Remark</Label>
-                                            <Input
-                                                id="possessor_remark"
-                                                type="text"
-                                                placeholder="Remark"
-                                                value={posRemark}
-                                                onInput={(e: any) => setPosRemark(e.currentTarget.value)}
-                                            />
-                                        </div>
+                                    </CardContent>
+                                </Card>
 
-                                    </div>
-
-                                </CardContent>
-                            </Card>
-
-
-                            <button
-                                onClick={submitPossessor}
-                                className="px-4 py-2 my-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                            >
-                                Submit
-                            </button>
-                            <button
-                                onClick={() => setIsOpen(false)}
-                                className="px-4 ml-3 py-2 my-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
-                            >
-                                Close
-                            </button>
+                                <div className="flex justify-end gap-3">
+                                    <button
+                                        onClick={submitPossessor}
+                                        className="px-4 py-2 my-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                                    >
+                                        Submit
+                                    </button>
+                                    <button
+                                        onClick={() => setIsOpen(false)}
+                                        className="px-4 py-2 my-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                    </div>}
+                    )}
+
                 </div>
                 ) : (<div className="flex items-center justify-center p-7">
                     <p className="font-bold text-lg">No data available</p>
