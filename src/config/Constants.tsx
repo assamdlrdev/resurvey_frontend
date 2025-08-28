@@ -1,8 +1,18 @@
+
+// const Constants: any = {
+//     BASE_URL : 'http://localhost:8080/resurvey/',
+//     APP_NAME : 'Resurvey',
+//     COVER: 'cover.jpg',
+//     API_BASE_URL : 'http://localhost/chithaapi/index.php/',
+//     API_SECRET : 'CHITHARESURVEY12345678',
+//     SERVICE_PERCENTAGE: 5
+// };
+
 const Constants: any = {
-    BASE_URL : 'http://localhost:5173/resurvey/',
+    BASE_URL : 'http://localhost:8080/resurvey/',
     APP_NAME : 'Resurvey',
     COVER: 'cover.jpg',
-    API_BASE_URL : 'http://localhost/chithaapi/index.php/',
+    API_BASE_URL : 'https://chitha.assam.gov.in/chithaapi/index.php/',
     API_SECRET : 'CHITHARESURVEY12345678',
     SERVICE_PERCENTAGE: 5
 };
