@@ -155,6 +155,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         setPosAdhaar('');
         setPosGender('male');
         setPosRemark('');
+        setPosDob('');
     };
 
     const getDharLandRevenue = async (area_sm: string) => {
