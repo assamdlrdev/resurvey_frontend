@@ -20,7 +20,7 @@ export default function PartDagsView() {
                   <th className="px-2 py-2 border text-start">Part Dag</th>
                   <th className="px-2 py-2 border text-center">Area (sqm)</th>
                   <th className="px-2 py-2 border text-center">Old Dag No</th>
-                  <th className="px-2 py-2 border text-center">Land Class</th>
+                  <th className="px-2 py-2 border text-center">Current Land Class</th>
                   <th className="px-2 py-2 border text-center">Patta Type</th>
                   <th className="px-2 py-2 border text-center">Patta No</th>
                 </tr>
