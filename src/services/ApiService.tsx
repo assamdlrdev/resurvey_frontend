@@ -29,14 +29,17 @@ const ApiService = {
     },
     get: async (endpoint: string, data: any | null = null) => {
         const token = await StorageService.getJwtCookie();
+        var headers = {
+            'Content-Type': 'application/json'
+        };
+        if(token && token !== 'undefined'){
+            Object.assign(headers, {'Authorization': `Bearer ${token}`});
+        }
         let parsedData = data ? JSON.parse(data) : {};
         try{
             const result = await fetch(`${Constants.API_BASE_URL + endpoint}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: headers,
                 credentials: 'include',
                 body: JSON.stringify(parsedData)
             });
