@@ -145,6 +145,8 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         setPosNameMut('');
         setPosFatherNameMut('');
         setPosAddressMut('');
+        setPosDob('');
+        setPosRemark('');
 
     };
 
