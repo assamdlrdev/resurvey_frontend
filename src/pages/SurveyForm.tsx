@@ -104,6 +104,8 @@ export default function SurveyData() {
   useEffect(() => {
     if (dagNo && vill) {
       getData(dagNo, vill);
+    }else{
+      resetDagData();
     }
   }, [dagNo]);
 

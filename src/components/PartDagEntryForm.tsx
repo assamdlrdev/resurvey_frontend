@@ -311,10 +311,10 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
             toast.error('Missing Part Dag or Land Class!');
             return;
         }
-        if (!areaSm || areaSm == 0) {
-            toast.error('Missing Area!');
-            return;
-        }
+        // if (!areaSm || areaSm == 0) {
+        //     toast.error('Missing Area!');
+        //     return;
+        // }
         if (!dagLandRevenue || dagLandRevenue == 0 || !dagLocalTax || dagLocalTax == 0) {
             toast.error('Missing Land Revenue and Local Tax!');
             return;
