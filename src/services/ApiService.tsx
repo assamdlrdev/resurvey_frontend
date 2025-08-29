@@ -32,7 +32,7 @@ const ApiService = {
         var headers = {
             'Content-Type': 'application/json'
         };
-        if(token) {
+        if(token && token !== 'undefined'){
             Object.assign(headers, {'Authorization': `Bearer ${token}`});
         }
         let parsedData = data ? JSON.parse(data) : {};
