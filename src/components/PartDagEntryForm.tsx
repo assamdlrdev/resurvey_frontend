@@ -15,6 +15,9 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useDagStore } from "@/store/SurveyStore";
 import { useMasterDataStore } from "@/store/SurveyStore";
 import { Plus, Trash2, Users } from "lucide-react";
+import { set } from "date-fns";
+import { error } from "console";
+import { validatePossessorCreateForm } from "@/services/FormValidation.service";
 
 
 interface Props {
@@ -64,6 +67,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
     const [partDag, setPartDag] = useState<string>('');
     const [currLandClass, setCurrLandClass] = useState<string | number>('');
     const [areaSm, setAreaSm] = useState<number>(0);
+    // const [surveyNo, setSurveyNo] = useState<string>('');
     const [areaBigha, setAreaBigha] = useState<number>(0);
     const [areaKatha, setAreaKatha] = useState<number>(0);
     const [areaLc, setAreaLc] = useState<number>(0.00);
@@ -96,6 +100,8 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
     const [posRemark, setPosRemark] = useState<string>('');
     const [posGender, setPosGender] = useState<string>('male');
     const [posDob, setPosDob] = useState<string>('');
+    const [posMobileNo, setPosMobileNo] = useState<string>('');
+    const [posAdhaar, setPosAdhaar] = useState<string>('');
     const [updateButton, setUpdateButton] = useState<boolean>(false);
 
 
@@ -133,7 +139,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         setDagLocalTax(0);
         setPattadars([]);
         setUpdateButton(false);
-
+        // setSurveyNo('');
     };
 
     const resetPossessorAdd = () => {
@@ -145,9 +151,10 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         setPosNameMut('');
         setPosFatherNameMut('');
         setPosAddressMut('');
-        setPosDob('');
+        setPosMobileNo('');
+        setPosAdhaar('');
+        setPosGender('male');
         setPosRemark('');
-
     };
 
     const getDharLandRevenue = async (area_sm: string) => {
@@ -205,6 +212,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
             setDagLocalTax(partDagDetails.dag_local_tax);
             setPattadars(partDagDetails.pattadars);
             setTenants(partDagDetails.tenants);
+            // setSurveyNo(partDagDetails.survey_no2);
             setUpdateButton(true);
             setPossessors(partDagDetails.possessors);
         }
@@ -280,7 +288,8 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
             dag_land_revenue: dagLandRevenue,
             dag_local_tax: dagLocalTax,
             pattadars: dharPattadars,
-            tenants: dharTenants
+            tenants: dharTenants,
+            // survey_no: surveyNo
         };
 
         setLoading(true);
@@ -302,7 +311,6 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
 
 
     const modalOpen = (e: any) => {
-        console.log(e.currentTarget.id, dagNo, vill);
         resetPossessorAdd();
         setIsOpen(true);
     };
@@ -317,10 +325,10 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         //     toast.error('Missing Area!');
         //     return;
         // }
-        if (!dagLandRevenue || dagLandRevenue == 0 || !dagLocalTax || dagLocalTax == 0) {
-            toast.error('Missing Land Revenue and Local Tax!');
-            return;
-        }
+        // if (!dagLandRevenue || dagLandRevenue == 0 || !dagLocalTax || dagLocalTax == 0) {
+        //     toast.error('Missing Land Revenue and Local Tax!');
+        //     return;
+        // }
 
         const data = {
             vill_townprt_code: vill,
@@ -331,7 +339,8 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
             dag_land_revenue: dagLandRevenue,
             dag_local_tax: dagLocalTax,
             pattadars: dharPattadars,
-            tenants: dharTenants
+            tenants: dharTenants,
+            // survey_no: surveyNo
         };
 
         setLoading(true);
@@ -384,11 +393,6 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
 
 
     const submitPossessor = async () => {
-        if (!posName || !posGuardianName || !posGuardianRelation || !posDob || posName == '' || posGuardianName == '' || posGuardianRelation == '' || posDob == '' || posDob == undefined) {
-            toast.error('Input fields missing!');
-            return;
-        }
-
         const data = {
             vill_townprt_code: vill,
             dag_no: dagNo,
@@ -403,8 +407,15 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
             possessor_address_mut: posAddressMut,
             possessor_remark: posRemark,
             possessor_gender: posGender,
-            possessor_dob: posDob
+            possessor_dob: posDob,
+            possessor_mobile_no: posMobileNo,
+            possessor_aadhaar: posAdhaar
         };
+
+        const isValid = validatePossessorCreateForm(data);
+        if (!isValid) {
+            return;
+        }
 
         setLoading(true);
         const response = await ApiService.get('submit_possessor', JSON.stringify(data));
@@ -420,11 +431,12 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         setIsOpen(false);
     };
 
-    const deletePossessor = async (e: any) => {
+    const deletePossessor = async (possessor: any) => {
         // console.log(e.currentTarget.value);
         const data = {
-            possessor: e.currentTarget.value
+            possessor: possessor
         };
+
 
         setLoading(true);
         const response = await ApiService.get('delete_possessor', JSON.stringify(data));
@@ -461,10 +473,17 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                             <div className="space-y-2">
                                 <Label htmlFor="part_dag">Part Dag</Label>
                                 <MyCombobox partDag={partDag} setPartDag={setPartDag} bhunakshaPartDags={partDags} setFinalPartDag={setFinalPartDag} />
-                                {/* {errors.part_dag && (
-                            <p className="text-sm text-destructive">{errors.part_dag.message}</p>
-                            )} */}
                             </div>
+                            {/* <div className="space-y-2">
+                                <Label htmlFor="survey_no">Survey No</Label>
+                                <Input
+                                    id="survey_no"
+                                    className="w-full border rounded px-3 py-2 mt-1"
+                                    placeholder="Enter Survey No"
+                                    value={surveyNo}
+                                    onChange={(e) => setSurveyNo(e.target.value)}
+                                />
+                            </div> */}
                             <div className="space-y-2">
                                 <Label htmlFor="o_land_class">Land Class (Existing)</Label>
                                 <select
@@ -629,6 +648,9 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                             <CardHeader className="border-b border-gray-100">
                                 <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
                                     🧾 Pattadars
+                                    {showPattadars && (
+                                        <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Total - {showPattadars.length}</span>
+                                    )}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-0">
@@ -707,6 +729,9 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                 <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
                                     <Users className="h-5 w-5 text-indigo-500" />
                                     ৰায়ত/ আধিয়াৰৰ তথ্য
+                                    {showTenants && (
+                                        <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Total - {showTenants.length}</span>
+                                    )}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-0">
@@ -811,6 +836,9 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                     <CardTitle className="text-base sm:text-lg font-semibold text-gray-800 flex items-center gap-2">
                                         <Users className="h-5 w-5 text-indigo-500" />
                                         <span>Possessors</span>
+                                        {possessors && (
+                                            <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Total - {possessors.length}</span>
+                                        )}
                                     </CardTitle>
 
                                     {/* Button */}
@@ -832,6 +860,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                             <thead>
                                                 <tr className="bg-medical-50">
                                                     <th className="px-2 py-2 border text-start font-medium">Possessor Name</th>
+                                                    <th className="px-2 py-2 border text-start font-medium">Mobile No</th>
                                                     <th className="px-2 py-2 border text-start font-medium">Guardian&apos;s Name</th>
                                                     <th className="px-2 py-2 border text-start font-medium">Remarks</th>
                                                     <th className="px-2 py-2 border text-end font-medium">Action</th>
@@ -842,6 +871,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                                     possessors.map((p, i) => (
                                                         <tr key={i} className="hover:bg-medical-50 transition-colors">
                                                             <td className="px-2 py-2 border text-start">{p.name || "N/A"}</td>
+                                                            <td className="px-2 py-2 border text-start">{p.mobile_no || "N/A"}</td>
                                                             <td className="px-2 py-2 border text-start">{p.guard_name || "N/A"}</td>
                                                             <td className="px-2 py-2 border text-start">{p.remarks || "N/A"}</td>
                                                             <td className="px-2 py-2 border">
@@ -872,6 +902,8 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                                                                         <div><strong>Possessor Father&apos;s Name for Mutation:</strong> {p.mut_possessor_father_name}</div>
                                                                                         <div><strong>Address for Mutation:</strong> {p.mut_possessor_address}</div>
                                                                                         <div><strong>Gender:</strong> {p.gender}</div>
+                                                                                        <div><strong>Mobile No:</strong> {p.mobile_no}</div>
+                                                                                        <div><strong>Aadhaar No:</strong> {p.aadhaar_no}</div>
                                                                                         <div><strong>Date of Birth:</strong> {p.dob}</div>
                                                                                         <div><strong>Remark:</strong> {p.remarks}</div>
                                                                                     </div>
@@ -888,14 +920,23 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                                                     </Button>
 
                                                                     {/* Delete Button */}
-                                                                    <Button
+                                                                    {/* <Button
                                                                         className="bg-red-500 hover:bg-red-600 text-white rounded-md px-3 py-1 flex items-center gap-1"
                                                                         value={`${p.dist_code}-${p.subdiv_code}-${p.cir_code}-${p.mouza_pargona_code}-${p.lot_no}-${p.vill_townprt_code}-${p.old_dag_no}-${p.part_dag}-${p.possessor_id}`}
                                                                         onClick={deletePossessor}
                                                                     >
                                                                         <Trash2 className="h-4 w-4" />
                                                                         Delete
-                                                                    </Button>
+                                                                    </Button> */}
+
+                                                                    <ConfirmDialog
+                                                                        trigger={<Button type="button" className="bg-red-600 hover:bg-red-700 text-white">Delete</Button>}
+                                                                        title="Delete Possessor"
+                                                                        description="This will permanently delete the possessor record. Are you sure?"
+                                                                        confirmText="Yes, delete"
+                                                                        cancelText="No, keep it"
+                                                                        onConfirm={() => deletePossessor(`${p.dist_code}-${p.subdiv_code}-${p.cir_code}-${p.mouza_pargona_code}-${p.lot_no}-${p.vill_townprt_code}-${p.old_dag_no}-${p.part_dag}-${p.possessor_id}`)}
+                                                                    />
                                                                 </div>
                                                             </td>
                                                         </tr>
@@ -985,7 +1026,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
 
                     {finalPartDag && finalPartDag !== '' && isOpen && (
                         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                            <div className="bg-white rounded-lg shadow-lg w-full max-w-lg md:max-w-2xl p-6 relative overflow-y-auto max-h-[90vh]">
+                            <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl md:max-w-5xl p-6 relative overflow-y-auto max-h-[90vh]">
                                 <button
                                     onClick={() => setIsOpen(false)}
                                     className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
@@ -998,7 +1039,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                         <CardTitle className="w-full text-center">Add Possessor</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                             <div className="space-y-2">
                                                 <Label htmlFor="possessor_name">Possessor Name <span className="text-red-500">*</span></Label>
                                                 <Input
@@ -1087,7 +1128,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                             </div>
 
                                             <div className="space-y-2">
-                                                <Label htmlFor="possessor_gender">Gender</Label>
+                                                <Label htmlFor="possessor_gender">Gender <span className="text-red-500">*</span> </Label>
                                                 <select
                                                     id="possessor_gender"
                                                     value={posGender}
@@ -1102,7 +1143,29 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                             </div>
 
                                             <div className="space-y-2">
-                                                <Label htmlFor="possessor_dob">Date of Birth <span className="text-red-500">*</span></Label>
+                                                <Label htmlFor="possessor_aadhaar">Aadhaar Number (optional)</Label>
+                                                <Input
+                                                    id="possessor_aadhaar"
+                                                    type="text"
+                                                    placeholder="Aadhaar Number"
+                                                    value={posAdhaar}
+                                                    onInput={(e: any) => setPosAdhaar(e.currentTarget.value)}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="possessor_mobile">Mobile Number <span className="text-red-500">*</span> </Label>
+                                                <Input
+                                                    id="possessor_mobile"
+                                                    type="text"
+                                                    placeholder="Mobile Number"
+                                                    value={posMobileNo}
+                                                    onInput={(e: any) => setPosMobileNo(e.currentTarget.value)}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label htmlFor="possessor_dob">Date of Birth (optional)</Label>
                                                 <Input
                                                     id="possessor_dob"
                                                     type="date"
@@ -1112,7 +1175,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                             </div>
 
                                             <div className="space-y-2 md:col-span-2">
-                                                <Label htmlFor="possessor_remark">Remark</Label>
+                                                <Label htmlFor="possessor_remark">Remark (optional)</Label>
                                                 <Input
                                                     id="possessor_remark"
                                                     type="text"

@@ -61,6 +61,7 @@ interface Tenant {
 
 interface PartDag {
     part_dag: string;
+    survey_no: string;
     name: string;
     id: string;
     dag_area_sqmtr: number;
