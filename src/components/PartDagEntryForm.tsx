@@ -382,7 +382,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
 
 
     const submitPossessor = async () => {
-        if (!posName || !posGuardianName || !posGuardianRelation || posName == '' || posGuardianName == '' || posGuardianRelation == '') {
+        if (!posName || !posGuardianName || !posGuardianRelation || !posDob || posName == '' || posGuardianName == '' || posGuardianRelation == '' || posDob == '' || posDob == undefined) {
             toast.error('Input fields missing!');
             return;
         }
@@ -751,7 +751,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
 
                                 <div className="sm:hidden space-y-4">
                                     {showTenants?.length ? (
-                                        showTenants.map((t) => (
+                                        showTenants.map((t: any) => (
                                             <div
                                                 key={t.tenant_id}
                                                 className="bg-white shadow rounded-lg p-2 border space-y-2"
@@ -998,7 +998,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                     <CardContent>
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div className="space-y-2">
-                                                <Label htmlFor="possessor_name">Possessor Name</Label>
+                                                <Label htmlFor="possessor_name">Possessor Name <span className="text-red-500">*</span></Label>
                                                 <Input
                                                     id="possessor_name"
                                                     type="text"
@@ -1009,7 +1009,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                             </div>
 
                                             <div className="space-y-2">
-                                                <Label htmlFor="possessor_guard_name">Possessor's Guardian Name</Label>
+                                                <Label htmlFor="possessor_guard_name">Possessor's Guardian Name <span className="text-red-500">*</span></Label>
                                                 <Input
                                                     id="possessor_guard_name"
                                                     type="text"
@@ -1020,7 +1020,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                             </div>
 
                                             <div className="space-y-2">
-                                                <Label htmlFor="possessor_guard_relation">Possessor's Guardian Relation</Label>
+                                                <Label htmlFor="possessor_guard_relation">Possessor's Guardian Relation <span className="text-red-500">*</span></Label>
                                                 <select
                                                     id="possessor_guard_relation"
                                                     className="w-full border rounded px-3 py-2 mt-1"
@@ -1100,7 +1100,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                             </div>
 
                                             <div className="space-y-2">
-                                                <Label htmlFor="possessor_dob">Date of Birth</Label>
+                                                <Label htmlFor="possessor_dob">Date of Birth <span className="text-red-500">*</span></Label>
                                                 <Input
                                                     id="possessor_dob"
                                                     type="date"
