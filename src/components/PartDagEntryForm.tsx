@@ -154,6 +154,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         setPosMobileNo('');
         setPosAdhaar('');
         setPosGender('male');
+        setPosRemark('');
     };
 
     const getDharLandRevenue = async (area_sm: string) => {
@@ -777,7 +778,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
 
                                 <div className="sm:hidden space-y-4">
                                     {showTenants?.length ? (
-                                        showTenants.map((t) => (
+                                        showTenants.map((t: any) => (
                                             <div
                                                 key={t.tenant_id}
                                                 className="bg-white shadow rounded-lg p-2 border space-y-2"
