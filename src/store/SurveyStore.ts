@@ -14,48 +14,48 @@ interface Pattadar {
 }
 
 interface Tenant {
-  dist_code: string;
-  subdiv_code: string;
-  cir_code: string;
-  mouza_pargona_code: string;
-  lot_no: string;
-  vill_townprt_code: string;
-  dag_no: string;
+    dist_code: string;
+    subdiv_code: string;
+    cir_code: string;
+    mouza_pargona_code: string;
+    lot_no: string;
+    vill_townprt_code: string;
+    dag_no: string;
 
-  tenant_name: string;
-  tenants_father: string;
-  tenants_add1: string;
-  tenants_add2?: string | null;
-  tenants_add3?: string | null;
+    tenant_name: string;
+    tenants_father: string;
+    tenants_add1: string;
+    tenants_add2?: string | null;
+    tenants_add3?: string | null;
 
-  type_of_tenant: string;
-  khatian_no: string;
-  revenue_tenant: string; // looks numeric but API returns as string
-  crop_rate?: string | null;
+    type_of_tenant: string;
+    khatian_no: string;
+    revenue_tenant: string; // looks numeric but API returns as string
+    crop_rate?: string | null;
 
-  user_code: string;
-  date_entry: string; // ISO date string
-  operation: string;
-  tenant_id: string;
+    user_code: string;
+    date_entry: string; // ISO date string
+    operation: string;
+    tenant_id: string;
 
-  duration?: string | null;
-  paid_cash_kind: string;
-  payable_cash_kind: string;
-  special_conditions: string;
-  status?: string | null;
-  tenant_status: string;
-  remarks: string;
+    duration?: string | null;
+    paid_cash_kind: string;
+    payable_cash_kind: string;
+    special_conditions: string;
+    status?: string | null;
+    tenant_status: string;
+    remarks: string;
 
-  bigha: string;
-  katha: string;
-  lessa: string;
-  ganda: string;
-  kranti: string;
+    bigha: string;
+    katha: string;
+    lessa: string;
+    ganda: string;
+    kranti: string;
 
-  uuid: string;
-  updated_date?: string | null;
-  old_khatian_no?: string | null;
-  p_flag?: string | null;
+    uuid: string;
+    updated_date?: string | null;
+    old_khatian_no?: string | null;
+    p_flag?: string | null;
 }
 
 
@@ -130,6 +130,8 @@ interface DagState {
     setLoading: (loading: boolean) => void;
 }
 
+interface TransferType { value: string; label: string }
+
 export const useDagStore = create<DagState>((set, get) => ({
     isLoading: false,
     vill: '',
@@ -139,7 +141,7 @@ export const useDagStore = create<DagState>((set, get) => ({
     landGroups: [],
     pattaTypes: [],
     dharPattadars: [],
-    dharTenants:[],
+    dharTenants: [],
     dharDagData: null,
     getCreatedPartDags: () => {
         return get().partDags.filter(dag => dag.from_bhunaksha !== 1);
@@ -188,6 +190,7 @@ interface MasterDataState {
     landClasses: LandClass[];
     landGroups: LandGroup[];
     pattaTypes: PattaType[];
+    transferTypes: TransferType[];
     getMasterData: (distCode: string) => Promise<void>;
 }
 
@@ -199,11 +202,13 @@ export const useMasterDataStore = create<MasterDataState>()(
             landClasses: [],
             landGroups: [],
             pattaTypes: [],
+            transferTypes: [],
             clearMasterStore: () =>
                 set({
                     landClasses: [],
                     landGroups: [],
                     pattaTypes: [],
+                    transferTypes: [],
                 }),
             getMasterData: async (distCode: string) => {
                 set({ distCode: distCode, isLoadingMaster: true });
@@ -227,6 +232,7 @@ export const useMasterDataStore = create<MasterDataState>()(
                         landClasses: resp.land_classes || [],
                         landGroups: resp.land_groups || [],
                         pattaTypes: resp.patta_types || [],
+                        transferTypes: resp.transfer_types || [],
                     });
                 } catch (error) {
                     console.error(error);

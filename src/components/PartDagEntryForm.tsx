@@ -4,8 +4,6 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { useForm } from "react-hook-form";
-import Select from 'react-tailwindcss-select';
-import { Combobox } from "@headlessui/react";
 import MyCombobox from "./ComboBox";
 import ApiService from "@/services/ApiService";
 import { toast } from "react-hot-toast";
@@ -15,9 +13,10 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useDagStore } from "@/store/SurveyStore";
 import { useMasterDataStore } from "@/store/SurveyStore";
 import { Plus, Trash2, Users } from "lucide-react";
-import { set } from "date-fns";
-import { error } from "console";
 import { validatePossessorCreateForm } from "@/services/FormValidation.service";
+import PossessorsList from "./PossessorList";
+import TenantsList from "./TenantsList";
+import PattadarsList from "./PattadarsList";
 
 
 interface Props {
@@ -62,7 +61,7 @@ interface ErrorType {
 const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) => {
     const { register, handleSubmit, reset, formState: { errors } } = useForm<InputFormData>();
     const { isLoading, getData, setLoading, partDags, dharDagData, dharPattadars, dharTenants } = useDagStore();
-    const { landClasses, landGroups, pattaTypes } = useMasterDataStore();
+    const { landClasses, landGroups, pattaTypes, transferTypes } = useMasterDataStore();
 
     const [partDag, setPartDag] = useState<string>('');
     const [currLandClass, setCurrLandClass] = useState<string | number>('');
@@ -102,6 +101,11 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
     const [posDob, setPosDob] = useState<string>('');
     const [posMobileNo, setPosMobileNo] = useState<string>('');
     const [posAdhaar, setPosAdhaar] = useState<string>('');
+    const [posEmail, setPosEmail] = useState<string>('');
+    const [posPhoto, setPosPhoto] = useState<string | null>(null);
+    const [documents, setDocuments] = useState<any[]>([
+        { document_name: "", document_no: "", issuing_authority: "", document_issue_date: "", file: null }
+    ]);
     const [updateButton, setUpdateButton] = useState<boolean>(false);
 
 
@@ -155,6 +159,9 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         setPosAdhaar('');
         setPosGender('male');
         setPosRemark('');
+        setPosEmail('');
+        setPosPhoto(null);
+        setPosDob('');
     };
 
     const getDharLandRevenue = async (area_sm: string) => {
@@ -391,37 +398,93 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
 
     };
 
+    const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = (reader.result as string).split(",")[1]; // strip "data:image/jpeg;base64,"
+                setPosPhoto(base64String);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+
+    // Handle input changes
+    const handleDocumentChange = (index: number, field: string, value: any) => {
+        const updated = [...documents];
+        updated[index][field] = value;
+        setDocuments(updated);
+    };
+
+    // Handle file change
+    const handleDocumentFileChange = (index: number, file: File | null) => {
+        const updated = [...documents];
+        updated[index].file = file;
+        setDocuments(updated);
+    };
+
+    // Add new document entry
+    const addDocument = () => {
+        setDocuments([
+            ...documents,
+            { document_name: "", document_no: "", issuing_authority: "", document_issue_date: "", file: null }
+        ]);
+    };
+
+    // Remove a document
+    const removeDocument = (index: number) => {
+        setDocuments(documents.filter((_, i) => i !== index));
+    };
+
 
     const submitPossessor = async () => {
-        const data = {
-            vill_townprt_code: vill,
-            dag_no: dagNo,
-            part_dag: finalPartDag,
-            possessor_name: posName,
-            possessor_guardian_name: posGuardianName,
-            possessor_guardian_relation: posGuardianRelation,
-            possessor_pattadar_relation: posPattadarRelation,
-            possessor_mode_of_acquisition: posModeOfAcquisition,
-            possessor_name_mut: posNameMut,
-            possessor_father_name_mut: posFatherNameMut,
-            possessor_address_mut: posAddressMut,
-            possessor_remark: posRemark,
-            possessor_gender: posGender,
-            possessor_dob: posDob,
-            possessor_mobile_no: posMobileNo,
-            possessor_aadhaar: posAdhaar
-        };
+        const formData = new FormData();
 
-        const isValid = validatePossessorCreateForm(data);
-        if (!isValid) {
-            return;
+        formData.append("vill_townprt_code", vill);
+        formData.append("dag_no", dagNo);
+        formData.append("part_dag", finalPartDag);
+        formData.append("possessor_name", posName);
+        formData.append("possessor_guardian_name", posGuardianName);
+        formData.append("possessor_guardian_relation", posGuardianRelation);
+        formData.append("possessor_pattadar_relation", posPattadarRelation);
+        formData.append("possessor_mode_of_acquisition", posModeOfAcquisition);
+        formData.append("possessor_name_mut", posNameMut);
+        formData.append("possessor_father_name_mut", posFatherNameMut);
+        formData.append("possessor_address_mut", posAddressMut);
+        formData.append("possessor_remark", posRemark);
+        formData.append("possessor_gender", posGender);
+        formData.append("possessor_dob", posDob);
+        formData.append("possessor_mobile_no", posMobileNo);
+        formData.append("possessor_aadhaar", posAdhaar);
+        formData.append("possessor_email", posEmail);
+
+        if (posPhoto) {
+            formData.append("possessor_photo", posPhoto); // file
         }
 
+        // Append dynamic documents
+        documents.forEach((doc, index) => {
+            // Append document metadata as a JSON string
+            const docMetadata = {
+                document_name: doc.document_name,
+                document_no: doc.document_no,
+                issuing_authority: doc.issuing_authority,
+                document_issue_date: doc.document_issue_date,
+            };
+            formData.append(`document_metadata_${index}`, JSON.stringify(docMetadata));
+
+            // Append the actual file
+            if (doc.file) {
+                formData.append(`document_file_${index}`, doc.file);
+            }
+        });
         setLoading(true);
-        const response = await ApiService.get('submit_possessor', JSON.stringify(data));
+        const response = await ApiService.postForm("submit_possessor", formData);
         setLoading(false);
 
-        if (response.status !== 'y') {
+        if (response.status !== "y") {
             toast.error(response.msg);
             return;
         }
@@ -430,6 +493,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         getPartDagInfo();
         setIsOpen(false);
     };
+
 
     const deletePossessor = async (possessor: any) => {
         // console.log(e.currentTarget.value);
@@ -453,6 +517,9 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         getPartDagInfo();
 
     };
+
+
+
 
 
     return (
@@ -654,69 +721,8 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-0">
-                                {/* Table View for sm+ */}
-                                <div className="hidden md:block overflow-x-auto">
-                                    <table className="min-w-full border rounded-lg bg-white text-sm md:text-base text-gray-800">
-                                        <thead>
-                                            <tr className="bg-medical-50">
-                                                <th className="px-2 py-2 border text-start font-medium">পট্টাদাৰৰ নাম</th>
-                                                <th className="px-2 py-2 border text-center font-medium">পিতাৰ নাম</th>
-                                                <th className="px-2 py-2 border text-center font-medium">ঠিকনা</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {showPattadars?.length ? (
-                                                showPattadars.map((p, i) => (
-                                                    <tr key={i} className="hover:bg-medical-50">
-                                                        <td className="px-2 py-2 border text-start">{p.pdar_name || "N/A"}</td>
-                                                        <td className="px-2 py-2 border text-center">{p.pdar_father_name || "N/A"}</td>
-                                                        <td className="px-2 py-2 border text-center">
-                                                            {p.pdar_add1 || "N/A"}{p.pdar_add2 ? `, ${p.pdar_add2}` : ""}
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            ) : (
-                                                <tr>
-                                                    <td colSpan={3} className="py-6 text-center text-medical-500">
-                                                        📭 No Pattadars Found
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
 
-
-                                <div className="sm:hidden space-y-4">
-                                    {showPattadars?.length ? (
-                                        showPattadars.map((p, i) => (
-                                            <div
-                                                key={i}
-                                                className="bg-white shadow rounded-lg p-2 border space-y-2"
-                                            >
-                                                <div className="flex justify-between">
-                                                    <span className="font-semibold text-medical-700">পট্টাদাৰৰ নাম:</span>
-                                                    <span>{p?.pdar_name || "N/A"}</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="font-semibold text-medical-700">পিতাৰ নাম:</span>
-                                                    <span>{p?.pdar_father_name || "N/A"}</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="font-semibold text-medical-700">ঠিকনা:</span>
-                                                    <span>
-                                                        {p?.pdar_add1 || "N/A"}
-                                                        {p?.pdar_add2 ? `, ${p.pdar_add2}` : ""}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="text-center text-gray-500 py-6 bg-white shadow rounded-lg border">
-                                            📭 No Pattadar Data
-                                        </div>
-                                    )}
-                                </div>
+                                <PattadarsList pattadars={showPattadars} />
 
                             </CardContent>
                         </Card>
@@ -735,94 +741,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-0">
-                                {/* Table View for sm+ */}
-                                <div className="hidden md:block overflow-x-auto">
-                                    <table className="min-w-full border rounded-lg bg-white text-sm md:text-base text-gray-800">
-                                        <thead>
-                                            <tr className="bg-medical-50">
-                                                <th className="px-2 py-2 border text-start font-medium">Tenant Name</th>
-                                                <th className="px-2 py-2 border text-start font-medium">Father&apos;s Name</th>
-                                                <th className="px-2 py-2 border text-start font-medium">Address</th>
-                                                <th className="px-2 py-2 border text-center font-medium">Khatian No</th>
-                                                <th className="px-2 py-2 border text-center font-medium">Tenant Status</th>
-                                                <th className="px-2 py-2 border text-center font-medium">Revenue Tenant</th>
-                                                <th className="px-2 py-2 border text-center font-medium">Remarks</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {showTenants?.length ? (
-                                                showTenants.map((t) => (
-                                                    <tr key={t.tenant_id} className="hover:bg-medical-50">
-                                                        <td className="px-2 py-2 border text-start">{t.tenant_name || "N/A"}</td>
-                                                        <td className="px-2 py-2 border text-start">{t.tenants_father || "N/A"}</td>
-                                                        <td className="px-2 py-2 border text-start">
-                                                            {t.tenants_add1 || "N/A"}{t.tenants_add2 ? `, ${t.tenants_add2}` : ""}
-                                                        </td>
-                                                        <td className="px-2 py-2 border text-center">{t.khatian_no || "N/A"}</td>
-                                                        <td className="px-2 py-2 border text-center">{t.tenant_status || "N/A"}</td>
-                                                        <td className="px-2 py-2 border text-center">{t.revenue_tenant || "N/A"}</td>
-                                                        <td className="px-2 py-2 border text-center">{t.remarks || "N/A"}</td>
-                                                    </tr>
-                                                ))
-                                            ) : (
-                                                <tr>
-                                                    <td colSpan={7} className="py-6 text-center text-medical-500">
-                                                        📭 No Tenant Data
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-
-                                <div className="sm:hidden space-y-4">
-                                    {showTenants?.length ? (
-                                        showTenants.map((t: any) => (
-                                            <div
-                                                key={t.tenant_id}
-                                                className="bg-white shadow rounded-lg p-2 border space-y-2"
-                                            >
-                                                <div className="flex justify-between">
-                                                    <span className="font-semibold text-medical-700">Tenant Name:</span>
-                                                    <span>{t?.tenant_name || "N/A"}</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="font-semibold text-medical-700">Father&apos;s Name:</span>
-                                                    <span>{t?.tenants_father || "N/A"}</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="font-semibold text-medical-700">Address:</span>
-                                                    <span>
-                                                        {t?.tenants_add1 || "N/A"}
-                                                        {t?.tenants_add2 ? `, ${t.tenants_add2}` : ""}
-                                                    </span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="font-semibold text-medical-700">Khatian No:</span>
-                                                    <span>{t?.khatian_no || "N/A"}</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="font-semibold text-medical-700">Status:</span>
-                                                    <span>{t?.tenant_status || "N/A"}</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="font-semibold text-medical-700">Revenue Tenant:</span>
-                                                    <span>{t?.revenue_tenant || "N/A"}</span>
-                                                </div>
-                                                <div className="flex justify-between">
-                                                    <span className="font-semibold text-medical-700">Remarks:</span>
-                                                    <span>{t?.remarks || "N/A"}</span>
-                                                </div>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <div className="text-center text-gray-500 py-6 bg-white shadow rounded-lg border">
-                                            📭 No Tenant Data
-                                        </div>
-                                    )}
-                                </div>
-
+                                <TenantsList tenants={showTenants} />
                             </CardContent>
                         </Card>
                     </div>
@@ -854,171 +773,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                 </CardHeader>
 
                                 <CardContent className="p-0">
-                                    {/* Table View (md and up) */}
-                                    <div className="hidden md:block overflow-x-auto">
-                                        <table className="min-w-full border rounded-lg bg-white text-sm md:text-base text-gray-800">
-                                            <thead>
-                                                <tr className="bg-medical-50">
-                                                    <th className="px-2 py-2 border text-start font-medium">Possessor Name</th>
-                                                    <th className="px-2 py-2 border text-start font-medium">Mobile No</th>
-                                                    <th className="px-2 py-2 border text-start font-medium">Guardian&apos;s Name</th>
-                                                    <th className="px-2 py-2 border text-start font-medium">Remarks</th>
-                                                    <th className="px-2 py-2 border text-end font-medium">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {possessors?.length ? (
-                                                    possessors.map((p, i) => (
-                                                        <tr key={i} className="hover:bg-medical-50 transition-colors">
-                                                            <td className="px-2 py-2 border text-start">{p.name || "N/A"}</td>
-                                                            <td className="px-2 py-2 border text-start">{p.mobile_no || "N/A"}</td>
-                                                            <td className="px-2 py-2 border text-start">{p.guard_name || "N/A"}</td>
-                                                            <td className="px-2 py-2 border text-start">{p.remarks || "N/A"}</td>
-                                                            <td className="px-2 py-2 border">
-                                                                <div className="flex justify-end gap-2">
-                                                                    {/* Details Button */}
-                                                                    <Button
-                                                                        className="bg-blue-500 hover:bg-blue-600 text-white rounded-md px-3 py-1 flex items-center gap-1"
-                                                                        type="button"
-                                                                        onClick={() => {
-                                                                            toast.dismiss();
-                                                                            toast(
-                                                                                (t) => (
-                                                                                    <div className="text-left">
-                                                                                        <div className="flex justify-between items-center mb-2">
-                                                                                            <span className="font-bold">Possessor Details</span>
-                                                                                            <button
-                                                                                                className="ml-2 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300"
-                                                                                                onClick={() => toast.dismiss(t.id)}
-                                                                                            >
-                                                                                                Close
-                                                                                            </button>
-                                                                                        </div>
-                                                                                        <div><strong>Name:</strong> {p.name}</div>
-                                                                                        <div><strong>Guardian Name:</strong> {p.guard_name}</div>
-                                                                                        <div><strong>Guardian Relation:</strong> {p.guard_relation_name}</div>
-                                                                                        <div><strong>Mode of Acquisition:</strong> {p.mode_of_acquisition_name}</div>
-                                                                                        <div><strong>Possessor Name for Mutation:</strong> {p.mut_possessor_name}</div>
-                                                                                        <div><strong>Possessor Father&apos;s Name for Mutation:</strong> {p.mut_possessor_father_name}</div>
-                                                                                        <div><strong>Address for Mutation:</strong> {p.mut_possessor_address}</div>
-                                                                                        <div><strong>Gender:</strong> {p.gender}</div>
-                                                                                        <div><strong>Mobile No:</strong> {p.mobile_no}</div>
-                                                                                        <div><strong>Aadhaar No:</strong> {p.aadhaar_no}</div>
-                                                                                        <div><strong>Date of Birth:</strong> {p.dob}</div>
-                                                                                        <div><strong>Remark:</strong> {p.remarks}</div>
-                                                                                    </div>
-                                                                                ),
-                                                                                {
-                                                                                    duration: 30000,
-                                                                                    position: "top-center",
-                                                                                    style: { minWidth: "350px", maxWidth: "90vw", fontSize: "14px" },
-                                                                                }
-                                                                            );
-                                                                        }}
-                                                                    >
-                                                                        Details
-                                                                    </Button>
-
-                                                                    {/* Delete Button */}
-                                                                    {/* <Button
-                                                                        className="bg-red-500 hover:bg-red-600 text-white rounded-md px-3 py-1 flex items-center gap-1"
-                                                                        value={`${p.dist_code}-${p.subdiv_code}-${p.cir_code}-${p.mouza_pargona_code}-${p.lot_no}-${p.vill_townprt_code}-${p.old_dag_no}-${p.part_dag}-${p.possessor_id}`}
-                                                                        onClick={deletePossessor}
-                                                                    >
-                                                                        <Trash2 className="h-4 w-4" />
-                                                                        Delete
-                                                                    </Button> */}
-
-                                                                    <ConfirmDialog
-                                                                        trigger={<Button type="button" className="bg-red-600 hover:bg-red-700 text-white">Delete</Button>}
-                                                                        title="Delete Possessor"
-                                                                        description="This will permanently delete the possessor record. Are you sure?"
-                                                                        confirmText="Yes, delete"
-                                                                        cancelText="No, keep it"
-                                                                        onConfirm={() => deletePossessor(`${p.dist_code}-${p.subdiv_code}-${p.cir_code}-${p.mouza_pargona_code}-${p.lot_no}-${p.vill_townprt_code}-${p.old_dag_no}-${p.part_dag}-${p.possessor_id}`)}
-                                                                    />
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    ))
-                                                ) : (
-                                                    <tr>
-                                                        <td colSpan={4} className="py-6 text-center text-medical-500">
-                                                            📭 No possessors found
-                                                        </td>
-                                                    </tr>
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-
-                                    {/* Card View (Mobile) */}
-                                    <div className="md:hidden p-4 space-y-3">
-                                        {possessors?.length ? (
-                                            possessors.map((p, i) => (
-                                                <div key={i} className="border rounded-lg p-3 shadow-sm bg-white space-y-1">
-                                                    <p><span className="font-semibold">Possessor:</span> {p.name}</p>
-                                                    <p><span className="font-semibold">Guardian:</span> {p.guard_name}</p>
-                                                    <p><span className="font-semibold">Remarks:</span> {p.remarks || "N/A"}</p>
-
-                                                    <div className="flex justify-end gap-2 pt-2">
-                                                        {/* Details Button */}
-                                                        <Button
-                                                            className="bg-blue-500 hover:bg-blue-600 text-white rounded-md px-3 py-1 flex items-center gap-1"
-                                                            type="button"
-                                                            onClick={() => {
-                                                                toast.dismiss();
-                                                                toast(
-                                                                    (t) => (
-                                                                        <div className="text-left">
-                                                                            <div className="flex justify-between items-center mb-2">
-                                                                                <span className="font-bold">Possessor Details</span>
-                                                                                <button
-                                                                                    className="ml-2 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300"
-                                                                                    onClick={() => toast.dismiss(t.id)}
-                                                                                >
-                                                                                    Close
-                                                                                </button>
-                                                                            </div>
-                                                                            <div><strong>Name:</strong> {p.name}</div>
-                                                                            <div><strong>Guardian Name:</strong> {p.guard_name}</div>
-                                                                            <div><strong>Guardian Relation:</strong> {p.guard_relation_name}</div>
-                                                                            <div><strong>Mode of Acquisition:</strong> {p.mode_of_acquisition_name}</div>
-                                                                            <div><strong>Possessor Name for Mutation:</strong> {p.mut_possessor_name}</div>
-                                                                            <div><strong>Possessor Father's Name for Mutation:</strong> {p.mut_possessor_father_name}</div>
-                                                                            <div><strong>Address for Mutation:</strong> {p.mut_possessor_address}</div>
-                                                                            <div><strong>Gender:</strong> {p.gender}</div>
-                                                                            <div><strong>Date of Birth:</strong> {p.dob}</div>
-                                                                            <div><strong>Remark:</strong> {p.remarks}</div>
-                                                                        </div>
-                                                                    ),
-                                                                    {
-                                                                        duration: 30000,
-                                                                        position: "top-center",
-                                                                        style: { minWidth: "350px", maxWidth: "90vw", fontSize: "14px" }
-                                                                    }
-                                                                );
-                                                            }}
-                                                        >
-                                                            Details
-                                                        </Button>
-                                                        {/* Delete Button */}
-                                                        <Button
-                                                            className="bg-red-500 hover:bg-red-600 text-white rounded-md px-3 py-1 flex items-center gap-1"
-                                                            value={`${p.dist_code}-${p.subdiv_code}-${p.cir_code}-${p.mouza_pargona_code}-${p.lot_no}-${p.vill_townprt_code}-${p.old_dag_no}-${p.part_dag}-${p.possessor_id}`}
-                                                            onClick={deletePossessor}
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                            Delete
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <p className="text-center text-gray-500">📭 No possessors found</p>
-                                        )}
-                                    </div>
+                                    <PossessorsList possessors={possessors} deletePossessor={deletePossessor} />
                                 </CardContent>
                             </Card>
                         </div>
@@ -1026,7 +781,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
 
                     {finalPartDag && finalPartDag !== '' && isOpen && (
                         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                            <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl md:max-w-5xl p-6 relative overflow-y-auto max-h-[90vh]">
+                            <div className="bg-white rounded-lg shadow-lg w-full max-w-5xl md:max-w-7xl p-6 relative overflow-y-auto max-h-[90vh]">
                                 <button
                                     onClick={() => setIsOpen(false)}
                                     className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
@@ -1088,9 +843,11 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                                     onChange={(e: any) => setPosModeOfAcquisition(e.currentTarget.value)}
                                                 >
                                                     <option value="">Select Mode</option>
-                                                    <option value="s">Sale</option>
-                                                    <option value="m">Mortgage</option>
-                                                    <option value="l">Lease</option>
+                                                    {transferTypes.map((type) => (
+                                                        <option key={type.value} value={type.value}>
+                                                            {type.label}
+                                                        </option>
+                                                    ))}
                                                 </select>
                                             </div>
 
@@ -1165,6 +922,16 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                             </div>
 
                                             <div className="space-y-2">
+                                                <Label htmlFor="possessor_email">Email (optional)</Label>
+                                                <Input
+                                                    id="possessor_email"
+                                                    type="email"
+                                                    placeholder="Email"
+                                                    value={posEmail}
+                                                    onInput={(e: any) => setPosEmail(e.currentTarget.value)}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
                                                 <Label htmlFor="possessor_dob">Date of Birth (optional)</Label>
                                                 <Input
                                                     id="possessor_dob"
@@ -1173,16 +940,138 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                                     onInput={(e: any) => setPosDob(e.currentTarget.value)}
                                                 />
                                             </div>
+                                            <div className="space-y-3">
+                                                <Label htmlFor="possessor_photo" className="text-gray-700 font-medium">
+                                                    Photo (optional)
+                                                </Label>
+
+                                                {/* Custom file input box */}
+                                                <label
+                                                    htmlFor="possessor_photo"
+                                                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-2xl cursor-pointer hover:bg-gray-50 transition p-4 text-gray-500"
+                                                >
+                                                    <svg
+                                                        className="w-8 h-8 mb-2 text-gray-400"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                    >
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4a1 1 0 011-1h8a1 1 0 011 1v12m-4 4h-4m0 0l-4-4m4 4l4-4" />
+                                                    </svg>
+                                                    <span className="text-sm">Click to upload or drag & drop</span>
+                                                    <span className="text-xs text-gray-400">PNG, JPG up to 5MB</span>
+                                                    <Input
+                                                        id="possessor_photo"
+                                                        type="file"
+                                                        accept="image/*"
+                                                        className="hidden"
+                                                        onChange={handlePhotoChange}
+                                                    />
+                                                </label>
+
+                                                {posPhoto && (
+                                                    <div className="space-y-2">
+                                                        <Label className="text-gray-700 font-medium">Photo Preview:</Label>
+                                                        <div className="w-40 h-40 border rounded-2xl overflow-hidden shadow-sm">
+                                                            <img
+                                                                src={`data:image/jpeg;base64,${posPhoto}`}
+                                                                alt="Possessor Photo"
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                            </div>
 
                                             <div className="space-y-2 md:col-span-2">
                                                 <Label htmlFor="possessor_remark">Remark (optional)</Label>
-                                                <Input
+                                                <Textarea
                                                     id="possessor_remark"
-                                                    type="text"
-                                                    placeholder="Remark"
                                                     value={posRemark}
                                                     onInput={(e: any) => setPosRemark(e.currentTarget.value)}
                                                 />
+
+                                            </div>
+
+                                            <div className="space-y-3 md:col-span-2">
+                                                <Label className="text-gray-700 font-medium">Ownership / Transfer Documents</Label>
+
+                                                {documents.map((doc, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-xl bg-gray-50 relative"
+                                                    >
+                                                        <div className="space-y-1">
+                                                            <Label>Document Name</Label>
+                                                            <Input
+                                                                type="text"
+                                                                placeholder="e.g. Sale Deed"
+                                                                value={doc.document_name}
+                                                                onChange={(e) => handleDocumentChange(index, "document_name", e.target.value)}
+                                                            />
+                                                        </div>
+
+                                                        <div className="space-y-1">
+                                                            <Label>Document No</Label>
+                                                            <Input
+                                                                type="text"
+                                                                placeholder="Document Number"
+                                                                value={doc.document_no}
+                                                                onChange={(e) => handleDocumentChange(index, "document_no", e.target.value)}
+                                                            />
+                                                        </div>
+
+                                                        <div className="space-y-1">
+                                                            <Label>Issuing Authority</Label>
+                                                            <Input
+                                                                type="text"
+                                                                placeholder="Authority Name"
+                                                                value={doc.issuing_authority}
+                                                                onChange={(e) => handleDocumentChange(index, "issuing_authority", e.target.value)}
+                                                            />
+                                                        </div>
+
+                                                        <div className="space-y-1">
+                                                            <Label>Issue Date</Label>
+                                                            <Input
+                                                                type="date"
+                                                                value={doc.document_issue_date}
+                                                                onChange={(e) => handleDocumentChange(index, "document_issue_date", e.target.value)}
+                                                            />
+                                                        </div>
+
+                                                        <div className="space-y-1">
+                                                            <Label>Upload</Label>
+                                                            <Input
+                                                                type="file"
+                                                                accept=".pdf,image/*"
+                                                                onChange={(e) =>
+                                                                    handleDocumentFileChange(index, e.target.files ? e.target.files[0] : null)
+                                                                }
+                                                            />
+                                                        </div>
+
+                                                        <button
+                                                            type="button"
+                                                            className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                                                            onClick={() => removeDocument(index)}
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    </div>
+                                                ))}
+
+                                                {/* Add More Button */}
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    onClick={addDocument}
+                                                    className="mt-2 w-full md:w-auto"
+                                                >
+                                                    + Add Document
+                                                </Button>
                                             </div>
                                         </div>
                                     </CardContent>

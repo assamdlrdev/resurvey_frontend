@@ -10,9 +10,9 @@ const ApiService = {
         Object.keys(parsedData).forEach((key: string) => {
             formData.append(key, parsedData[key]);
         });
-        try{
+        try {
             const result = await fetch(`${Constants.API_BASE_URL + endpoint}`
-                ,{
+                , {
                     method: 'POST',
                     body: formData
                 }
@@ -20,7 +20,7 @@ const ApiService = {
             const response = await result.json();
             return response;
         }
-        catch(error) {
+        catch (error) {
             return {
                 status: 'n',
                 msg: `API Call Failed:${error}`
@@ -32,11 +32,11 @@ const ApiService = {
         var headers = {
             'Content-Type': 'application/json'
         };
-        if(token && token !== 'undefined'){
-            Object.assign(headers, {'Authorization': `Bearer ${token}`});
+        if (token && token !== 'undefined') {
+            Object.assign(headers, { 'Authorization': `Bearer ${token}` });
         }
         let parsedData = data ? JSON.parse(data) : {};
-        try{
+        try {
             const result = await fetch(`${Constants.API_BASE_URL + endpoint}`, {
                 method: 'POST',
                 headers: headers,
@@ -56,10 +56,10 @@ const ApiService = {
     register: async (endpoint: string, data: any) => {
         try {
             const result = await fetch(`${Constants.API_BASE_URL + endpoint}`
-                ,{
+                , {
                     method: 'POST',
                     headers: {
-                        'Content-Type' : 'application/json'
+                        'Content-Type': 'application/json'
                     },
                     body: data
                 }
@@ -67,17 +67,37 @@ const ApiService = {
             const response = await result.json();
             return response;
         }
-        catch(error) {
+        catch (error) {
             return {
                 status: 'n',
                 msg: `API Call Failed:${error}`
             };
         }
-        
+
     },
     decodePayload: async (data: any) => {
         const decoded = jwtDecode(data);
         return decoded;
+    },
+    postForm: async (endpoint: string, data: any) => {
+        const token = await StorageService.getJwtCookie();
+
+        try {
+            const result = await fetch(`${Constants.API_BASE_URL + endpoint}`, {
+                method: "POST",
+                headers: token && token !== "undefined" ? {
+                    Authorization: `Bearer ${token}`,
+                } : undefined,
+                body: data,
+            });
+
+            return await result.json();
+        } catch (error) {
+            return {
+                status: "n",
+                msg: `API Call Failed: ${error}`,
+            };
+        }
     }
 };
 
