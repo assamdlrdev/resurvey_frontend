@@ -458,6 +458,35 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         formData.append("possessor_aadhaar", posAdhaar);
         formData.append("possessor_email", posEmail);
 
+        // validate before appending
+        const mobileRegex = /^[6-9]\d{9}$/;   // 10 digits, starts with 6-9
+        const aadhaarRegex = /^\d{12}$/;      // exactly 12 digits
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // simple email check
+
+        if (posMobileNo) {
+            if (!mobileRegex.test(posMobileNo)) {
+                alert("Invalid Mobile Number");
+                return;
+            }
+            formData.append("possessor_mobile_no", posMobileNo);
+        }
+
+        if (posAdhaar) {
+            if (!aadhaarRegex.test(posAdhaar)) {
+                alert("Invalid Aadhaar Number");
+                return;
+            }
+            formData.append("possessor_aadhaar", posAdhaar);
+        }
+
+        if (posEmail) {
+            if (!emailRegex.test(posEmail)) {
+                alert("Invalid Email Address");
+                return;
+            }
+            formData.append("possessor_email", posEmail);
+        }
+
         if (posPhoto) {
             formData.append("possessor_photo", posPhoto); // file
         }
@@ -527,7 +556,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <div className="space-y-2">
-                                <Label htmlFor="part_dag">Dag No (Old)</Label>
+                                <Label htmlFor="dag_no">দাগ নং (Dag No)</Label>
                                 <Input
                                     id="dag_no"
                                     className="w-full border rounded px-3 py-2 mt-1"
@@ -535,184 +564,156 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                     value={dagNo}
                                 />
                             </div>
+
                             <div className="space-y-2">
-                                <Label htmlFor="part_dag">Part Dag</Label>
-                                <MyCombobox partDag={partDag} setPartDag={setPartDag} bhunakshaPartDags={partDags} setFinalPartDag={setFinalPartDag} />
-                            </div>
-                            {/* <div className="space-y-2">
-                                <Label htmlFor="survey_no">Survey No</Label>
-                                <Input
-                                    id="survey_no"
-                                    className="w-full border rounded px-3 py-2 mt-1"
-                                    placeholder="Enter Survey No"
-                                    value={surveyNo}
-                                    onChange={(e) => setSurveyNo(e.target.value)}
+                                <Label htmlFor="part_dag">অংশিক দাগ নং(Part Dag)</Label>
+                                <MyCombobox
+                                    partDag={partDag}
+                                    setPartDag={setPartDag}
+                                    bhunakshaPartDags={partDags}
+                                    setFinalPartDag={setFinalPartDag}
                                 />
-                            </div> */}
+                            </div>
+
                             <div className="space-y-2">
-                                <Label htmlFor="o_land_class">Land Class (Existing)</Label>
+                                <Label htmlFor="o_land_class">মাটিৰ শ্ৰেণী (Land Class - Old)</Label>
                                 <select
                                     id="o_land_class"
                                     className="w-full border rounded px-3 py-2 mt-1"
                                     value={dharDagData.land_class_code}
-                                    // onChange={(e: any) => setOriginalLandClass(e.currentTarget.value)}
                                     disabled
                                 >
                                     <option value="">Select Land Class</option>
-                                    {landClasses && landClasses.length > 0 && landClasses.map((dharLandClass, index) => <option key={index} value={dharLandClass.class_code}>{dharLandClass.land_type}</option>)}
+                                    {landClasses &&
+                                        landClasses.length > 0 &&
+                                        landClasses.map((dharLandClass, index) => (
+                                            <option key={index} value={dharLandClass.class_code}>
+                                                {dharLandClass.land_type}
+                                            </option>
+                                        ))}
                                 </select>
                             </div>
+
                             <div className="space-y-2">
-                                <Label htmlFor="curr_land_use">Current Land Class use</Label>
+                                <Label htmlFor="curr_land_use">বৰ্তমান মাটিৰ শ্ৰেণী (Current Land Class)</Label>
                                 <select
                                     id="curr_land_use"
-                                    // {...register("curr_land_use", { required: "Current Land Class Use is required" })}
                                     className="w-full border rounded px-3 py-2 mt-1"
                                     value={currLandClass}
                                     onChange={(e: any) => setCurrLandClass(e.currentTarget.value)}
                                 >
                                     <option value="">--Select--</option>
-                                    {landGroups && landGroups.length > 0 && landGroups.map((dharLandGroup, index) => <option key={index} value={dharLandGroup.land_class_code}>{dharLandGroup.name_ass} ({dharLandGroup.name})</option>)}
+                                    {landGroups &&
+                                        landGroups.length > 0 &&
+                                        landGroups.map((dharLandGroup, index) => (
+                                            <option key={index} value={dharLandGroup.land_class_code}>
+                                                {dharLandGroup.name_ass} ({dharLandGroup.name})
+                                            </option>
+                                        ))}
                                 </select>
-                                {/* {errors.curr_land_use && (
-                            <p className="text-sm text-destructive">{errors.curr_land_use.message}</p>
-                            )} */}
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="area_sm">Land Area (sq. metre)</Label>
+                                <Label htmlFor="area_sm">কালি (Land Area - sq. metre)</Label>
                                 <Input
                                     id="area_sm"
                                     type="number"
-                                    // {...register("area_sm", { required: "Area in sq. metre is a required field" })}
-                                    placeholder="Enter Land Area in sq. metre"
+                                    placeholder="Enter Land Area"
                                     value={areaSm}
-                                    // onInput={(e: any) => setAreaSm(e.currentTarget.value)}
                                     onInput={handleAreaSm}
                                 />
                             </div>
 
-
-
                             <div className="space-y-2">
-                                <Label htmlFor="patta_no">Patta No. (Old)</Label>
+                                <Label htmlFor="patta_no">পট্টাৰ নং (Patta No - Old)</Label>
                                 <Input
                                     id="patta_no"
                                     type="text"
-                                    placeholder="Enter Patta No"
                                     value={dharDagData.patta_no}
-                                    // onInput={(e: any) => setOriginalPattaNo(e.currentTarget.value)}
                                     disabled
                                 />
                             </div>
+
                             <div className="space-y-2">
-                                <Label htmlFor="patta_type_code">Patta Type (Old)</Label>
+                                <Label htmlFor="patta_type_code">পট্টাৰ প্ৰকাৰ (Patta Type - Old)</Label>
                                 <select
                                     id="patta_type_code"
                                     className="w-full border rounded px-3 py-2 mt-1"
                                     value={dharDagData.patta_type_code}
-                                    // onChange={(e: any) => setOriginalPattaTypeCode(e.currentTarget.value)}
                                     disabled
                                 >
                                     <option value="">Select Patta Type</option>
-                                    {pattaTypes && pattaTypes.length > 0 && pattaTypes.map((dharPattaType, index) => <option key={index} value={dharPattaType.type_code}>{dharPattaType.patta_type}</option>)}
-
+                                    {pattaTypes &&
+                                        pattaTypes.length > 0 &&
+                                        pattaTypes.map((dharPattaType, index) => (
+                                            <option key={index} value={dharPattaType.type_code}>
+                                                {dharPattaType.patta_type}
+                                            </option>
+                                        ))}
                                 </select>
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="patta_no">Patta No. (New)</Label>
+                                <Label htmlFor="patta_no_new">পট্টাৰ নং (Patta No - New)</Label>
                                 <Input
-                                    id="patta_no"
+                                    id="patta_no_new"
                                     type="text"
-                                    // {...register("patta_no", { required: "Patta No is a required field" })}
-                                    placeholder="Enter Patta No"
                                     value={pattaNo}
                                     onInput={(e: any) => setPattaNo(e.currentTarget.value)}
                                     disabled
                                 />
-                                {/* {errors.patta_no && (
-                            <p className="text-sm text-destructive">{errors.patta_no.message}</p>
-                            )} */}
                             </div>
+
                             <div className="space-y-2">
-                                <Label htmlFor="patta_type_code">Patta Type (New)</Label>
+                                <Label htmlFor="patta_type_code_new">পট্টাৰ প্ৰকাৰ (Patta Type - New)</Label>
                                 <select
-                                    id="patta_type_code"
-                                    // {...register("patta_type_code", { required: "Patta Type is a required field!" })}
+                                    id="patta_type_code_new"
                                     className="w-full border rounded px-3 py-2 mt-1"
                                     value={dharDagData.patta_type_code}
-                                    // onChange={(e: any) => setPattaTypeCode(e.currentTarget.value)}
                                     disabled
                                 >
                                     <option value="">Select Patta Type</option>
-                                    {pattaTypes && pattaTypes.length > 0 && pattaTypes.map((dharPattaType, index) => <option key={index} value={dharPattaType.type_code}>{dharPattaType.patta_type}</option>)}
-
+                                    {pattaTypes &&
+                                        pattaTypes.length > 0 &&
+                                        pattaTypes.map((dharPattaType, index) => (
+                                            <option key={index} value={dharPattaType.type_code}>
+                                                {dharPattaType.patta_type}
+                                            </option>
+                                        ))}
                                 </select>
-                                {/* {errors.patta_type_code && (
-                            <p className="text-sm text-destructive">{errors.patta_type_code.message}</p>
-                            )} */}
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="dag_land_revenue">Dag Land Revenue</Label>
+                                <Label htmlFor="dag_land_revenue">ৰাজহ (টকা) (Dag Land Revenue)</Label>
                                 <Input
                                     id="dag_land_revenue"
                                     type="number"
-                                    // {...register("dag_land_revenue", { required: "Dag Land Revenue is a required field" })}
                                     placeholder="Enter Dag Land Revenue"
                                     value={dagLandRevenue}
                                     onInput={handleDagLandRevenue}
                                 />
-
-                                {/* {errors.dag_land_revenue && (
-                            <p className="text-sm text-destructive">{errors.dag_land_revenue.message}</p>
-                            )} */}
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="dag_local_tax">Dag Local Tax</Label>
+                                <Label htmlFor="dag_local_tax">স্হানীয় কৰ (টকা) (Dag Local Tax)</Label>
                                 <Input
                                     id="dag_local_tax"
                                     type="number"
-                                    // {...register("dag_local_tax", { required: "Patta No is a required field" })}
-                                    placeholder="Enter Dag Land Revenue"
+                                    placeholder="Enter Dag Local Tax"
                                     value={dagLocalTax}
                                     onInput={(e: any) => setDagLocalTax(e.currentTarget.value)}
                                 />
-
-                                {/* {errors.dag_local_tax && (
-                            <p className="text-sm text-destructive">{errors.dag_local_tax.message}</p>
-                            )} */}
                             </div>
-
                         </div>
-                        {!updateButton && <div className="flex justify-end space-x-4">
-                            <Button type="submit" className="">
-                                Create
-                            </Button>
-                        </div>}
-                        {updateButton && <div className="flex justify-end space-x-4">
-                            <Button type="button" className="" onClick={handleUpdatePartDag}>
-                                Update
-                            </Button>
-                            <ConfirmDialog
-                                trigger={<Button type="button" className="bg-red-600 hover:bg-red-700 text-white">Delete</Button>}
-                                title="Delete DAG"
-                                description="This will permanently delete the DAG record. Are you sure?"
-                                confirmText="Yes, delete"
-                                cancelText="No, keep it"
-                                onConfirm={handlePartDagDelete}
-                            />
-                        </div>}
-
                     </form>
+
                     {/* Pattadars */}
                     <div className="mt-6">
                         <Card className="w-full shadow-sm border border-gray-200 rounded-xl">
                             <CardHeader className="border-b border-gray-100">
                                 <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                                    🧾 Pattadars
+                                    🧾পট্টাদাৰৰ তথ্য 
+                                    (Pattadars)
                                     {showPattadars && (
                                         <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Total - {showPattadars.length}</span>
                                     )}
@@ -732,7 +733,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                             <CardHeader className="border-b border-gray-100">
                                 <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
                                     <Users className="h-5 w-5 text-indigo-500" />
-                                    ৰায়ত/ আধিয়াৰৰ তথ্য
+                                    ৰায়ত/ আধিয়াৰৰ তথ্য (Tenants)
                                     {showTenants && (
                                         <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Total - {showTenants.length}</span>
                                     )}

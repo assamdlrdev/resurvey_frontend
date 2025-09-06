@@ -17,7 +17,9 @@ import Loader from "@/components/Loader";
 import PartDagEntryForm from "@/components/PartDagEntryForm";
 import { useDagStore } from "@/store/SurveyStore";
 import PartDagsView from "@/components/PartDagsView";
-import {useMasterDataStore} from "@/store/SurveyStore";
+import { useMasterDataStore } from "@/store/SurveyStore";
+import MapView from "@/components/MapView";
+import MapViewCom from "@/components/MapView";
 
 interface DagType {
   dag_no: string
@@ -28,7 +30,7 @@ interface DagType {
 
 export default function SurveyData() {
   const { dagNo, setDagNo, getData, resetDagData, getCreatedPartDags, setLoading, isLoading } = useDagStore();
-  const {getMasterData} = useMasterDataStore();
+  const { getMasterData } = useMasterDataStore();
   const [mode, setMode] = useState<string>("reference");
   const [showDagDropdown, setShowDagDropdown] = useState(false);
   const [dagNos, setDagNos] = useState<DagType[]>([]
@@ -47,6 +49,7 @@ export default function SurveyData() {
   const [lotData, setLotData] = useState<any[]>([]);
   const [villData, setVillData] = useState<any[]>([]);
   const [originalDagInfo, setOriginalDagInfo] = useState<any[]>([]);
+  const [mapGeoJson, setMapGeoJson] = useState<string>('');
 
 
   useEffect(() => {
@@ -104,13 +107,13 @@ export default function SurveyData() {
   useEffect(() => {
     if (dagNo && vill) {
       getData(dagNo, vill);
-    }else{
+    } else {
       resetDagData();
     }
   }, [dagNo]);
 
   const goTo = (url: string) => {
-      navigate(url);
+    navigate(url);
   };
 
   const dagNoUpdated = (new_dag_no: string) => {
@@ -263,6 +266,7 @@ export default function SurveyData() {
   };
 
   const getDags = async (v: any) => {
+    setMapGeoJson("");
     const data = {
       vill_townprt_code: v
     };
@@ -275,11 +279,12 @@ export default function SurveyData() {
       toast.error(response.msg);
       return;
     }
-    if(response.data == 'N') {
+    if (response.data == 'N') {
       toast.error('No Data!');
       setDagNos([]);
       return;
     }
+    setMapGeoJson(response.map_geojson);
     setDagNos(response.data);
   };
 
@@ -379,7 +384,7 @@ export default function SurveyData() {
               onFocus={() => setShowDagDropdown(true)}
               onBlur={() => setTimeout(() => setShowDagDropdown(false), 150)}
               value={dagNo}
-              onChange={(e: any) =>dagNoUpdated(e.currentTarget.value)}
+              onChange={(e: any) => dagNoUpdated(e.currentTarget.value)}
             />
 
             {showDagDropdown && (
@@ -406,19 +411,43 @@ export default function SurveyData() {
             type="single"
             value={mode}
             onValueChange={(val) => setMode(val)}
-            className="bg-white rounded-lg p-1 shadow-sm"
+            className="bg-white rounded-lg p-1 shadow-sm 
+               flex flex-wrap gap-2 sm:flex-nowrap sm:gap-0"
           >
-            <ToggleGroupItem value="reference" className="px-6 py-2">
+            <ToggleGroupItem
+              value="reference"
+              className="px-4 py-2 text-sm sm:px-6 sm:py-2 w-full sm:w-auto"
+            >
               Dharitry Data
             </ToggleGroupItem>
-            <ToggleGroupItem disabled={!dagNo} value="input" className="px-6 py-2">
-              Part Dag Entry
+
+            <ToggleGroupItem
+              disabled={!dagNo}
+              value="input"
+              className="px-4 py-2 text-sm sm:px-6 sm:py-2 w-full sm:w-auto"
+            >
+              Possessor Details
             </ToggleGroupItem>
-            <ToggleGroupItem value="part_dags" className="px-6 py-2">
-              Existing Part Dags  (<span className="text-gray-500">{getCreatedPartDags().length}</span>)
+
+            <ToggleGroupItem
+              value="part_dags"
+              className="px-4 py-2 text-sm sm:px-6 sm:py-2 w-full sm:w-auto"
+            >
+              Existing Part Dags{" "}
+              <span className="text-gray-500">({getCreatedPartDags().length})</span>
             </ToggleGroupItem>
+
+            {(mapGeoJson && vill) && (
+              <ToggleGroupItem
+                value="map_view"
+                className="px-4 py-2 text-sm sm:px-6 sm:py-2 w-full sm:w-auto"
+              >
+                Bhunaksa Map
+              </ToggleGroupItem>
+            )}
           </ToggleGroup>
         </div>
+
 
         <Card className="w-full">
           <CardHeader>
@@ -426,7 +455,7 @@ export default function SurveyData() {
               {mode === "reference"
                 ? "Dharitry Data"
                 : mode === "input"
-                  ? "Part Dag Entry"
+                  ? "Possessor Details Entry"
                   : "Existing Part Dags"}
             </CardTitle>
           </CardHeader>
@@ -442,6 +471,7 @@ export default function SurveyData() {
               />
             )}
             {mode === "part_dags" && <PartDagsView />}
+            {(mode === 'map_view' && mapGeoJson && vill) && <MapViewCom mapdata={mapGeoJson} />}
           </CardContent>
         </Card>
 
