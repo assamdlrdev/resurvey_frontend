@@ -63,7 +63,30 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
     const { isLoading, getData, setLoading, partDags, dharDagData, dharPattadars, dharTenants } = useDagStore();
     const { landClasses, landGroups, pattaTypes, transferTypes } = useMasterDataStore();
 
-    const [partDag, setPartDag] = useState<string>('');
+    const [partDag, setPartDag] = useState<string>();
+    useEffect(() => {
+        nextPartDag();
+    }, []);
+
+    const nextPartDag = () => {
+        if (!dagNo) return;
+
+        // Extract all part_dag values for the current dagNo
+        const existingPartDags = partDags
+            .filter((d: any) => d.part_dag?.startsWith(`${dagNo}/`))
+            .map((d: any) => d.part_dag);
+
+        // Find the next available serial number
+        let serial = 1;
+        while (existingPartDags.includes(`${dagNo}/${serial}`)) {
+            serial++;
+        }
+
+        // Set the new partDag
+        setPartDag(`${dagNo}/${serial}`);
+        setFinalPartDag(`${dagNo}/${serial}`);
+    }
+
     const [currLandClass, setCurrLandClass] = useState<string | number>('');
     const [areaSm, setAreaSm] = useState<number>(0);
     // const [surveyNo, setSurveyNo] = useState<string>('');
@@ -705,6 +728,27 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                 />
                             </div>
                         </div>
+                        {!updateButton && <div className="flex justify-end space-x-4">
+                            <Button type="submit" className="">
+                                Create
+                            </Button>
+                        </div>}
+                        {updateButton && <div className="flex justify-end space-x-4">
+                            <Button type="button" className="" onClick={handleUpdatePartDag}>
+                                Update
+                            </Button>
+                            <ConfirmDialog
+                                trigger={<Button type="button" className="bg-red-600 hover:bg-red-700 text-white">Delete</Button>}
+                                title="Delete DAG"
+                                description="This will permanently delete the DAG record. Are you sure?"
+                                confirmText="Yes, delete"
+                                cancelText="No, keep it"
+                                onConfirm={handlePartDagDelete}
+                            />
+                            <Button type="button" className="" onClick={() => nextPartDag()}>
+                                Next Dag
+                            </Button>
+                        </div>}
                     </form>
 
                     {/* Pattadars */}
@@ -712,7 +756,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                         <Card className="w-full shadow-sm border border-gray-200 rounded-xl">
                             <CardHeader className="border-b border-gray-100">
                                 <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                                    🧾পট্টাদাৰৰ তথ্য 
+                                    🧾পট্টাদাৰৰ তথ্য
                                     (Pattadars)
                                     {showPattadars && (
                                         <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Total - {showPattadars.length}</span>
