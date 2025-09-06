@@ -103,9 +103,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
     const [posAdhaar, setPosAdhaar] = useState<string>('');
     const [posEmail, setPosEmail] = useState<string>('');
     const [posPhoto, setPosPhoto] = useState<string | null>(null);
-    const [documents, setDocuments] = useState<any[]>([
-        { document_name: "", document_no: "", issuing_authority: "", document_issue_date: "", file: null }
-    ]);
+    const [documents, setDocuments] = useState<any[]>([]);
     const [updateButton, setUpdateButton] = useState<boolean>(false);
 
 
