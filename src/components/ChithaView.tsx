@@ -16,86 +16,101 @@ export default function ChithaView() {
       ) : dagNo ? (
         <>
           {/* Dag Details Section */}
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-800 pb-2 mb-2">
-              🗂️ দাগৰ তথ্য
-            </h2>
-            {/* Table for larger screens */}
-            <div className="hidden sm:block overflow-x-auto w-full rounded-lg border border-gray-200 bg-white shadow">
-              <table className="w-full table-auto text-sm md:text-base text-gray-800">
-                <tbody className="divide-y divide-gray-100">
-                  <tr>
-                    <td className="px-4 py-3 font-semibold text-medical-700">দাগ নং:</td>
-                    <td className="px-4 py-3">{dharDagData?.dag_no || "N/A"}</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-semibold text-medical-700">কালি (বি-ক-লে):</td>
-                    <td className="px-4 py-3">
-                      {dharDagData
-                        ? `${dharDagData.dag_area_b}-${dharDagData.dag_area_k}-${dharDagData.dag_area_lc}`
-                        : "N/A"}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-semibold text-medical-700">মাটিৰ শ্ৰেণী:</td>
-                    <td className="px-4 py-3">{dharDagData?.land_type || "N/A"}</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-semibold text-medical-700">পট্টাৰ নং:</td>
-                    <td className="px-4 py-3">{dharDagData?.patta_no || "N/A"}</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-semibold text-medical-700">পট্টাৰ প্ৰকাৰ:</td>
-                    <td className="px-4 py-3">{dharDagData?.patta_type || "N/A"}</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-semibold text-medical-700">ৰাজহ (টকা):</td>
-                    <td className="px-4 py-3">{dharDagData?.dag_revenue || "N/A"}</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-3 font-semibold text-medical-700">স্হানীয় কৰ (টকা):</td>
-                    <td className="px-4 py-3">{dharDagData?.dag_local_tax || "N/A"}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* Card view for mobile */}
-            <div className="sm:hidden space-y-4">
-              <div className="bg-white shadow rounded-lg p-2 border space-y-2">
-                <div className="flex justify-between">
-                  <span className="font-semibold text-medical-700">দাগ নং:</span>
-                  <span>{dharDagData?.dag_no || "N/A"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-semibold text-medical-700">কালি (বি-ক-লে):</span>
-                  <span>
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 pb-2 mb-2">
+            🗂️ দাগৰ তথ্য
+          </h2>
+          {/* Table for larger screens */}
+          <div className="hidden sm:block overflow-x-auto w-full rounded-lg border border-gray-200 bg-white shadow">
+            <table className="w-full table-auto text-sm md:text-base text-gray-800">
+              <tbody className="divide-y divide-gray-100">
+                <tr>
+                  <td className="px-4 py-3 font-semibold text-medical-700">
+                    দাগ নং (Dag No):
+                  </td>
+                  <td className="px-4 py-3">{dharDagData?.dag_no || "N/A"}</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-semibold text-medical-700">
+                    কালি (বি-ক-লে) (Area B-K-LC):
+                  </td>
+                  <td className="px-4 py-3">
                     {dharDagData
                       ? `${dharDagData.dag_area_b}-${dharDagData.dag_area_k}-${dharDagData.dag_area_lc}`
                       : "N/A"}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-semibold text-medical-700">মাটিৰ শ্ৰেণী:</span>
-                  <span>{dharDagData?.land_type || "N/A"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-semibold text-medical-700">পট্টাৰ নং:</span>
-                  <span>{dharDagData?.patta_no || "N/A"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-semibold text-medical-700">পট্টাৰ প্ৰকাৰ:</span>
-                  <span>{dharDagData?.patta_type || "N/A"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-semibold text-medical-700">ৰাজহ (টকা):</span>
-                  <span>{dharDagData?.dag_revenue || "N/A"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="font-semibold text-medical-700">স্হানীয় কৰ (টকা):</span>
-                  <span>{dharDagData?.dag_local_tax || "N/A"}</span>
-                </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-semibold text-medical-700">
+                    মাটিৰ শ্ৰেণী (Land Class):
+                  </td>
+                  <td className="px-4 py-3">{dharDagData?.land_type || "N/A"}</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-semibold text-medical-700">
+                    পট্টাৰ নং (Patta No):
+                  </td>
+                  <td className="px-4 py-3">{dharDagData?.patta_no || "N/A"}</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-semibold text-medical-700">
+                    পট্টাৰ প্ৰকাৰ (Patta Type):
+                  </td>
+                  <td className="px-4 py-3">{dharDagData?.patta_type || "N/A"}</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-semibold text-medical-700">
+                    ৰাজহ (Revenue ₹):
+                  </td>
+                  <td className="px-4 py-3">{dharDagData?.dag_revenue || "N/A"}</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-semibold text-medical-700">
+                    স্হানীয় কৰ (Local Tax ₹):
+                  </td>
+                  <td className="px-4 py-3">{dharDagData?.dag_local_tax || "N/A"}</td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+          {/* Card view for mobile */}
+          <div className="sm:hidden space-y-4">
+            <div className="bg-white shadow rounded-lg p-2 border space-y-2">
+              <div className="flex justify-between">
+                <span className="font-semibold text-medical-700">দাগ নং:</span>
+                <span>{dharDagData?.dag_no || "N/A"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-medical-700">কালি (বি-ক-লে):</span>
+                <span>
+                  {dharDagData
+                    ? `${dharDagData.dag_area_b}-${dharDagData.dag_area_k}-${dharDagData.dag_area_lc}`
+                    : "N/A"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-medical-700">মাটিৰ শ্ৰেণী:</span>
+                <span>{dharDagData?.land_type || "N/A"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-medical-700">পট্টাৰ নং:</span>
+                <span>{dharDagData?.patta_no || "N/A"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-medical-700">পট্টাৰ প্ৰকাৰ:</span>
+                <span>{dharDagData?.patta_type || "N/A"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-medical-700">ৰাজহ (টকা):</span>
+                <span>{dharDagData?.dag_revenue || "N/A"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-medical-700">স্হানীয় কৰ (টকা):</span>
+                <span>{dharDagData?.dag_local_tax || "N/A"}</span>
               </div>
             </div>
+          </div>
 
           {/* Pattadar Section */}
           <div className="mt-8 sm:mt-12">
@@ -109,11 +124,18 @@ export default function ChithaView() {
               <table className="min-w-full border rounded-lg bg-white">
                 <thead>
                   <tr className="bg-medical-50">
-                    <th className="px-2 py-2 border text-start">পট্টাদাৰৰ নাম</th>
-                    <th className="px-2 py-2 border text-center">পিতাৰ নাম</th>
-                    <th className="px-2 py-2 border text-center">ঠিকনা</th>
+                    <th className="px-2 py-2 border text-start">
+                      পট্টাদাৰৰ নাম (Pattadar Name)
+                    </th>
+                    <th className="px-2 py-2 border text-center">
+                      পিতাৰ নাম (Father's Name)
+                    </th>
+                    <th className="px-2 py-2 border text-center">
+                      ঠিকনা (Address)
+                    </th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {dharPattadars?.length === 0 ? (
                     <tr>
@@ -185,15 +207,30 @@ export default function ChithaView() {
               <table className="min-w-full border rounded-lg bg-white">
                 <thead>
                   <tr className="bg-medical-50">
-                    <th className="px-2 py-2 border text-start">Tenant Name</th>
-                    <th className="px-2 py-2 border text-center">Father&apos;s Name</th>
-                    <th className="px-2 py-2 border text-center">Address</th>
-                    <th className="px-2 py-2 border text-center">Khatian No</th>
-                    <th className="px-2 py-2 border text-center">Tenant Status</th>
-                    <th className="px-2 py-2 border text-center">Revenue Tenant</th>
-                    <th className="px-2 py-2 border text-center">Remarks</th>
+                    <th className="px-2 py-2 border text-start font-medium">
+                      ৰায়ত/ আধিয়াৰৰ নাম (Tenant Name)
+                    </th>
+                    <th className="px-2 py-2 border text-start font-medium">
+                      পিতাৰ নাম (Father's Name)
+                    </th>
+                    <th className="px-2 py-2 border text-start font-medium">
+                      ঠিকনা (Address)
+                    </th>
+                    <th className="px-2 py-2 border text-center font-medium">
+                      খতিয়ান নং (Khatian No)
+                    </th>
+                    <th className="px-2 py-2 border text-center font-medium">
+                      ৰায়ত/ আধিয়াৰৰ স্থিতি (Tenant Status)
+                    </th>
+                    <th className="px-2 py-2 border text-center font-medium">
+                      ৰায়ত/আধিয়াৰ আয় (Revenue Tenant)
+                    </th>
+                    <th className="px-2 py-2 border text-center font-medium">
+                      মন্তব্য (Remarks)
+                    </th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {dharTenants?.length === 0 ? (
                     <tr>

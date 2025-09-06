@@ -19,9 +19,9 @@ const PattadarsList: React.FC<PattadarsListProps> = ({ pattadars }) => {
         <table className="min-w-full border rounded-lg bg-white text-sm md:text-base text-gray-800">
           <thead>
             <tr className="bg-medical-50">
-              <th className="px-2 py-2 border text-start font-medium">পট্টাদাৰৰ নাম</th>
-              <th className="px-2 py-2 border text-center font-medium">পিতাৰ নাম</th>
-              <th className="px-2 py-2 border text-center font-medium">ঠিকনা</th>
+              <th className="px-2 py-2 border text-start">পট্টাদাৰৰ নাম <br /> (Pattadar Name) </th>
+              <th className="px-2 py-2 border text-center">পিতাৰ নাম <br /> (Father's Name)</th>
+              <th className="px-2 py-2 border text-center">ঠিকনা <br /> (Address)</th>
             </tr>
           </thead>
           <tbody>

@@ -24,15 +24,30 @@ const TenantsList: React.FC<TenantsListProps> = ({ tenants }) => {
         <table className="min-w-full border rounded-lg bg-white text-sm md:text-base text-gray-800">
           <thead>
             <tr className="bg-medical-50">
-              <th className="px-2 py-2 border text-start font-medium">Tenant Name</th>
-              <th className="px-2 py-2 border text-start font-medium">Father&apos;s Name</th>
-              <th className="px-2 py-2 border text-start font-medium">Address</th>
-              <th className="px-2 py-2 border text-center font-medium">Khatian No</th>
-              <th className="px-2 py-2 border text-center font-medium">Tenant Status</th>
-              <th className="px-2 py-2 border text-center font-medium">Revenue Tenant</th>
-              <th className="px-2 py-2 border text-center font-medium">Remarks</th>
+              <th className="px-2 py-2 border text-start font-medium">
+                ৰায়ত/ আধিয়াৰৰ নাম<br /> (Tenant Name)
+              </th>
+              <th className="px-2 py-2 border text-start font-medium">
+                পিতাৰ নাম <br />(Father&apos;s Name)
+              </th>
+              <th className="px-2 py-2 border text-start font-medium">
+                ঠিকনা <br />(Address)
+              </th>
+              <th className="px-2 py-2 border text-center font-medium">
+                খতিয়ান নং <br />(Khatian No)
+              </th>
+              <th className="px-2 py-2 border text-center font-medium">
+                ৰায়ত/ আধিয়াৰৰ স্থিতি <br />(Tenant Status)
+              </th>
+              <th className="px-2 py-2 border text-center font-medium">
+                ৰায়ত/আধিয়াৰ আয় <br />(Revenue Tenant)
+              </th>
+              <th className="px-2 py-2 border text-center font-medium">
+                মন্তব্য <br />(Remarks)
+              </th>
             </tr>
           </thead>
+
           <tbody>
             {tenants?.length ? (
               tenants.map((t) => (
