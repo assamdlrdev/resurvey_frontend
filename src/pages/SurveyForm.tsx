@@ -467,6 +467,8 @@ export default function SurveyData() {
                 ? "Dharitry Data"
                 : mode === "input"
                   ? "Possessor Details Entry"
+                  :mode == 'map_view' 
+                  ? 'Draft Bhunaksa MAp View'
                   : "Existing Part Dags"}
             </CardTitle>
           </CardHeader>
