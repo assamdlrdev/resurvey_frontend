@@ -112,7 +112,9 @@ export default function MapViewCom(mapdata: any) {
             if (feature.properties) {
               let content = "<b>Parcel Info</b><br/>";
               // for (const [key, value] of Object.entries(feature.properties)) {
+                content += `<b>Survey Number:</b> ${feature.properties.kide || ""}<br/>`;
                 content += `<b>Area (sqm):</b> ${feature.properties.area_sqm || ""}m²<br/>`;
+
               // }
               layer.bindPopup(content);
             }
