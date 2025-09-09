@@ -12,18 +12,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useDagStore } from "@/store/SurveyStore";
 import { useMasterDataStore } from "@/store/SurveyStore";
-import { Plus, Trash2, Users } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 import { validatePossessorCreateForm } from "@/services/FormValidation.service";
 import PossessorsList from "./PossessorList";
 import TenantsList from "./TenantsList";
 import PattadarsList from "./PattadarsList";
-
+import { calculateAreaByKide } from "@/lib/utils";
 
 interface Props {
     dagNo: string;
     setDagNo: Dispatch<SetStateAction<string>>,
     vill: string;
-    setVill: Dispatch<SetStateAction<string>>
+    setVill: Dispatch<SetStateAction<string>>,
+    mapdata: any
 }
 
 interface InputFormData {
@@ -58,12 +59,15 @@ interface ErrorType {
     msg: string;
 }
 
-const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) => {
+const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, setVill }) => {
     const { register, handleSubmit, reset, formState: { errors } } = useForm<InputFormData>();
     const { isLoading, getData, setLoading, partDags, dharDagData, dharPattadars, dharTenants } = useDagStore();
     const { landClasses, landGroups, pattaTypes, transferTypes } = useMasterDataStore();
 
-    const [partDag, setPartDag] = useState<string>();
+    const [partDag, setPartDag] = useState<string>('');
+    const [bhunaksaSurveyNo, setBhunaksaSurveyNo] = useState<string>('');
+    const [matchedFeatureWithArea, setMatchedFeatureWithArea] = useState<any>('');
+
     useEffect(() => {
         nextPartDag();
     }, []);
@@ -90,11 +94,6 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
     const [currLandClass, setCurrLandClass] = useState<string | number>('');
     const [areaSm, setAreaSm] = useState<number>(0);
     // const [surveyNo, setSurveyNo] = useState<string>('');
-    const [areaBigha, setAreaBigha] = useState<number>(0);
-    const [areaKatha, setAreaKatha] = useState<number>(0);
-    const [areaLc, setAreaLc] = useState<number>(0.00);
-    const [dist, setDist] = useState<string>('');
-    const [areaGanda, setAreaGanda] = useState<number>(0.00);
     const [pattaNo, setPattaNo] = useState<string>('');
     const [pattaTypeCode, setPattaTypeCode] = useState<string>('');
     const [dagLandRevenue, setDagLandRevenue] = useState<number>(0);
@@ -138,6 +137,23 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
     }, [dagNo, vill]);
 
     useEffect(() => {
+        if (bhunaksaSurveyNo && mapdata?.features) {
+            const featureWithArea = calculateAreaByKide(mapdata, bhunaksaSurveyNo);
+            if (featureWithArea) {
+                setMatchedFeatureWithArea(featureWithArea);
+                setAreaSm(featureWithArea.properties.area_sqm);
+                setTriggerLandRevenue(featureWithArea.properties.area_sqm);
+                toast.success("Area fectched from draft Bhunaksa successfully");
+            }else{
+                setMatchedFeatureWithArea('');
+                setAreaSm(0);
+                toast.error('Survey number does not exist in draft Bhunaksa');
+            }
+        }
+    }, [bhunaksaSurveyNo, mapdata]);
+
+
+    useEffect(() => {
         if (finalPartDag && finalPartDag != '' && finalPartDag == partDag) {
             getPartDagInfo();
         }
@@ -164,7 +180,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
         setDagLocalTax(0);
         setPattadars([]);
         setUpdateButton(false);
-        // setSurveyNo('');
+        setBhunaksaSurveyNo('');
     };
 
     const resetPossessorAdd = () => {
@@ -240,9 +256,9 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
             setDagLocalTax(partDagDetails.dag_local_tax);
             setPattadars(partDagDetails.pattadars);
             setTenants(partDagDetails.tenants);
-            // setSurveyNo(partDagDetails.survey_no2);
             setUpdateButton(true);
             setPossessors(partDagDetails.possessors);
+            setBhunaksaSurveyNo(partDagDetails.bhunaksha_survey_no);
         }
         if (partDagDetails.from_bhunaksha == 1) {
             const dag_area_sqmtr = partDagDetails.dag_area_sqmtr ? partDagDetails.dag_area_sqmtr : 0;
@@ -268,7 +284,8 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
             setDagLocalTax(0);
             setPattadars([]);
             setUpdateButton(false);
-            setPossessors([])
+            setPossessors([]);
+            setBhunaksaSurveyNo('');
         }
     };
 
@@ -317,7 +334,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
             dag_local_tax: dagLocalTax,
             pattadars: dharPattadars,
             tenants: dharTenants,
-            // survey_no: surveyNo
+            bhunaksha_survey_no: bhunaksaSurveyNo
         };
 
         setLoading(true);
@@ -579,7 +596,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <div className="space-y-2">
-                                <Label htmlFor="dag_no">দাগ নং (Dag No)</Label>
+                                <Label htmlFor="dag_no">দাগ নং (Dag No - Old)</Label>
                                 <Input
                                     id="dag_no"
                                     className="w-full border rounded px-3 py-2 mt-1"
@@ -589,12 +606,24 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="part_dag">অংশিক দাগ নং(Part Dag)</Label>
+                                <Label htmlFor="part_dag">অংশিক দাগ নং(Part Dag) <span className="text-red-500" title="This field is required">*</span></Label>
                                 <MyCombobox
                                     partDag={partDag}
                                     setPartDag={setPartDag}
                                     bhunakshaPartDags={partDags}
                                     setFinalPartDag={setFinalPartDag}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="part_dag">জৰীপ নম্বৰ(Survey Number) <span className="text-red-500" title="This field is required">*</span> </Label>
+                                <Input
+                                    id="dag_no"
+                                    className="w-full border rounded px-3 py-2 mt-1"
+                                    placeholder="Enter Survey Number"
+                                    value={bhunaksaSurveyNo}
+                                    onChange={(e: any) => {
+                                        setBhunaksaSurveyNo(e.currentTarget.value);
+                                    }}
                                 />
                             </div>
 
@@ -618,7 +647,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="curr_land_use">বৰ্তমান মাটিৰ শ্ৰেণী (Current Land Class)</Label>
+                                <Label htmlFor="curr_land_use">বৰ্তমান মাটিৰ ব্যৱহাৰ (Current Land Use as) <span className="text-red-500" title="This field is required">*</span></Label>
                                 <select
                                     id="curr_land_use"
                                     className="w-full border rounded px-3 py-2 mt-1"
@@ -642,6 +671,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, setVill }) =
                                     id="area_sm"
                                     type="number"
                                     placeholder="Enter Land Area"
+                                    readOnly
                                     value={areaSm}
                                     onInput={handleAreaSm}
                                 />
