@@ -19,6 +19,7 @@ import { Map as MapIcon, Maximize2, X } from "lucide-react";
 import proj4 from "proj4";
 import L from "leaflet";
 import pointOnFeature from "@turf/point-on-feature";
+import area from "@turf/area";
 
 function FitBounds({ geojson }: { geojson: any }) {
   const map = useMap();
@@ -31,7 +32,14 @@ function FitBounds({ geojson }: { geojson: any }) {
   return null;
 }
 
-// ✅ Reproject polygons and multipolygons
+function reprojectCoords(coords: any): any {
+  if (typeof coords[0] === "number") {
+    const [x, y] = coords;
+    return proj4("EPSG:32646", "EPSG:4326", [x, y]);
+  }
+  return coords.map(reprojectCoords);
+}
+
 function reprojectGeojson(data: any) {
   if (!data) return null;
 
@@ -40,30 +48,28 @@ function reprojectGeojson(data: any) {
     features: data.features.map((f: any) => {
       if (!f.geometry) return f;
 
-      const type = f.geometry.type;
-      const coords = f.geometry.coordinates;
-
-      const reprojectCoords = (coords: any) =>
-        coords.map(([x, y]: [number, number]) =>
-          proj4("EPSG:32646", "EPSG:4326", [x, y])
-        );
-
-      let newCoords;
-      if (type === "Polygon") {
-        newCoords = coords.map(reprojectCoords);
-      } else if (type === "MultiPolygon") {
-        newCoords = coords.map((poly: any) => poly.map(reprojectCoords));
-      } else {
-        return f; // skip unsupported geometries
-      }
-
-      return {
+      const reprojectedFeature = {
         ...f,
         geometry: {
           ...f.geometry,
-          coordinates: newCoords,
+          coordinates: reprojectCoords(f.geometry.coordinates),
         },
       };
+
+      try {
+        // Calculate area in square metres
+        const polygonArea = area(reprojectedFeature);
+
+        // Attach to properties
+        reprojectedFeature.properties = {
+          ...reprojectedFeature.properties,
+          area_sqm: polygonArea.toFixed(2), // keep 2 decimals
+        };
+      } catch (err) {
+        console.error("Area calc failed:", err);
+      }
+
+      return reprojectedFeature;
     }),
   };
 }
@@ -105,9 +111,9 @@ export default function MapViewCom(mapdata: any) {
             // Popup info
             if (feature.properties) {
               let content = "<b>Parcel Info</b><br/>";
-              for (const [key, value] of Object.entries(feature.properties)) {
-                content += `<b>${key}:</b> ${value || ""}<br/>`;
-              }
+              // for (const [key, value] of Object.entries(feature.properties)) {
+                content += `<b>Area (sqm):</b> ${feature.properties.area_sqm || ""}m²<br/>`;
+              // }
               layer.bindPopup(content);
             }
 
@@ -141,8 +147,8 @@ export default function MapViewCom(mapdata: any) {
               position={[lat, lng]}
               icon={L.divIcon({
                 className:
-                  "text-xs font-bold text-blue-900 bg-white/70 px-1 rounded shadow",
-                html: feature.properties?.TEXTPARCEL || "",
+                  "text-xs font-bold text-blue-900 px-1 rounded shadow",
+                html: feature.properties?.kide || "",
               })}
               interactive={false}
             />
@@ -159,14 +165,8 @@ export default function MapViewCom(mapdata: any) {
       {/* Normal Map View */}
       {!isFullscreen && (
         <Card className="relative">
-          <CardHeader className="pb-3 flex items-center justify-between">
-            <div>
-              <CardTitle className="text-lg flex items-center">
-                <MapIcon className="h-5 w-5 mr-2" />
-                Survey Map
-              </CardTitle>
-              <CardDescription>Old Cadastral Map</CardDescription>
-            </div>
+          <CardHeader className="py-1 flex items-center justify-between">
+           
             <Button
               variant="outline"
               size="icon"
