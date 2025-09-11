@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ApiService from "@/services/ApiService";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
-
+import { useNavigate } from "react-router-dom";
 interface DagItem {
   dist_code: string;
   subdiv_code: string;
@@ -43,6 +43,7 @@ type ApiResponse = {
 export default function ResurveyReports() {
   const [districts, setDistricts] = useState<{ [district: string]: DistrictData }>({});
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchReport();
@@ -75,16 +76,31 @@ export default function ResurveyReports() {
           <div className="text-center py-10 text-lg text-medical-600">Loading...</div>
         ) : (
           Object.entries(districts).map(([districtKey, district]) => {
-            const { chitha_basic_splitted_dags, dist_name } = district;
+            const { chitha_basic_splitted_dags, dist_name, dist_code } = district;
 
             return (
               <Card key={districtKey} className="shadow-md">
-                <CardHeader>
-                  <CardTitle className="text-xl">{dist_name}</CardTitle>
-                  <div className="text-sm text-medical-600">
-                    Total DAGs: {chitha_basic_splitted_dags.length}
+                <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  {/* Left side: District name + DAG count */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4">
+                    <CardTitle className="text-lg font-semibold text-gray-900">
+                      {dist_name}
+                    </CardTitle>
+                    <span className="text-sm text-blue-700 bg-blue-100 px-2 py-1 rounded-full">
+                      Total DAGs: {chitha_basic_splitted_dags.length}
+                    </span>
                   </div>
+
+                  {/* Right side: Button */}
+                  <Button
+                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-md rounded-lg transition-colors"
+                    onClick={() => navigate(`/district-report/${dist_code}`)}
+                  >
+                    View Report
+                  </Button>
                 </CardHeader>
+
+
                 <CardContent>
                   {/* Table for medium+ screens */}
                   <div className="hidden md:block overflow-x-auto">
