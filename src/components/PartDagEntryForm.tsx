@@ -18,6 +18,7 @@ import PossessorsList from "./PossessorList";
 import TenantsList from "./TenantsList";
 import PattadarsList from "./PattadarsList";
 import { calculateAreaByKide } from "@/lib/utils";
+import SelectFromMapComp from "./SelectFromMapComp";
 
 interface Props {
     dagNo: string;
@@ -385,7 +386,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
             dag_local_tax: dagLocalTax,
             pattadars: dharPattadars,
             tenants: dharTenants,
-            // survey_no: surveyNo
+            bhunaksha_survey_no: bhunaksaSurveyNo
         };
 
         setLoading(true);
@@ -585,8 +586,9 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
 
     };
 
-
-
+    const handleSelectedFrmMap = (e) => {
+        setBhunaksaSurveyNo(e);
+    }
 
 
     return (
@@ -596,7 +598,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <div className="space-y-2">
-                                <Label htmlFor="dag_no">দাগ নং (Dag No - Old)</Label>
+                                <Label htmlFor="dag_no">পুৰণি দাগ নং (Old Dag No)</Label>
                                 <Input
                                     id="dag_no"
                                     className="w-full border rounded px-3 py-2 mt-1"
@@ -606,7 +608,9 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="part_dag">অংশিক দাগ নং(Part Dag) <span className="text-red-500" title="This field is required">*</span></Label>
+                                <Label htmlFor="part_dag">
+                                    অংশিক দাগ নং(Part Dag No) <span className="text-red-500" title="This field is required">*</span>
+                                </Label>
                                 <MyCombobox
                                     partDag={partDag}
                                     setPartDag={setPartDag}
@@ -615,7 +619,9 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="part_dag">জৰীপ নম্বৰ(Survey Number) <span className="text-red-500" title="This field is required">*</span> </Label>
+                                <Label htmlFor="part_dag">জৰীপ নম্বৰ(Survey Number) <span className="text-red-500" title="This field is required">*</span> 
+                                    <SelectFromMapComp mapdata={mapdata} partDag={finalPartDag} villCode={vill} onSelect={(e) => handleSelectedFrmMap(e)}/>
+                                </Label>
                                 <Input
                                     id="dag_no"
                                     className="w-full border rounded px-3 py-2 mt-1"
@@ -625,10 +631,11 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                                         setBhunaksaSurveyNo(e.currentTarget.value);
                                     }}
                                 />
+                                
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="o_land_class">মাটিৰ শ্ৰেণী (Land Class - Old)</Label>
+                                <Label htmlFor="o_land_class">পুৰণি মাটিৰ শ্ৰেণী (Old Land Class)</Label>
                                 <select
                                     id="o_land_class"
                                     className="w-full border rounded px-3 py-2 mt-1"
@@ -678,7 +685,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="patta_no">পট্টাৰ নং (Patta No - Old)</Label>
+                                <Label htmlFor="patta_no">পুৰণি পট্টাৰ নং (Old Patta No)</Label>
                                 <Input
                                     id="patta_no"
                                     type="text"
@@ -688,7 +695,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="patta_type_code">পট্টাৰ প্ৰকাৰ (Patta Type - Old)</Label>
+                                <Label htmlFor="patta_type_code">পুৰণি পট্টাৰ প্ৰকাৰ (Old Patta Type)</Label>
                                 <select
                                     id="patta_type_code"
                                     className="w-full border rounded px-3 py-2 mt-1"
@@ -707,7 +714,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="patta_no_new">পট্টাৰ নং (Patta No - New)</Label>
+                                <Label htmlFor="patta_no_new">নতুন পট্টাৰ নং (New Patta No)</Label>
                                 <Input
                                     id="patta_no_new"
                                     type="text"
@@ -718,7 +725,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="patta_type_code_new">পট্টাৰ প্ৰকাৰ (Patta Type - New)</Label>
+                                <Label htmlFor="patta_type_code_new">নতুন পট্টাৰ প্ৰকাৰ (New Patta Type)</Label>
                                 <select
                                     id="patta_type_code_new"
                                     className="w-full border rounded px-3 py-2 mt-1"
