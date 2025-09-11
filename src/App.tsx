@@ -12,6 +12,7 @@ import AuthLayout from "./layouts/AuthLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
 import SurveyorLayout from "./layouts/SurveyorLayout";
 import SurveyDashboard from "./pages/SurveyDashboard";
+import DistrictReport from "./pages/reports/DistrictReports";
 
 function App() {
   const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ function App() {
                   <Route path="/survey-form" element={<SurveyForm />} />
                   <Route path="/survey-reports" element={<SurveyReports />} />
                   <Route path="/survey-dashboard" element={<SurveyDashboard />} />
+                  <Route path="/district-report/:dist_code" element={<DistrictReport />} />
                 </Route>
               </Route>
               <Route path="*" element={<NotFound />} />
