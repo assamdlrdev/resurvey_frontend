@@ -1,11 +1,19 @@
 import React, { useEffect } from "react";
 import { useDagStore } from "@/store/SurveyStore";
+import { Button } from "./ui/button";
+import { useNavigate } from "react-router-dom";
+
 
 export default function PartDagsView() {
   const { getCreatedPartDags, isLoading } = useDagStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
   }, [getCreatedPartDags]);
+
+  const viewChitha = async (e: any) => {
+    navigate(`/chitha-view?id=${e.currentTarget.id}`);
+  };
 
   return (
     <div className="px-4 max-w-6xl mx-auto">
@@ -35,6 +43,9 @@ export default function PartDagsView() {
               <th className="px-2 py-2 border text-center">
                 পট্টাৰ নং (Patta No)
               </th>
+              <th className="px-2 py-2 border text-center">
+                Action
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -53,6 +64,7 @@ export default function PartDagsView() {
                   <td className="px-2 py-2 border text-center">{dag.current_land_class_ass || "-"}</td>
                   <td className="px-2 py-2 border text-center">{dag.patta_type}</td>
                   <td className="px-2 py-2 border text-center">{dag.patta_no}</td>
+                  <td className="px-2 py-2 border text-center"><Button type="button" id={`${dag.location}-${dag.old_dag_no}-${dag.part_dag}`} onClick={viewChitha}>View Chitha</Button></td>
                 </tr>
               ))
             )}

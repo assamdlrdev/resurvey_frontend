@@ -71,6 +71,7 @@ interface PartDag {
     patta_type: string;
     patta_no: string;
     from_bhunaksha: number;
+    location: string;
 }
 
 interface LandClass {

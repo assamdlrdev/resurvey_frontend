@@ -13,6 +13,8 @@ import DashboardLayout from "./layouts/DashboardLayout";
 import SurveyorLayout from "./layouts/SurveyorLayout";
 import SurveyDashboard from "./pages/SurveyDashboard";
 import DistrictReport from "./pages/reports/DistrictReports";
+import Chitha from "./pages/Chitha";
+
 
 function App() {
   const queryClient = new QueryClient();
@@ -39,6 +41,7 @@ function App() {
                 </Route>
               </Route>
               <Route path="*" element={<NotFound />} />
+              <Route path="/chitha-view" element={<Chitha />} />
             </Routes>
           </main>
         </BrowserRouter>
