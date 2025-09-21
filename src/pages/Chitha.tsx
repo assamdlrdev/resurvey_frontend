@@ -7,18 +7,19 @@ import { useLocation } from "react-router-dom";
 const Chitha: React.FC = () => {
     const location = useLocation();
     const [loading, setLoading] = useState<boolean>(false);
+    const [chithaData, setChithaData] = useState<any>(null);
 
     useEffect(() => {
-        if(location.pathname == '/chitha-view') {
+        if (location.pathname == '/chitha-view') {
             const params = new URLSearchParams(window.location.search);
             const id = params.get('id');
             getChithaData(id);
         }
-        
+
     }, [location]);
 
     const getChithaData = async (id: string) => {
-        if(!id || id == '' && id == undefined) {
+        if (!id || id == '' && id == undefined) {
             return;
         }
         const data = {
@@ -28,24 +29,191 @@ const Chitha: React.FC = () => {
         const response = await ApiService.get('get_chitha_data', JSON.stringify(data));
         setLoading(false);
 
-         if (response.status !== 'y') {
+        if (response.status !== 'y') {
             toast.error(response.msg);
             return;
         }
-        console.log(response);
-        
+
+        setChithaData(response.data);
+        console.log(response.data);
+
     };
 
 
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-medical-50 to-medical-100 p-4">
-            <div className="sm:max-w-3xl lg:max-w-screen-2xl mx-auto space-y-4">
-                <div className="text-center">
-                    <h1 className="text-3xl font-bold text-medical-900 mb-2">Chitha</h1>
-                </div>
-            </div>
-            
+        <div className="p-6">
+            <h2 className="text-center text-lg font-semibold mb-2">
+                অসম অনুসূচী XXXVII,প্ৰপত্ৰ নং ৩০
+            </h2>
+            <h1 className="text-center text-xl font-bold mb-4">
+                Chitha for Surveyed Villages / জৰীপ হোৱা গাঁৱৰ চিঠা
+            </h1>
+
+            {/* Top Section */}
+            <table className="w-full border border-black text-sm text-center">
+                <tbody>
+                    <tr>
+                        <td className="border border-black p-2">জিলা: <span>{chithaData?.location.dist_name}</span></td>
+                        <td className="border border-black p-2">মহকুমা: <span>{chithaData?.location.subdiv_name}</span></td>
+                        <td className="border border-black p-2">চক্র: <span>{chithaData?.location.circle_name}</span></td>
+                    </tr>
+                    <tr>
+                        <td className="border border-black p-2">মৌজা: <span>{chithaData?.location.mouza_name}</span></td>
+                        <td className="border border-black p-2">লট নং: <span>{chithaData?.location.lot_name}</span></td>
+                        <td className="border border-black p-2">গাঁও <span>{chithaData?.location.village_name}</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            {/* Middle Section */}
+            <table className="w-full border border-black text-sm text-center mt-4">
+                <thead>
+                    <tr>
+                        <th className="border border-black p-2" rowSpan={2}>পুৰনা দাগ নং</th>
+                        <th className="border border-black p-2" rowSpan={2}>অংশ দাগ নং</th>
+                        <th className="border border-black p-2" rowSpan={2}>নতুন দাগ নং</th>
+                        <th className="border border-black p-2" colSpan={2} >মাটিৰ শ্ৰেণী</th>
+                        <th className="border border-black p-2" colSpan={2}>কালি</th>
+                        <th className="border border-black p-2" colSpan={2}>পট্টা নং আৰু প্ৰকাৰ</th>
+                        <th className="border border-black p-2" rowSpan={2}>ৰাজহ (টকা)</th>
+                        <th className="border border-black p-2" rowSpan={2}>স্থানীয় কৰ (টকা)</th>
+                        <th className="border border-black p-2" rowSpan={2}>পট্টাদাৰৰ নাম, পিতাৰ নাম আৰু ঠিকনা</th>
+                        <th className="border border-black p-2" rowSpan={2}>অধিকাৰীৰ নাম</th>
+                        <th className="border border-black p-2" rowSpan={2}>অধিকাৰীৰ অভিভাৱকৰ নাম</th>
+                        <th className="border border-black p-2" rowSpan={2}>অধিকাৰীৰ অভিভাৱকৰ সৈতে সম্পৰ্ক</th>
+                        <th className="border border-black p-2" rowSpan={2}>অধিকাৰীৰ অধিকাৰ লাভ কৰাৰ পদ্ধতি</th>
+                        <th className="border border-black p-2" rowSpan={2}>নামজাৰী হবলগীয়া দখলদাৰৰ নাম, পিতাৰ নাম, ঠিকনা</th>
+                        <th className="border border-black p-2" rowSpan={2}>ৰায়ত/ আধিয়াৰৰ নাম, পিতাৰ নাম, ঠিকনা</th>
+                        <th className="border border-black p-2" rowSpan={2}>অধিকাৰীৰ ভাড়াটিয়াৰ সৈতে সম্পৰ্ক</th>
+                        <th className="border border-black p-2" rowSpan={2}>ৰায়তৰ প্ৰকাৰ/ খতিয়ন নং, খাজানা বা ফছলৰ নিৰিখ</th>
+                        <th className="border border-black p-2" rowSpan={2}>মন্তব্য</th>
+                    </tr>
+                    <tr>
+                        <th className="border border-black p-2">পুৰনা মাটিৰ শ্ৰেণী</th>
+                        <th className="border border-black p-2">বৰ্তমান মাটিৰ ব্যৱহাৰ</th>
+                        <th className="border border-black p-2 text-nowrap">বি-ক-লে</th>
+                        <th className="border border-black p-2 text-nowrap">বৰ্গ মিটাৰ</th>
+                        <th className="border border-black p-2">পুৰনা পট্টা নং আৰু প্ৰকাৰ</th>
+                        <th className="border border-black p-2">নতুন পট্টা নং আৰু প্ৰকাৰ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td className="border border-black p-2">১</td>
+                        <td className="border border-black p-2">১/ক</td>
+                        <td className="border border-black p-2">১/খ</td>
+                        <td className="border border-black p-2">২</td>
+                        <td className="border border-black p-2">২/ক</td>
+                        <td className="border border-black p-2">৩</td>
+                        <td className="border border-black p-2">৩/ক</td>
+                        <td className="border border-black p-2">৪</td>
+                        <td className="border border-black p-2">৪/ক</td>
+                        <td className="border border-black p-2">৫</td>
+                        <td className="border border-black p-2">৬</td>
+                        <td className="border border-black p-2">৭</td>
+                        <td className="border border-black p-2">৭/ক</td>
+                        <td className="border border-black p-2">৭/খ</td>
+                        <td className="border border-black p-2">৭/গ</td>
+                        <td className="border border-black p-2">৭/ঘ</td>
+                        <td className="border border-black p-2">৮</td>
+                        <td className="border border-black p-2">৯</td>
+                        <td className="border border-black p-2">৯/ক</td>
+                        <td className="border border-black p-2">১০</td>
+                        <td className="border border-black p-2">১১</td>
+                    </tr>
+                    <tr>
+                        <td className="border border-black p-2">{chithaData?.part_dag.dag_no}</td>
+                        <td className="border border-black p-2">{chithaData?.part_dag.survey_no}</td>
+                        <td className="border border-black p-2">&nbsp;</td>
+                        <td className="border border-black p-2">{chithaData?.dag.land_class_old}</td>
+                        <td className="border border-black p-2">{chithaData?.part_dag.land_current_use}</td>
+                        <td className="border border-black p-2">{chithaData?.part_dag.dag_area_b+'-'+chithaData?.part_dag.dag_area_k+'-'+chithaData?.part_dag.dag_area_lc}</td>
+                        <td className="border border-black p-2">{chithaData?.part_dag.dag_area_sqmtr}</td>
+                        <td className="border border-black p-2 text-nowrap">{chithaData?.dag.patta_no}, {chithaData?.dag.patta_type_old}</td>
+                        <td className="border border-black p-2 text-nowrap">{chithaData?.part_dag.patta_type}</td>
+                        <td className="border border-black p-2">{chithaData?.part_dag.dag_revenue}</td>
+                        <td className="border border-black p-2">{chithaData?.part_dag.dag_local_tax}</td>
+                        <td className="border border-black p-2">
+                            {chithaData?.pattadars?.map((pattadar: any, idx: number) => (
+                                <div className="py-0" key={idx}>
+                                    {pattadar.pdar_name}<br />
+                                    {pattadar.pdar_father}<br />
+                                    {pattadar.pdar_add1}
+                                    {pattadar.pdar_add2}
+                                    {pattadar.pdar_add3}
+                                    {idx !== chithaData.pattadars.length - 1 && <hr className="my-2" />}
+                                </div>
+                            ))}
+                        </td>
+                        {/* Name */}
+                        <td className="border border-black p-2">
+                            {chithaData?.possessors?.map((possessor: any, idx: number) => (
+                                <div key={idx} className="mb-2">
+                                    {possessor.name || '\u00A0'}
+                                    {idx !== chithaData.possessors.length - 1 && <hr className="my-2" />}
+                                </div>
+                            ))}
+                        </td>
+                        {/* Guardian Name */}
+                        <td className="border border-black p-2">
+                            {chithaData?.possessors?.map((possessor: any, idx: number) => (
+                                <div key={idx} className="mb-2">
+                                    {possessor.guard_name || '\u00A0'}
+                                    {idx !== chithaData.possessors.length - 1 && <hr className="my-2" />}
+                                </div>
+                            ))}
+                        </td>
+                        {/* Guardian Relation */}
+                        <td className="border border-black p-2">
+                            {chithaData?.possessors?.map((possessor: any, idx: number) => (
+                                <div key={idx} className="mb-2">
+                                    {possessor.guard_relation_name || '\u00A0'}
+                                    {idx !== chithaData.possessors.length - 1 && <hr className="my-2" />}
+                                </div>
+                            ))}
+                        </td>
+                        {/* Mode of Acquisition */}
+                        <td className="border border-black p-2">
+                            {chithaData?.possessors?.map((possessor: any, idx: number) => (
+                                <div key={idx} className="mb-2">
+                                    {possessor.mode_of_acquisition || '\u00A0'}
+                                    {idx !== chithaData.possessors.length - 1 && <hr className="my-2" />}
+                                </div>
+                            ))}
+                        </td>
+                        <td className="border border-black p-2">&nbsp;</td>
+                        <td className="border border-black p-2">
+                            {chithaData?.tenants?.map((tenant: any, idx: number) => (
+                                <div key={idx} className="mb-2">
+                                    {tenant.tenant_name || '\u00A0'}
+                                    {tenant.tenants_father || '\u00A0'}
+                                    {tenant.tenants_add1 || "N/A"}{tenant.tenants_add2 ? `, ${tenant.tenants_add2}` : ""}
+                                    {idx !== chithaData.tenants.length - 1 && <hr className="my-2" />}
+                                </div>
+                            ))}
+                        </td>
+                        <td className="border border-black p-2">
+                            {chithaData?.tenants?.map((tenant: any, idx: number) => (
+                                <div key={idx} className="mb-2">
+                                    {tenant.khatian_no || '\u00A0'}
+                                    {tenant.revenue_tenant}
+                                    {idx !== chithaData.tenants.length - 1 && <hr className="my-2" />}
+                                </div>
+                            ))}
+                        </td>
+                        <td className="border border-black p-2">&nbsp;</td>
+                        <td className="border border-black p-2">
+                            {chithaData?.possessors?.map((possessor: any, idx: number) => (
+                                <div key={idx} className="mb-2">
+                                    {possessor.remarks || '\u00A0'}
+                                    {idx !== chithaData.possessors.length - 1 && <hr className="my-2" />}
+                                </div>
+                            ))}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     );
 };
