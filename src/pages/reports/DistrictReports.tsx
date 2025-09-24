@@ -6,6 +6,12 @@ import ApiService from "@/services/ApiService";
 import toast from "react-hot-toast";
 
 interface DagItem {
+    dist_code: string;
+    subdiv_code: string;
+    cir_code: string;
+    mouza_pargona_code: string;
+    lot_no: string;
+    vill_townprt_code: string;
     dag_no: string;
     old_dag_no: string | null;
     patta_no: string;
@@ -105,6 +111,7 @@ export default function DistrictReport() {
                                         <th className="px-2 py-2 border">Village</th>
                                         <th className="px-2 py-2 border">Entry Date</th>
                                         <th className="px-2 py-2 border">User</th>
+                                        <th className="px-2 py-2 border">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -134,6 +141,9 @@ export default function DistrictReport() {
                                                         : "-"}
                                                 </td>
                                                 <td className="px-2 py-2 border">{dag.user_code}</td>
+                                                <td className="px-2 py-2 border text-center">
+                                                    <Button type="button" id={`${dag.dag_no}-${dag.old_dag_no}`} onClick={() => navigate(`/chitha-view?id=${dag.dist_code+'-'+dag.subdiv_code+'-'+dag.cir_code+'-'+dag.mouza_pargona_code+'-'+dag.lot_no+'-'+dag.vill_townprt_code+'-'+'lgd'+'-'+dag.old_dag_no+'-'+dag.dag_no}`)}>View Chitha</Button>
+                                                </td>
                                             </tr>
                                         ))
                                     )}

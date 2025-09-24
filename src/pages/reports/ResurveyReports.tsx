@@ -65,6 +65,10 @@ export default function ResurveyReports() {
     }
   };
 
+  const viewChitha = async (e: any) => {
+    navigate(`/chitha-view?id=${e.currentTarget.id}`);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-medical-50 to-medical-100 p-4">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -115,7 +119,8 @@ export default function ResurveyReports() {
                           <th className="px-2 py-2 border">Circle</th>
                           <th className="px-2 py-2 border">Village</th>
                           <th className="px-2 py-2 border">Entry Date</th>
-                          <th className="px-2 py-2 border text-end">User</th>
+                          <th className="px-2 py-2 border">User</th>
+                          <th className="px-2 py-2 border text-end">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -144,7 +149,10 @@ export default function ResurveyReports() {
                                   })
                                   : "-"}
                               </td>
-                              <td className="px-2 py-2 border text-end">{dag.user_code}</td>
+                              <td className="px-2 py-2 border">{dag.user_code}</td>
+                              <td className="px-2 py-2 border text-end">
+                                <Button type="button" id={`${dag.dist_code+'-'+dag.subdiv_code+'-'+dag.cir_code+'-'+dag.mouza_pargona_code+'-'+dag.lot_no+'-'+dag.vill_townprt_code+'-'+'lgd'+'-'+dag.old_dag_no+'-'+dag.dag_no}`} onClick={viewChitha}>View Chitha</Button>
+                              </td>
                             </tr>
                           ))
                         )}
