@@ -47,6 +47,9 @@ export function AppSidebar() {
     navigate(url);
   };
 
+  const user = StorageService.getJwtCookie();
+  const userData: any = StorageService.getJwtCookieData(user);
+
   const isActive = (path: string) => currentPath === path;
   const isCollapsed = state === "collapsed";
 
@@ -161,13 +164,13 @@ export function AppSidebar() {
 
         {/* Navigation Groups */}
         <div className="">
-          <SidebarGroup>
+          {(userData.usertype == '1' || userData.usertype == '11') && <SidebarGroup>
             {renderCollapsibleGroup("Survey", mainItems, "main")}
-          </SidebarGroup>
+          </SidebarGroup>}
 
-          <SidebarGroup>
+          {(userData.usertype == '1' || userData.usertype == '11') && <SidebarGroup>
             {renderCollapsibleGroup("Reports", analyticsItems, "analytics")}
-          </SidebarGroup>
+          </SidebarGroup>}
 
           {/* Settings Section */}
           <SidebarGroup>

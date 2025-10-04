@@ -14,6 +14,9 @@ import SurveyorLayout from "./layouts/SurveyorLayout";
 import SurveyDashboard from "./pages/SurveyDashboard";
 import DistrictReport from "./pages/reports/DistrictReports";
 import Chitha from "./pages/Chitha";
+import COLayout from "./layouts/COLayout";
+import MainDash from "./pages/MainDash";
+import CODashboard from "./pages/co/CODashboard";
 
 
 function App() {
@@ -40,8 +43,16 @@ function App() {
                   <Route path="/district-report/:dist_code" element={<DistrictReport />} />
                 </Route>
               </Route>
+
+              <Route element={<COLayout />}>
+                <Route element={<DashboardLayout />}>
+                  <Route path="/co-dashboard" element={<CODashboard />} />
+                </Route>
+              </Route>
+
               <Route path="*" element={<NotFound />} />
               <Route path="/chitha-view" element={<Chitha />} />
+              <Route path="/dashboard" element={<MainDash />} />
             </Routes>
           </main>
         </BrowserRouter>
