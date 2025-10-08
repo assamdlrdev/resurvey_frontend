@@ -17,6 +17,7 @@ import Chitha from "./pages/Chitha";
 import COLayout from "./layouts/COLayout";
 import MainDash from "./pages/MainDash";
 import CODashboard from "./pages/co/CODashboard";
+import CoSurveyReport from "./pages/co/SurveyReports";
 
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
               <Route element={<COLayout />}>
                 <Route element={<DashboardLayout />}>
                   <Route path="/co-dashboard" element={<CODashboard />} />
+                  <Route path="/co-survey-reports" element={<CoSurveyReport />} />
                 </Route>
               </Route>
 
