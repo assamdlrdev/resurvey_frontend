@@ -17,6 +17,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import StorageService from "@/services/StorageService";
+import { title } from "process";
 
 const authItems = [
   { title: "Login", url: "/login", icon: LogIn },
@@ -30,6 +31,11 @@ const mainItems = [
 const analyticsItems = [
   { title: "Survey Reports", url: "/survey-reports", icon: BarChart3 },
   // { title: "Analytics", url: "/analytics", icon: Activity },
+];
+
+const coItems = [
+  { title: "CO Dashboard", url: "/co-dashboard", icon: Home },
+  { title: "Survey Reports", url: "/co-survey-reports", icon: FileText },
 ];
 
 export function AppSidebar() {
@@ -170,6 +176,9 @@ export function AppSidebar() {
 
           {(userData.usertype == '1' || userData.usertype == '11') && <SidebarGroup>
             {renderCollapsibleGroup("Reports", analyticsItems, "analytics")}
+          </SidebarGroup>}
+          {userData.usertype == '4' && <SidebarGroup>
+            {renderCollapsibleGroup("CO Panel", coItems, "co")}
           </SidebarGroup>}
 
           {/* Settings Section */}

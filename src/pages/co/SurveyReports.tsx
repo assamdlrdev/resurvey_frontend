@@ -26,11 +26,13 @@ interface DagItem {
 interface DistrictData {
     dist_code: string | number;
     dist_name: string;
+    subdiv_name: string;
+    circle_name: string;
     totalCount: number; 
     chitha_basic_splitted_dags: DagItem[];
 }
 
-export default function DistrictReport() {
+export default function CoSurveyReport() {
     const { dist_code } = useParams<{ dist_code: string }>();
     const navigate = useNavigate();
 
@@ -49,8 +51,7 @@ export default function DistrictReport() {
         setIsLoading(true);
         try {
             
-            const response = await ApiService.get("get-district-report", JSON.stringify({
-                dist_code,
+            const response = await ApiService.get("get-circle-resurvey-report", JSON.stringify({
                 page,
                 pageSize
             }));
@@ -78,14 +79,21 @@ export default function DistrictReport() {
         return <div className="text-center py-10 text-lg text-medical-600">No data found.</div>;
     }
 
-    const { dist_name, chitha_basic_splitted_dags, totalCount } = district;
+    const { dist_name, subdiv_name, circle_name, chitha_basic_splitted_dags, totalCount } = district;
     const totalPages = Math.ceil(totalCount / pageSize);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-medical-50 to-medical-100 p-4">
             <div className="max-w-7xl mx-auto space-y-8">
-                <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-bold text-medical-900">{dist_name} Report</h1>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                    <div>
+                        <h1 className="text-2xl font-bold text-medical-900">Resurvey Report</h1>
+                        <div className="text-medical-700 text-sm mt-1">
+                            <span className="font-medium">District:</span> {dist_name} &nbsp;|&nbsp;
+                            <span className="font-medium">Subdivision:</span> {subdiv_name} &nbsp;|&nbsp;
+                            <span className="font-medium">Circle:</span> {circle_name}
+                        </div>
+                    </div>
                     <Button variant="outline" onClick={() => navigate(-1)}>
                         Back
                     </Button>
