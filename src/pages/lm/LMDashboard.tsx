@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-const CODashboard: React.FC = () => {
+const LMDashboard: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [dashData, setDashData] = useState<any>(null);
@@ -13,23 +13,23 @@ const CODashboard: React.FC = () => {
     const pageSize = 10; // rows per page
 
     useEffect(() => {
-        if (location.pathname === "/co-dashboard") {
+        if (location.pathname === "/lm-dashboard") {
             const user = StorageService.getJwtCookie();
             const userData: any = StorageService.getJwtCookieData(user);
             console.log(userData);
-            if (userData && userData.user_desig_code === "CO") {
-                getCoDashData(currentPage);
+            if (userData && userData.user_desig_code === "LM") {
+                getLmDashData(currentPage);
             } else {
                 console.log("Unauthorized access");
             }
         }
     }, [location]);
 
-    const getCoDashData = async (page: number) => {
+    const getLmDashData = async (page: number) => {
         setIsLoading(true);
         try {
             const response = await ApiService.get(
-                "get-circle-resurvey-dashboard",
+                "get-lot-resurvey-dashboard",
                 JSON.stringify({ page, pageSize })
             );
             setIsLoading(false);
@@ -100,4 +100,4 @@ const CODashboard: React.FC = () => {
     );
 };
 
-export default CODashboard;
+export default LMDashboard;
