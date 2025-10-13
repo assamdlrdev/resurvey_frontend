@@ -1147,7 +1147,8 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                                                     <option value="">--Select--</option>
                                                     <option value="male">Male</option>
                                                     <option value="female">Female</option>
-                                                    <option value="other">Other</option>
+                                                    <option value="third gender">Third Gender</option>
+                                                    <option value="institute">Institute</option>
                                                 </select>
                                             </div>
                                             <div className="space-y-2">
@@ -1575,7 +1576,8 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                                                     <option value="">--Select--</option>
                                                     <option value="male">Male</option>
                                                     <option value="female">Female</option>
-                                                    <option value="other">Other</option>
+                                                    <option value="third gender">Third Gender</option>
+                                                    <option value="institute">Institute</option>
                                                 </select>
                                             </div>
 
