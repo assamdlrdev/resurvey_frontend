@@ -226,7 +226,7 @@ const Chitha: React.FC = () => {
                                         <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
                                             {chithaData?.part_dag.dag_local_tax}
                                         </td>
-                                        <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
+                                        <td rowSpan={chithaData.pattadars.length} className="border border-black p-2">
                                             {chithaData?.pattadars?.map((pattadar: any, i: number) => (
                                                 <div key={i} className="py-0">
                                                     {pattadar.pdar_name}<br />
@@ -277,6 +277,78 @@ const Chitha: React.FC = () => {
                                 <td className="border-r border-black p-2">{possessor.remarks || '\u00A0'}</td>
                             </tr>
                         ))}
+
+                        {chithaData?.possessors.length === 0 && (
+                            <tr>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
+                                    {chithaData?.part_dag.dag_no}
+                                </td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
+                                    {chithaData?.part_dag.survey_no}
+                                </td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2">&nbsp;</td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
+                                    {chithaData?.dag.land_class_old}
+                                </td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
+                                    {chithaData?.part_dag.land_current_use}
+                                </td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
+                                    {chithaData?.part_dag.dag_area_b}-{chithaData?.part_dag.dag_area_k}-{Number(chithaData?.part_dag.dag_area_lc).toFixed(1)}
+                                </td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
+                                    {Math.floor(Number(chithaData?.part_dag.dag_area_sqmtr))}
+                                </td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2 text-nowrap">
+                                    {chithaData?.dag.patta_no}, {chithaData?.dag.patta_type_old}
+                                </td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2 text-nowrap">
+                                    0, {chithaData?.part_dag.patta_type}
+                                </td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
+                                    {chithaData?.part_dag.dag_revenue}
+                                </td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
+                                    {chithaData?.part_dag.dag_local_tax}
+                                </td>
+                                <td rowSpan={chithaData.pattadars.length} className="border border-black p-2">
+                                    {chithaData?.pattadars?.map((pattadar: any, i: number) => (
+                                        <div key={i} className="py-0">
+                                            {pattadar.pdar_name}<br />
+                                            {pattadar.pdar_father}<br />
+                                            {pattadar.pdar_add1}{pattadar.pdar_add2}{pattadar.pdar_add3}
+                                            {i !== chithaData.pattadars.length - 1 && <hr className="my-2" />}
+                                        </div>
+                                    ))}
+                                </td>
+                                <td className="border-r border-black p-2"></td>
+                                <td className="border-r border-black p-2"></td>
+                                <td className="border-r border-black p-2"></td>
+                                <td className="border-r border-black p-2"></td>
+                                <td className="border-r border-black p-2"></td>
+                                <td className="border-r border-black p-2"></td>
+                                <td className="border-r border-black p-2"></td>
+                                <td rowSpan={chithaData.tenants.length} className="border border-black p-2">
+                                    {chithaData?.tenants?.map((tenant: any, i: number) => (
+                                        <div key={i} className="mb-2">
+                                            {tenant.tenant_name || '\u00A0'}<br />
+                                            {tenant.tenants_father || '\u00A0'}<br />
+                                            {tenant.tenants_add1 || "N/A"}{tenant.tenants_add2 ? `, ${tenant.tenants_add2}` : ""}
+                                            {i !== chithaData.tenants.length - 1 && <hr className="my-2" />}
+                                        </div>
+                                    ))}
+                                </td>
+                                <td rowSpan={chithaData.tenants.length} className="border border-black p-2">
+                                    {chithaData?.tenants?.map((tenant: any, i: number) => (
+                                        <div key={i} className="mb-2">
+                                            {tenant.khatian_no || '\u00A0'} {tenant.revenue_tenant}
+                                            {i !== chithaData.tenants.length - 1 && <hr className="my-2" />}
+                                        </div>
+                                    ))}
+                                </td>
+                                <td rowSpan={chithaData.tenants.length} className="border border-black p-2">&nbsp;</td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>

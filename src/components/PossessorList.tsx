@@ -4,15 +4,17 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Trash2 } from "lucide-react";
-import {ConfirmDialog} from "@/components/ui/confirm-dialog"; 
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import Constants from "@/config/Constants";
 
 export default function PossessorsList({
   possessors,
   deletePossessor,
+  onEditPossessor
 }: {
   possessors: any[];
   deletePossessor: (id: string) => void;
+  onEditPossessor: (possessor: any) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<any | null>(null);
@@ -72,6 +74,13 @@ export default function PossessorsList({
                           )
                         }
                       />
+                      <Button
+                        className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-md px-3 py-1"
+                        type="button"
+                        onClick={() => onEditPossessor(p)}
+                      >
+                        Edit
+                      </Button>
                     </div>
                   </td>
                 </tr>
