@@ -131,10 +131,10 @@ const Chitha: React.FC = () => {
             </div>
             <div id="chitha-content" className="py-5 px-5">
                 <h2 className="text-center text-lg font-semibold mb-2">
-                    অসম অনুসূচী XXXVII,প্ৰপত্ৰ নং ৩০
+                    অসম অনুসূচী XXXVII, প্ৰপত্ৰ নং ৩০
                 </h2>
                 <h1 className="text-center text-xl font-bold mb-4">
-                    Chitha for Surveyed Villages / জৰীপ হোৱা গাঁৱৰ চিঠা
+                    Draft Chitha for Surveyed Villages /  জৰীপ হোৱা গাঁৱৰ খচৰা চিঠা
                 </h1>
 
                 {/* Top Section */}
