@@ -18,6 +18,7 @@ import COLayout from "./layouts/COLayout";
 import MainDash from "./pages/MainDash";
 import CODashboard from "./pages/co/CODashboard";
 import CoSurveyReport from "./pages/co/SurveyReports";
+import DeedDocument from "./pages/DeedDocument";
 
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
                   <Route path="/survey-reports" element={<SurveyReports />} />
                   <Route path="/survey-dashboard" element={<SurveyDashboard />} />
                   <Route path="/district-report/:dist_code" element={<DistrictReport />} />
+                  <Route path="/deedDoc" element={<DeedDocument />} />
                 </Route>
               </Route>
 

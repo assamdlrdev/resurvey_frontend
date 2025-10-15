@@ -122,6 +122,7 @@ interface DagState {
     dagNo: string | null;
     partDags: PartDag[];
     dharPattadars: Pattadar[];
+    dharDeeds: any[];
     dharTenants: Tenant[];
     dharDagData: DharitreeData | null;
     getData: (dagNo: string, vill: string) => Promise<void>;
@@ -142,6 +143,7 @@ export const useDagStore = create<DagState>((set, get) => ({
     landGroups: [],
     pattaTypes: [],
     dharPattadars: [],
+    dharDeeds: [],
     dharTenants: [],
     dharDagData: null,
     getCreatedPartDags: () => {
@@ -167,12 +169,14 @@ export const useDagStore = create<DagState>((set, get) => ({
             }
 
             const resp = response.data;
+            // console.log(resp);
 
             set({
                 partDags: resp.part_dags || [],
                 dharPattadars: resp.dhar_pattadars || [],
                 dharTenants: resp.dhar_tenants || [],
                 dharDagData: resp.dhar_dag || null,
+                dharDeeds: resp.dhar_deeds || null
             });
         } catch (error) {
             console.error(error);
@@ -180,7 +184,7 @@ export const useDagStore = create<DagState>((set, get) => ({
             set({ isLoading: false });
         }
     },
-    resetDagData: () => set({ vill: '', dagNo: '', partDags: [], dharPattadars: [], dharDagData: null }),
+    resetDagData: () => set({ vill: '', dagNo: '', partDags: [], dharPattadars: [], dharDagData: null, dharDeeds: [] }),
     setDagNo: (dagNo: string) => set({ dagNo: dagNo }),
     setLoading: (loading: boolean) => set({ isLoading: loading })
 }));

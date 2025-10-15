@@ -36,6 +36,7 @@ const analyticsItems = [
 const coItems = [
   { title: "CO Dashboard", url: "/co-dashboard", icon: Home },
   { title: "Survey Reports", url: "/co-survey-reports", icon: FileText },
+  { title: "Mutation", url: "/co-mutation", icon: FileText}
 ];
 
 export function AppSidebar() {
