@@ -19,6 +19,7 @@ import MainDash from "./pages/MainDash";
 import CODashboard from "./pages/co/CODashboard";
 import CoSurveyReport from "./pages/co/SurveyReports";
 import DeedDocument from "./pages/DeedDocument";
+import LMDashboard from "./pages/lm/LMDashboard";
 
 
 function App() {
@@ -53,7 +54,9 @@ function App() {
                   <Route path="/co-survey-reports" element={<CoSurveyReport />} />
                 </Route>
               </Route>
-
+              <Route element={<DashboardLayout />}>
+                <Route path="/lm-dashboard" element={<LMDashboard />} />
+              </Route>
               <Route path="*" element={<NotFound />} />
               <Route path="/chitha-view" element={<Chitha />} />
               <Route path="/dashboard" element={<MainDash />} />

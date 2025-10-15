@@ -35,13 +35,18 @@ const Chitha: React.FC = () => {
         }
 
         setChithaData(response.data);
-        console.log(response.data);
 
     };
 
+    const [isDownloading, setIsDownloading] = useState<boolean>(false);
+
     const handleDownloadPDF = async () => {
+        setIsDownloading(true);
         const content = document.getElementById("chitha-content");
-        if (!content) return;
+        if (!content) {
+            setIsDownloading(false);
+            return;
+        }
 
         // Dynamically import required libraries
         const jsPDFModule = await import("jspdf");
@@ -49,13 +54,22 @@ const Chitha: React.FC = () => {
         const jsPDF = jsPDFModule.jsPDF;
         const html2canvas = html2canvasModule.default;
 
+        // Add extra bottom margin by temporarily appending a spacer div
+        const spacer = document.createElement("div");
+        spacer.style.height = "60px"; // adjust as needed for margin
+        content.appendChild(spacer);
+
         // Create canvas from HTML
         const canvas = await html2canvas(content, {
             scale: 2,
             useCORS: true,
             logging: false,
             backgroundColor: "#ffffff",
+            windowHeight: content.scrollHeight + 60, // ensure full content is rendered
         });
+
+        // Remove the spacer after rendering
+        content.removeChild(spacer);
 
         const imgData = canvas.toDataURL("image/png");
 
@@ -83,6 +97,7 @@ const Chitha: React.FC = () => {
         );
 
         pdf.save("chitha.pdf");
+        setIsDownloading(false);
         toast.success("PDF downloaded successfully!");
     };
 
@@ -90,7 +105,7 @@ const Chitha: React.FC = () => {
 
     return (
         <div className="p-6">
-            <div className="flex justify-end mb-4 gap-2 print:hidden">
+            <div className="flex justify-end mb-4 gap-2 print:hidden px-5">
                 {/* <button
                     onClick={() => window.print()}
                     className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
@@ -100,16 +115,26 @@ const Chitha: React.FC = () => {
                 <button
                     onClick={handleDownloadPDF}
                     className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                    disabled={isDownloading}
                 >
                     Download as PDF
                 </button>
+                {isDownloading && (
+                    <div className="flex items-center gap-2">
+                        <svg className="animate-spin h-5 w-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
+                        <span>Loading...</span>
+                    </div>
+                )}
             </div>
-            <div id="chitha-content">
+            <div id="chitha-content" className="py-5 px-5">
                 <h2 className="text-center text-lg font-semibold mb-2">
-                    অসম অনুসূচী XXXVII,প্ৰপত্ৰ নং ৩০
+                    অসম অনুসূচী XXXVII, প্ৰপত্ৰ নং ৩০
                 </h2>
                 <h1 className="text-center text-xl font-bold mb-4">
-                    Chitha for Surveyed Villages / জৰীপ হোৱা গাঁৱৰ চিঠা
+                    Draft Chitha for Surveyed Villages /  জৰীপ হোৱা গাঁৱৰ খচৰা চিঠা
                 </h1>
 
                 {/* Top Section */}
@@ -226,7 +251,7 @@ const Chitha: React.FC = () => {
                                         <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
                                             {chithaData?.part_dag.dag_local_tax}
                                         </td>
-                                        <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
+                                        <td rowSpan={chithaData.pattadars.length} className="border border-black p-2">
                                             {chithaData?.pattadars?.map((pattadar: any, i: number) => (
                                                 <div key={i} className="py-0">
                                                     {pattadar.pdar_name}<br />
@@ -277,8 +302,81 @@ const Chitha: React.FC = () => {
                                 <td className="border-r border-black p-2">{possessor.remarks || '\u00A0'}</td>
                             </tr>
                         ))}
+
+                        {chithaData?.possessors.length === 0 && (
+                            <tr>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
+                                    {chithaData?.part_dag.dag_no}
+                                </td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
+                                    {chithaData?.part_dag.survey_no}
+                                </td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2">&nbsp;</td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
+                                    {chithaData?.dag.land_class_old}
+                                </td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
+                                    {chithaData?.part_dag.land_current_use}
+                                </td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
+                                    {chithaData?.part_dag.dag_area_b}-{chithaData?.part_dag.dag_area_k}-{Number(chithaData?.part_dag.dag_area_lc).toFixed(1)}
+                                </td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
+                                    {Math.floor(Number(chithaData?.part_dag.dag_area_sqmtr))}
+                                </td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2 text-nowrap">
+                                    {chithaData?.dag.patta_no}, {chithaData?.dag.patta_type_old}
+                                </td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2 text-nowrap">
+                                    0, {chithaData?.part_dag.patta_type}
+                                </td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
+                                    {chithaData?.part_dag.dag_revenue}
+                                </td>
+                                <td rowSpan={chithaData.possessors.length} className="border border-black p-2">
+                                    {chithaData?.part_dag.dag_local_tax}
+                                </td>
+                                <td rowSpan={chithaData.pattadars.length} className="border border-black p-2">
+                                    {chithaData?.pattadars?.map((pattadar: any, i: number) => (
+                                        <div key={i} className="py-0">
+                                            {pattadar.pdar_name}<br />
+                                            {pattadar.pdar_father}<br />
+                                            {pattadar.pdar_add1}{pattadar.pdar_add2}{pattadar.pdar_add3}
+                                            {i !== chithaData.pattadars.length - 1 && <hr className="my-2" />}
+                                        </div>
+                                    ))}
+                                </td>
+                                <td className="border-r border-black p-2"></td>
+                                <td className="border-r border-black p-2"></td>
+                                <td className="border-r border-black p-2"></td>
+                                <td className="border-r border-black p-2"></td>
+                                <td className="border-r border-black p-2"></td>
+                                <td className="border-r border-black p-2"></td>
+                                <td className="border-r border-black p-2"></td>
+                                <td rowSpan={chithaData.tenants.length} className="border border-black p-2">
+                                    {chithaData?.tenants?.map((tenant: any, i: number) => (
+                                        <div key={i} className="mb-2">
+                                            {tenant.tenant_name || '\u00A0'}<br />
+                                            {tenant.tenants_father || '\u00A0'}<br />
+                                            {tenant.tenants_add1 || "N/A"}{tenant.tenants_add2 ? `, ${tenant.tenants_add2}` : ""}
+                                            {i !== chithaData.tenants.length - 1 && <hr className="my-2" />}
+                                        </div>
+                                    ))}
+                                </td>
+                                <td rowSpan={chithaData.tenants.length} className="border border-black p-2">
+                                    {chithaData?.tenants?.map((tenant: any, i: number) => (
+                                        <div key={i} className="mb-2">
+                                            {tenant.khatian_no || '\u00A0'} {tenant.revenue_tenant}
+                                            {i !== chithaData.tenants.length - 1 && <hr className="my-2" />}
+                                        </div>
+                                    ))}
+                                </td>
+                                <td rowSpan={chithaData.tenants.length} className="border border-black p-2">&nbsp;</td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
+                <div className="h-24"></div>
             </div>
         </div>
     );

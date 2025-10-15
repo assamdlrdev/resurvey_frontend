@@ -134,60 +134,79 @@ interface DagState {
 
 interface TransferType { value: string; label: string }
 
-export const useDagStore = create<DagState>((set, get) => ({
-    isLoading: false,
-    vill: '',
-    dagNo: '',
-    partDags: [],
-    landClasses: [],
-    landGroups: [],
-    pattaTypes: [],
-    dharPattadars: [],
-    dharDeeds: [],
-    dharTenants: [],
-    dharDagData: null,
-    getCreatedPartDags: () => {
-        return get().partDags.filter(dag => dag.from_bhunaksha !== 1);
-    },
+interface FilterLocationState{
+    distCode: string;
+    subdivCode: string;
+    cirCode: string;
+    mouzaPargonaCode: string;
+    lotNo: string;
+    villTownprtCode: string;
+    surveyFormMode: string;
+    setDistCode: (code: string) => void;
+    setSubdivCode: (code: string) => void;
+    setCirCode: (code: string) => void;
+    setMouzaPargonaCode: (code: string) => void;
+    setLotNo: (lot: string) => void;
+    setVillTownprtCode: (vill: string) => void;
+    setSurveyFormMode: (mode: string) => void;
+}
 
-    getData: async (dagNo: string, vill: string) => {
-        set({ vill: vill, dagNo: dagNo, isLoading: true });
+export const useDagStore = create<DagState>()(
+    persist(
+        (set, get) => ({
+            isLoading: false,
+            vill: '',
+            dagNo: '',
+            partDags: [],
+            dharPattadars: [],
+            dharTenants: [],
+            dharDagData: null,
+            dharDeeds: [],
+            getCreatedPartDags: () => {
+                return get().partDags.filter(dag => dag.from_bhunaksha !== 1);
+            },
+            getData: async (dagNo: string, vill: string) => {
+                set({ vill: vill, dagNo: dagNo, isLoading: true });
 
-        try {
+                try {
+                    const data = {
+                        vill_townprt_code: vill,
+                        dag_no: dagNo,
+                    };
 
-            const data = {
-                vill_townprt_code: vill,
-                dag_no: dagNo,
-            };
+                    const response = await ApiService.get("get-dag-data", JSON.stringify(data));
+                    set({ isLoading: false });
 
-            const response = await ApiService.get("get-dag-data", JSON.stringify(data));
-            set({ isLoading: false });
+                    if (response.status !== "y") {
+                        toast.error(response.msg);
+                        return;
+                    }
 
-            if (response.status !== "y") {
-                toast.error(response.msg);
-                return;
-            }
+                    const resp = response.data;
+                    // console.log(resp);
 
-            const resp = response.data;
-            // console.log(resp);
-
-            set({
-                partDags: resp.part_dags || [],
-                dharPattadars: resp.dhar_pattadars || [],
-                dharTenants: resp.dhar_tenants || [],
-                dharDagData: resp.dhar_dag || null,
-                dharDeeds: resp.dhar_deeds || null
-            });
-        } catch (error) {
-            console.error(error);
-            toast.error("Failed to fetch DAG data");
-            set({ isLoading: false });
+                    set({
+                        partDags: resp.part_dags || [],
+                        dharPattadars: resp.dhar_pattadars || [],
+                        dharTenants: resp.dhar_tenants || [],
+                        dharDagData: resp.dhar_dag || null,
+                        dharDeeds: resp.dhar_deeds || null
+                    });
+                } catch (error) {
+                    console.error(error);
+                    toast.error("Failed to fetch DAG data");
+                    set({ isLoading: false });
+                }
+            },
+            resetDagData: () => set({ vill: '', dagNo: '', partDags: [], dharPattadars: [], dharTenants: [], dharDagData: null, dharDeeds: [] }),
+            setDagNo: (dagNo: string) => set({ dagNo: dagNo }),
+            setLoading: (loading: boolean) => set({ isLoading: loading })
+        }),
+        {
+            name: 'dag-data-storage', // key in localStorage
         }
-    },
-    resetDagData: () => set({ vill: '', dagNo: '', partDags: [], dharPattadars: [], dharDagData: null, dharDeeds: [] }),
-    setDagNo: (dagNo: string) => set({ dagNo: dagNo }),
-    setLoading: (loading: boolean) => set({ isLoading: loading })
-}));
+    )
+);
 
 interface MasterDataState {
     isLoadingMaster: boolean,
@@ -248,6 +267,31 @@ export const useMasterDataStore = create<MasterDataState>()(
         }),
         {
             name: 'master-data-storage', // key in localStorage
+        }
+    )
+);
+
+
+export const FilterLocationStore = create<FilterLocationState>()(
+    persist(
+        (set) => ({
+            distCode: '',
+            subdivCode: '',
+            cirCode: '',
+            mouzaPargonaCode: '',
+            lotNo: '',
+            villTownprtCode: '',
+            surveyFormMode: 'reference',
+            setDistCode: (code: string) => set({ distCode: code }),
+            setSubdivCode: (code: string) => set({ subdivCode: code }),
+            setCirCode: (code: string) => set({ cirCode: code }),
+            setMouzaPargonaCode: (code: string) => set({ mouzaPargonaCode: code }),
+            setLotNo: (lot: string) => set({ lotNo: lot }),
+            setVillTownprtCode: (vill: string) => set({ villTownprtCode: vill }),
+            setSurveyFormMode: (mode: string) => set({ surveyFormMode: mode }),
+        }),
+        {
+            name: 'filter-location-storage', // key in localStorage
         }
     )
 );

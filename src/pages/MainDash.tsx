@@ -7,22 +7,22 @@ import Constants from "@/config/Constants";
 const MainDash = () => {
 
     const user = StorageService.getJwtCookie();
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    const usertype = params.get('usertype');
 
-    if(!user) {
-        const params = new URLSearchParams(window.location.search);
-        const id = params.get('id');
-        const usertype = params.get('usertype');
-        if(!id) {
+    if (id && usertype) {
+        if (!id) {
             // return <Navigate to="/login" replace />;
             window.location.href = Constants.SINGLESIGN_URL;
             return;
         }
         StorageService.jwtSave(id);
 
-        if(usertype == "4") {
+        if (usertype == "4") {
             return <Navigate to="/co-dashboard" replace />;
         }
-        else if(usertype == "3") {
+        else if (usertype == "3") {
             return <Navigate to="/lm-dashboard" replace />;
         }
         else if (usertype == '5') {
@@ -36,10 +36,10 @@ const MainDash = () => {
             return;
         }
     }
-    
+
     const userData: any = StorageService.getJwtCookieData(user);
 
-    if(userData.usertype == "4")  {
+    if (userData.usertype == "4") {
         return <Navigate to="/co-dashboard" replace />;
     }
     else if (userData.usertype == "3") {
@@ -53,7 +53,8 @@ const MainDash = () => {
     }
     else {
         // return <Navigate to="/login" replace />;
-        window.location.href = Constants.SINGLESIGN_URL;
+        // window.location.href = Constants.SINGLESIGN_URL;
+        console.log(userData);
         return;
     }
 };
