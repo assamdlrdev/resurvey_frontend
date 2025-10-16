@@ -20,20 +20,20 @@ import PartDagsView from "@/components/PartDagsView";
 import { useMasterDataStore } from "@/store/SurveyStore";
 import MapView from "@/components/MapView";
 import MapViewCom from "@/components/MapView";
-import {FilterLocationStore} from "@/store/SurveyStore";
+import { FilterLocationStore } from "@/store/SurveyStore";
 
 interface DagType {
   dag_no: string
 }
-interface Village{
-  dist_code:string;
-  subdiv_code:string;
-  cir_code:string;
-  mouza_pargona_code:string;
-  lot_no:string;
-  vill_townprt_code:string;
-  loc_name:string;
-  locname_eng:string;
+interface Village {
+  dist_code: string;
+  subdiv_code: string;
+  cir_code: string;
+  mouza_pargona_code: string;
+  lot_no: string;
+  vill_townprt_code: string;
+  loc_name: string;
+  locname_eng: string;
 }
 
 
@@ -41,7 +41,8 @@ interface Village{
 
 export default function SurveyData() {
   const { dagNo, setDagNo, getData, resetDagData, getCreatedPartDags, setLoading, isLoading } = useDagStore();
-  const {distCode, subdivCode, cirCode, mouzaPargonaCode, lotNo, villTownprtCode, surveyFormMode, setDistCode, setSubdivCode, setCirCode, setMouzaPargonaCode, setLotNo, setVillTownprtCode, setSurveyFormMode} = FilterLocationStore();
+  const { districts, circles, mouzas, lots, villages, setDistricts, setCircles, setMouzas, setLots, setVillages } = FilterLocationStore();
+  const { distCode, subdivCode, cirCode, mouzaPargonaCode, lotNo, villTownprtCode, surveyFormMode, setDistCode, setSubdivCode, setCirCode, setMouzaPargonaCode, setLotNo, setVillTownprtCode, setSurveyFormMode } = FilterLocationStore();
   const { getMasterData } = useMasterDataStore();
   // const [mode, setMode] = useState<string>("reference");
   const [showDagDropdown, setShowDagDropdown] = useState(false);
@@ -55,11 +56,11 @@ export default function SurveyData() {
   // const [mouza, setMouza] = useState<string>('');
   // const [lot, setLot] = useState<string>('');
   // const [vill, setVill] = useState<string>('');
-  const [districtData, setDistrictData] = useState<any[]>([]);
-  const [circleData, setCircleData] = useState<any[]>([]);
-  const [mouzaData, setMouzaData] = useState<any[]>([]);
-  const [lotData, setLotData] = useState<any[]>([]);
-  const [villData, setVillData] = useState<any[]>([]);
+  // const [districtData, setDistrictData] = useState<any[]>([]);
+  // const [circleData, setCircleData] = useState<any[]>([]);
+  // const [mouzaData, setMouzaData] = useState<any[]>([]);
+  // const [lotData, setLotData] = useState<any[]>([]);
+  // const [villData, setVillData] = useState<any[]>([]);
   const [originalDagInfo, setOriginalDagInfo] = useState<any[]>([]);
   const [mapGeoJson, setMapGeoJson] = useState<string>('');
   // const [villObj,setVillObj] = 
@@ -68,14 +69,23 @@ export default function SurveyData() {
   useEffect(() => {
     if (location.pathname == '/survey-form') {
       resetDagData();
-      getDistricts();
+      if (districts.length == 0) {
+        getDistricts();
+      }
     }
   }, [location]);
 
   useEffect(() => {
     if (distCode != '') {
       getMasterData(distCode);
-      getCircles(distCode);
+      if (circles.length == 0) {
+        getCircles(distCode);
+      } else {
+        //check if dist code changed
+        if (circles[0].dist_code != distCode) {
+          getCircles(distCode);
+        }
+      }
     }
     else {
       // toast.error('District not set');
@@ -85,7 +95,18 @@ export default function SurveyData() {
 
   useEffect(() => {
     if (cirCode != '') {
-      getMouza(cirCode);
+      if (mouzas.length == 0) {
+        getMouza(cirCode);
+      } else {
+        //check if cir code changed
+        const cir_code_parts = cirCode.split('-');
+        var dist_code = cir_code_parts[0];
+        var subdiv_code = cir_code_parts[1];
+        var cir_code = cir_code_parts[2];
+        if (mouzas[0].dist_code != dist_code || mouzas[0].subdiv_code != subdiv_code || mouzas[0].cir_code != cir_code) {
+          getMouza(cirCode);
+        }
+      }
     }
     else {
       // toast.error('Circle not set');
@@ -95,7 +116,20 @@ export default function SurveyData() {
 
   useEffect(() => {
     if (mouzaPargonaCode != '') {
-      getLot(mouzaPargonaCode);
+      if(lots.length == 0) {
+        getLot(mouzaPargonaCode);
+      }
+      else {
+        //check if mouza code changed
+        const mouza_code_parts = mouzaPargonaCode.split('-');
+        var dist_code = mouza_code_parts[0];
+        var subdiv_code = mouza_code_parts[1];
+        var cir_code = mouza_code_parts[2];
+        var mouza_code = mouza_code_parts[3];
+        if (lots[0].dist_code != dist_code || lots[0].subdiv_code != subdiv_code || lots[0].cir_code != cir_code || lots[0].mouza_code != mouza_code) {
+          getLot(mouzaPargonaCode);
+        }
+      }
     }
     else {
       // toast.error('Circle not set');
@@ -105,7 +139,21 @@ export default function SurveyData() {
 
   useEffect(() => {
     if (lotNo) {
-      getVillage(lotNo);
+      if(villages.length == 0) {
+        getVillage(lotNo);
+      }
+      else {
+        //check if lot code changed
+        const lot_code_parts = lotNo.split('-');
+        var dist_code = lot_code_parts[0];
+        var subdiv_code = lot_code_parts[1];
+        var cir_code = lot_code_parts[2];
+        var mouza_code = lot_code_parts[3];
+        var lot_no = lot_code_parts[4];
+        if (villages[0].dist_code != dist_code || villages[0].subdiv_code != subdiv_code || villages[0].cir_code != cir_code || villages[0].mouza_code != mouza_code || villages[0].lot_no != lot_no) {
+          getVillage(lotNo);
+        }
+      }
     }
   }, [lotNo]);
 
@@ -136,9 +184,9 @@ export default function SurveyData() {
 
   const resetField = (type: string) => {
     if (type == 'circle') {
-      setMouzaData([]);
-      setLotData([]);
-      setVillData([]);
+      setMouzas([]);
+      setLots([]);
+      setVillages([]);
       setDagNos([]);
 
       setDagNo('');
@@ -147,8 +195,8 @@ export default function SurveyData() {
       // setMouzaPargonaCode('');
     }
     else if (type == 'mouza') {
-      setLotData([]);
-      setVillData([]);
+      setLots([]);
+      setVillages([]);
       setDagNos([]);
 
       setDagNo('');
@@ -156,7 +204,7 @@ export default function SurveyData() {
       // setLotNo('');
     }
     else if (type == 'lot') {
-      setVillData([]);
+      setVillages([]);
       setDagNos([]);
 
       setDagNo('');
@@ -168,10 +216,10 @@ export default function SurveyData() {
       setDagNo('');
     }
     else if (type == 'dist') {
-      setCircleData([]);
-      setMouzaData([]);
-      setLotData([]);
-      setVillData([]);
+      setCircles([]);
+      setMouzas([]);
+      setLots([]);
+      setVillages([]);
       setDagNos([]);
 
       setDagNo('');
@@ -198,7 +246,7 @@ export default function SurveyData() {
     }
     // const districts = StorageService.getJwtCookieData(response.data);
     const districtsArr = Object.entries(response.data).map(([key, value]) => ({ key, value }));
-    setDistrictData(districtsArr);
+    setDistricts(districtsArr);
 
   };
 
@@ -217,7 +265,7 @@ export default function SurveyData() {
       return;
     }
     // const circles = StorageService.getJwtCookieData(response.data);
-    setCircleData(response.data);
+    setCircles(response.data);
   };
 
   const getMouza = async (c: any) => {
@@ -235,7 +283,7 @@ export default function SurveyData() {
       return;
     }
 
-    setMouzaData(response.data);
+    setMouzas(response.data);
     // console.log(response);
 
   };
@@ -254,7 +302,7 @@ export default function SurveyData() {
       return;
     }
 
-    setLotData(response.data);
+    setLots(response.data);
 
     // console.log(response);
   };
@@ -275,7 +323,7 @@ export default function SurveyData() {
 
     // console.log(response.data);
 
-    setVillData(response.data);
+    setVillages(response.data);
   };
 
   const getDags = async (v: any) => {
@@ -322,7 +370,7 @@ export default function SurveyData() {
               >
                 <option value="">Select District</option>
                 {
-                  districtData && districtData.length > 0 && districtData.map((ddata, index) => <option key={index} value={ddata.key}>{ddata.value}</option>)
+                  districts && districts.length > 0 && districts.map((ddata, index) => <option key={index} value={ddata.key}>{ddata.value}</option>)
                 }
 
               </select>
@@ -337,7 +385,7 @@ export default function SurveyData() {
                 onChange={(e: any) => setCirCode(e.currentTarget.value)}
               >
                 <option value="">Select Circle</option>
-                {circleData && circleData.length > 0 && circleData.map((cdata, index) => <option key={index} value={`${cdata.dist_code}-${cdata.subdiv_code}-${cdata.cir_code}`}>{`${cdata.loc_name} (${cdata.locname_eng})`}</option>)}
+                {circles && circles.length > 0 && circles.map((cdata, index) => <option key={index} value={`${cdata.dist_code}-${cdata.subdiv_code}-${cdata.cir_code}`}>{`${cdata.loc_name} (${cdata.locname_eng})`}</option>)}
               </select>
 
             </div>
@@ -352,7 +400,7 @@ export default function SurveyData() {
                 <option value="">Select Mouza</option>
 
                 {
-                  mouzaData && mouzaData.length > 0 && mouzaData.map((mdata, index) => <option key={index} value={`${mdata.dist_code}-${mdata.subdiv_code}-${mdata.cir_code}-${mdata.mouza_code}`}>{`${mdata.loc_name} (${mdata.locname_eng})`}</option>)
+                  mouzas && mouzas.length > 0 && mouzas.map((mdata, index) => <option key={index} value={`${mdata.dist_code}-${mdata.subdiv_code}-${mdata.cir_code}-${mdata.mouza_code}`}>{`${mdata.loc_name} (${mdata.locname_eng})`}</option>)
                 }
               </select>
 
@@ -367,7 +415,7 @@ export default function SurveyData() {
               >
                 <option value="">Select Lot</option>
                 {
-                  lotData && lotData.length > 0 && lotData.map((ldata, index) => <option key={index} value={`${ldata.dist_code}-${ldata.subdiv_code}-${ldata.cir_code}-${ldata.mouza_code}-${ldata.lot_no}`}>{`${ldata.loc_name} (${ldata.locname_eng})`}</option>)
+                  lots && lots.length > 0 && lots.map((ldata, index) => <option key={index} value={`${ldata.dist_code}-${ldata.subdiv_code}-${ldata.cir_code}-${ldata.mouza_code}-${ldata.lot_no}`}>{`${ldata.loc_name} (${ldata.locname_eng})`}</option>)
                 }
               </select>
 
@@ -382,7 +430,7 @@ export default function SurveyData() {
               >
                 <option value="">Select Village</option>
                 {
-                  villData && villData.length > 0 && villData.map((vdata, index) => <option key={index} value={`${vdata.dist_code}-${vdata.subdiv_code}-${vdata.cir_code}-${vdata.mouza_code}-${vdata.lot_no}-${vdata.village_code}-${vdata.lgd_code}`}>{`${vdata.loc_name} (${vdata.locname_eng})`}</option>)
+                  villages && villages.length > 0 && villages.map((vdata, index) => <option key={index} value={`${vdata.dist_code}-${vdata.subdiv_code}-${vdata.cir_code}-${vdata.mouza_code}-${vdata.lot_no}-${vdata.village_code}-${vdata.lgd_code}`}>{`${vdata.loc_name} (${vdata.locname_eng})`}</option>)
                 }
               </select>
 
@@ -469,9 +517,9 @@ export default function SurveyData() {
                 ? "Dharitry Data"
                 : surveyFormMode === "input"
                   ? "Possessor Details Entry"
-                  :surveyFormMode == 'map_view' 
-                  ? 'Draft Bhunaksa MAp View'
-                  : "Existing Part Dags"}
+                  : surveyFormMode == 'map_view'
+                    ? 'Draft Bhunaksa MAp View'
+                    : "Existing Part Dags"}
             </CardTitle>
           </CardHeader>
 

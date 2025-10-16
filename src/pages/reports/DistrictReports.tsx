@@ -26,7 +26,7 @@ interface DagItem {
 interface DistrictData {
     dist_code: string | number;
     dist_name: string;
-    totalCount: number; 
+    totalCount: number;
     chitha_basic_splitted_dags: DagItem[];
 }
 
@@ -48,7 +48,7 @@ export default function DistrictReport() {
     const fetchDistrictReport = async (page: number) => {
         setIsLoading(true);
         try {
-            
+
             const response = await ApiService.get("get-district-report", JSON.stringify({
                 dist_code,
                 page,
@@ -142,7 +142,8 @@ export default function DistrictReport() {
                                                 </td>
                                                 <td className="px-2 py-2 border">{dag.user_code}</td>
                                                 <td className="px-2 py-2 border text-center">
-                                                    <Button type="button" id={`${dag.dag_no}-${dag.old_dag_no}`} onClick={() => navigate(`/chitha-view?id=${dag.dist_code+'-'+dag.subdiv_code+'-'+dag.cir_code+'-'+dag.mouza_pargona_code+'-'+dag.lot_no+'-'+dag.vill_townprt_code+'-'+'lgd'+'-'+dag.old_dag_no+'-'+dag.dag_no}`)}>View Chitha</Button>
+                                                    <Button type="button" id={`${dag.dag_no}-${dag.old_dag_no}`} onClick={() => navigate(`/chitha-view?id=${dag.dist_code + '-' + dag.subdiv_code + '-' + dag.cir_code + '-' + dag.mouza_pargona_code + '-' + dag.lot_no + '-' + dag.vill_townprt_code + '-' + 'lgd' + '-' + dag.old_dag_no + '-' + dag.dag_no}`)}>View Chitha</Button>
+                                                    <Button variant="secondary" type="button" id={`${dag.dag_no}-${dag.old_dag_no}`} onClick={() => navigate(`/part-dag-view?id=${dag.dist_code + '-' + dag.subdiv_code + '-' + dag.cir_code + '-' + dag.mouza_pargona_code + '-' + dag.lot_no + '-' + dag.vill_townprt_code + '-' + 'lgd' + '-' + dag.old_dag_no + '-' + dag.dag_no}`)}>View Part Dag</Button>
                                                 </td>
                                             </tr>
                                         ))
