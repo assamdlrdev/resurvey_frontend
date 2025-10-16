@@ -141,6 +141,11 @@ interface FilterLocationState{
     lotNo: string;
     villTownprtCode: string;
     surveyFormMode: string;
+    districts: any[];
+    circles: any[];
+    mouzas: any[];
+    lots: any[];
+    villages: any[];
     setDistCode: (code: string) => void;
     setSubdivCode: (code: string) => void;
     setCirCode: (code: string) => void;
@@ -148,6 +153,11 @@ interface FilterLocationState{
     setLotNo: (lot: string) => void;
     setVillTownprtCode: (vill: string) => void;
     setSurveyFormMode: (mode: string) => void;
+    setDistricts: (districts: any[]) => void;
+    setCircles: (circles: any[]) => void;
+    setMouzas: (mouzas: any[]) => void;
+    setLots: (lots: any[]) => void;
+    setVillages: (villages: any[]) => void;
 }
 
 export const useDagStore = create<DagState>()(
@@ -277,6 +287,11 @@ export const FilterLocationStore = create<FilterLocationState>()(
             mouzaPargonaCode: '',
             lotNo: '',
             villTownprtCode: '',
+            districts: [],
+            circles: [],
+            mouzas: [],
+            lots: [],
+            villages: [],
             surveyFormMode: 'reference',
             setDistCode: (code: string) => set({ distCode: code }),
             setSubdivCode: (code: string) => set({ subdivCode: code }),
@@ -285,6 +300,11 @@ export const FilterLocationStore = create<FilterLocationState>()(
             setLotNo: (lot: string) => set({ lotNo: lot }),
             setVillTownprtCode: (vill: string) => set({ villTownprtCode: vill }),
             setSurveyFormMode: (mode: string) => set({ surveyFormMode: mode }),
+            setDistricts: (districts: any[]) => set({ districts }),
+            setCircles: (circles: any[]) => set({ circles }),
+            setMouzas: (mouzas: any[]) => set({ mouzas }),
+            setLots: (lots: any[]) => set({ lots }),
+            setVillages: (villages: any[]) => set({ villages }),
         }),
         {
             name: 'filter-location-storage', // key in localStorage

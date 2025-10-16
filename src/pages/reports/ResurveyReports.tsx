@@ -69,6 +69,10 @@ export default function ResurveyReports() {
     navigate(`/chitha-view?id=${e.currentTarget.id}`);
   };
 
+  const viewPartDag = async (e: any) => {
+    navigate(`/part-dag-view?id=${e.currentTarget.id}`);
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-medical-50 to-medical-100 p-4">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -151,7 +155,23 @@ export default function ResurveyReports() {
                               </td>
                               <td className="px-2 py-2 border">{dag.user_code}</td>
                               <td className="px-2 py-2 border text-end">
-                                <Button type="button" id={`${dag.dist_code+'-'+dag.subdiv_code+'-'+dag.cir_code+'-'+dag.mouza_pargona_code+'-'+dag.lot_no+'-'+dag.vill_townprt_code+'-'+'lgd'+'-'+dag.old_dag_no+'-'+dag.dag_no}`} onClick={viewChitha}>View Chitha</Button>
+                                <div className="flex flex-row gap-2 justify-end">
+                                  <Button
+                                    type="button"
+                                    id={`${dag.dist_code+'-'+dag.subdiv_code+'-'+dag.cir_code+'-'+dag.mouza_pargona_code+'-'+dag.lot_no+'-'+dag.vill_townprt_code+'-'+'lgd'+'-'+dag.old_dag_no+'-'+dag.dag_no}`}
+                                    onClick={viewChitha}
+                                  >
+                                    View Chitha
+                                  </Button>
+                                  <Button
+                                    variant="secondary"
+                                    type="button"
+                                    id={`${dag.dist_code+'-'+dag.subdiv_code+'-'+dag.cir_code+'-'+dag.mouza_pargona_code+'-'+dag.lot_no+'-'+dag.vill_townprt_code+'-'+'lgd'+'-'+dag.old_dag_no+'-'+dag.dag_no}`}
+                                    onClick={viewPartDag}
+                                  >
+                                    View Part Dag
+                                  </Button>
+                                </div>
                               </td>
                             </tr>
                           ))

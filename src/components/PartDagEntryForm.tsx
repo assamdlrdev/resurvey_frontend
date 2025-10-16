@@ -185,8 +185,8 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
     const resetFields = () => {
         setCurrLandClass('');
         setAreaSm(0);
-        setPattaNo(dharDagData.patta_no);
-        setPattaTypeCode(dharDagData.patta_type_code);
+        setPattaNo(dharDagData?.patta_no);
+        setPattaTypeCode(dharDagData?.patta_type_code);
         setDagLandRevenue(0);
         setDagLocalTax(0);
         setPattadars([]);
@@ -275,8 +275,8 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
             const dag_area_sqmtr = partDagDetails.dag_area_sqmtr ? partDagDetails.dag_area_sqmtr : 0;
             setAreaSm(dag_area_sqmtr);
             setCurrLandClass('');
-            setPattaNo(dharDagData.patta_no);
-            setPattaTypeCode(dharDagData.patta_type_code);
+            setPattaNo(dharDagData?.patta_no);
+            setPattaTypeCode(dharDagData?.patta_type_code);
             setTriggerLandRevenue(dag_area_sqmtr);
             setPattadars([]);
             setUpdateButton(false);
@@ -288,8 +288,8 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
             const dag_area_sqmtr = partDagDetails.dag_area_sqmtr ? partDagDetails.dag_area_sqmtr : 0;
             setAreaSm(dag_area_sqmtr);
             setCurrLandClass('');
-            setPattaNo(dharDagData.patta_no);
-            setPattaTypeCode(dharDagData.patta_type_code);
+            setPattaNo(dharDagData?.patta_no);
+            setPattaTypeCode(dharDagData?.patta_type_code);
             setTriggerLandRevenue('');
             setDagLandRevenue(0);
             setDagLocalTax(0);
