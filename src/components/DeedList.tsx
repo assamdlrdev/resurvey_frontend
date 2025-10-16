@@ -34,15 +34,16 @@ interface DeedType {
 
 interface DeedProps {
     deeds: DeedType[];
+    viewDoc: (e: any) => void
 };
 
-const DeedList: React.FC<DeedProps> = ({deeds}) => {
+const DeedList: React.FC<DeedProps> = ({deeds, viewDoc}) => {
 
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
-    const viewDoc = (e: any) => {
-        navigate(`/deedDoc?id=${e.currentTarget.id}`);
-    };
+    // const viewDoc = (e: any) => {
+    //     navigate(`/deedDoc?id=${e.currentTarget.id}`);
+    // };
 
     return (
         <div className="w-full">
@@ -79,7 +80,7 @@ const DeedList: React.FC<DeedProps> = ({deeds}) => {
                             </tr>))
                         ) : (
                             <tr>
-                                <td colSpan={3} className="py-6 text-center text-medical-500">
+                                <td colSpan={5} className="py-6 text-center text-medical-500">
                                 📭 No Deeds Available
                                 </td>
                             </tr>
