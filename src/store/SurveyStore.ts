@@ -122,6 +122,7 @@ interface DagState {
     dagNo: string | null;
     partDags: PartDag[];
     dharPattadars: Pattadar[];
+    dharDeeds: any[];
     dharTenants: Tenant[];
     dharDagData: DharitreeData | null;
     getData: (dagNo: string, vill: string) => Promise<void>;
@@ -170,6 +171,7 @@ export const useDagStore = create<DagState>()(
             dharPattadars: [],
             dharTenants: [],
             dharDagData: null,
+            dharDeeds: [],
             getCreatedPartDags: () => {
                 return get().partDags.filter(dag => dag.from_bhunaksha !== 1);
             },
@@ -191,12 +193,14 @@ export const useDagStore = create<DagState>()(
                     }
 
                     const resp = response.data;
+                    // console.log(resp);
 
                     set({
                         partDags: resp.part_dags || [],
                         dharPattadars: resp.dhar_pattadars || [],
                         dharTenants: resp.dhar_tenants || [],
                         dharDagData: resp.dhar_dag || null,
+                        dharDeeds: resp.dhar_deeds || null
                     });
                 } catch (error) {
                     console.error(error);
@@ -204,7 +208,7 @@ export const useDagStore = create<DagState>()(
                     set({ isLoading: false });
                 }
             },
-            resetDagData: () => set({ vill: '', dagNo: '', partDags: [], dharPattadars: [], dharTenants: [], dharDagData: null }),
+            resetDagData: () => set({ vill: '', dagNo: '', partDags: [], dharPattadars: [], dharTenants: [], dharDagData: null, dharDeeds: [] }),
             setDagNo: (dagNo: string) => set({ dagNo: dagNo }),
             setLoading: (loading: boolean) => set({ isLoading: loading })
         }),

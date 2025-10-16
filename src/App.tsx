@@ -18,6 +18,7 @@ import COLayout from "./layouts/COLayout";
 import MainDash from "./pages/MainDash";
 import CODashboard from "./pages/co/CODashboard";
 import CoSurveyReport from "./pages/co/SurveyReports";
+import DeedDocument from "./pages/DeedDocument";
 import LMDashboard from "./pages/lm/LMDashboard";
 import PartDagView from "./pages/reports/PartDagView";
 
@@ -44,6 +45,7 @@ function App() {
                   <Route path="/survey-dashboard" element={<SurveyDashboard />} />
                   <Route path="/district-report/:dist_code" element={<DistrictReport />} />
                   <Route path="/part-dag-view" element={<PartDagView />} />
+                  <Route path="/deedDoc" element={<DeedDocument />} />
                 </Route>
               </Route>
 

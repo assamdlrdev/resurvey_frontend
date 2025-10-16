@@ -19,8 +19,10 @@ import TenantsList from "./TenantsList";
 import PattadarsList from "./PattadarsList";
 import { calculateAreaByKide } from "@/lib/utils";
 import SelectFromMapComp from "./SelectFromMapComp";
+import DeedList from "./DeedList";
 import Constants from "@/config/Constants";
 import { set } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
     dagNo: string;
@@ -64,7 +66,7 @@ interface ErrorType {
 
 const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, setVill }) => {
     const { register, handleSubmit, reset, formState: { errors } } = useForm<InputFormData>();
-    const { isLoading, getData, setLoading, partDags, dharDagData, dharPattadars, dharTenants } = useDagStore();
+    const { isLoading, getData, setLoading, partDags, dharDagData, dharPattadars, dharTenants, dharDeeds } = useDagStore();
     const { landClasses, landGroups, pattaTypes, transferTypes } = useMasterDataStore();
 
     const [partDag, setPartDag] = useState<string>('');
@@ -102,6 +104,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
     const [dagLandRevenue, setDagLandRevenue] = useState<number>(0);
     const [dagLocalTax, setDagLocalTax] = useState<number>(0);
     const [pattadars, setPattadars] = useState(null);
+    const [deeds, setDeeds] = useState(null);
     const [tenants, setTenants] = useState(null);
     const [triggerLandRevenue, setTriggerLandRevenue] = useState<string>('');
     const [errorTag, setErrorTag] = useState<ErrorType[]>([]);
@@ -138,12 +141,14 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
     const [updatingPhoto, setUpdatingPhoto] = useState<boolean>(false);
     const [removingPossessorPhoto, setRemovingPossessorPhoto] = useState<boolean>(false);
     const [newDocuments, setNewDocuments] = useState<any[]>([]);
+    const navigate = useNavigate();
 
 
     useEffect(() => {
         if (dagNo != '' && vill != '') {
-            setPattaNo(dharDagData.patta_no);
+            setPattaNo(dharDagData?.patta_no);
             setPattadars(dharPattadars);
+            setDeeds(dharDeeds);
         }
     }, [dagNo, vill]);
 
@@ -180,6 +185,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
     }, [triggerLandRevenue, currLandClass]);
 
     const showPattadars = updateButton ? pattadars : dharPattadars;
+    const showDeeds = updateButton ? deeds : dharDeeds;
     const showTenants = updateButton ? tenants : dharTenants;
 
     const resetFields = () => {
@@ -190,6 +196,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
         setDagLandRevenue(0);
         setDagLocalTax(0);
         setPattadars([]);
+        setDeeds([]);
         setUpdateButton(false);
         setBhunaksaSurveyNo('');
     };
@@ -266,6 +273,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
             setDagLandRevenue(partDagDetails.dag_revenue);
             setDagLocalTax(partDagDetails.dag_local_tax);
             setPattadars(partDagDetails.pattadars);
+            setDeeds(dharDeeds);
             setTenants(partDagDetails.tenants);
             setUpdateButton(true);
             setPossessors(partDagDetails.possessors);
@@ -279,6 +287,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
             setPattaTypeCode(dharDagData?.patta_type_code);
             setTriggerLandRevenue(dag_area_sqmtr);
             setPattadars([]);
+            setDeeds(dharDeeds);
             setUpdateButton(false);
             setPossessors([]);
             // setDagLandRevenue(0);
@@ -294,6 +303,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
             setDagLandRevenue(0);
             setDagLocalTax(0);
             setPattadars([]);
+            setDeeds(dharDeeds);
             setUpdateButton(false);
             setPossessors([]);
             setBhunaksaSurveyNo('');
@@ -771,6 +781,10 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
         setDocuments([]);
     }
 
+    const viewDoc = (e: any) => {
+        navigate(`/deedDoc?id=${e.currentTarget.id}`);
+    }
+
     return (
         <>
             {(dagNo && vill && dagNo != '' && vill != '') ?
@@ -987,6 +1001,22 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                             </CardContent>
                         </Card>
                     </div>
+
+                    {deeds && <div className="mt-6">
+                        <Card className="w-full shadow-sm border border-gray-200 rounded-xl">
+                            <CardHeader className="border-b border-gray-100">
+                                <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                                    Uploaded Deeds
+                                    
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-0">
+
+                                <DeedList deeds={showDeeds} viewDoc={viewDoc} />
+
+                            </CardContent>
+                        </Card>
+                    </div>}
 
                     {/* Tenants */}
                     <div className="mt-8">
