@@ -327,7 +327,7 @@ export const FilterLocationStore = create<FilterLocationState>()(
                     return;
                 }
                 const districtsArr = Object.entries(response.data).map(([key, value]) => ({ key, value }));
-                set({ districts: response.data });
+                set({ districts: districtsArr });
 
             },
             getCircles: async (distCode: string) => {
