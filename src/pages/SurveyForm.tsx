@@ -41,35 +41,22 @@ interface Village {
 
 export default function SurveyData() {
   const { dagNo, setDagNo, getData, resetDagData, getCreatedPartDags, setLoading, isLoading } = useDagStore();
-  const { districts, circles, mouzas, lots, villages, setDistricts, setCircles, setMouzas, setLots, setVillages } = FilterLocationStore();
+  const { districts, circles, mouzas, lots, villages, setCircles, setMouzas, setLots, setVillages, getDistricts, getCircles, getMouzas, getLots, getVillages } = FilterLocationStore();
   const { distCode, subdivCode, cirCode, mouzaPargonaCode, lotNo, villTownprtCode, surveyFormMode, setDistCode, setSubdivCode, setCirCode, setMouzaPargonaCode, setLotNo, setVillTownprtCode, setSurveyFormMode } = FilterLocationStore();
   const { getMasterData } = useMasterDataStore();
-  // const [mode, setMode] = useState<string>("reference");
   const [showDagDropdown, setShowDagDropdown] = useState(false);
   const [dagNos, setDagNos] = useState<DagType[]>([]
   );
-  // const [dagNo, setDagNo] = useState<string>("");
   const location = useLocation();
   const navigate = useNavigate();
-  // const [district, setDistrict] = useState<string>('');
-  // const [circle, setCircle] = useState<string>('');
-  // const [mouza, setMouza] = useState<string>('');
-  // const [lot, setLot] = useState<string>('');
-  // const [vill, setVill] = useState<string>('');
-  // const [districtData, setDistrictData] = useState<any[]>([]);
-  // const [circleData, setCircleData] = useState<any[]>([]);
-  // const [mouzaData, setMouzaData] = useState<any[]>([]);
-  // const [lotData, setLotData] = useState<any[]>([]);
-  // const [villData, setVillData] = useState<any[]>([]);
   const [originalDagInfo, setOriginalDagInfo] = useState<any[]>([]);
   const [mapGeoJson, setMapGeoJson] = useState<string>('');
-  // const [villObj,setVillObj] = 
-
 
   useEffect(() => {
     if (location.pathname == '/survey-form') {
       resetDagData();
       if (districts.length == 0) {
+        resetField('dist');
         getDistricts();
       }
     }
@@ -79,17 +66,18 @@ export default function SurveyData() {
     if (distCode != '') {
       getMasterData(distCode);
       if (circles.length == 0) {
+        resetField('circle');
         getCircles(distCode);
       } else {
         //check if dist code changed
         if (circles[0].dist_code != distCode) {
+          resetField('circle');
           getCircles(distCode);
         }
       }
-    }
-    else {
-      // toast.error('District not set');
-      // return;
+    } else {
+      setCircles([]);
+      resetField('circle');
     }
   }, [distCode]);
 
@@ -107,16 +95,15 @@ export default function SurveyData() {
           getMouza(cirCode);
         }
       }
-    }
-    else {
-      // toast.error('Circle not set');
-      // return;
+    } else {
+      setMouzas([]);
+      resetField('mouza');
     }
   }, [cirCode]);
 
   useEffect(() => {
     if (mouzaPargonaCode != '') {
-      if(lots.length == 0) {
+      if (lots.length == 0) {
         getLot(mouzaPargonaCode);
       }
       else {
@@ -130,16 +117,15 @@ export default function SurveyData() {
           getLot(mouzaPargonaCode);
         }
       }
-    }
-    else {
-      // toast.error('Circle not set');
-      // return;
+    } else {
+      setLots([]);
+      resetField('lot');
     }
   }, [mouzaPargonaCode]);
 
   useEffect(() => {
     if (lotNo) {
-      if(villages.length == 0) {
+      if (villages.length == 0) {
         getVillage(lotNo);
       }
       else {
@@ -154,14 +140,20 @@ export default function SurveyData() {
           getVillage(lotNo);
         }
       }
+    } else {
+      setVillages([]);
+      resetField('vill');
     }
   }, [lotNo]);
 
   useEffect(() => {
+    setDagNo('');
     if (villTownprtCode) {
-      setDagNo('');
       setShowDagDropdown(false);
       getDags(villTownprtCode);
+    } else {
+      setMapGeoJson("");
+      setDagNos([]);
     }
   }, [villTownprtCode]);
 
@@ -231,99 +223,20 @@ export default function SurveyData() {
     }
   };
 
-  const getDistricts = async () => {
-    resetField('dist');
-    const data = {
-      // api_key:Constants.API_SECRET
-    };
-    setLoading(true);
-    const response = await ApiService.get('get_districts', JSON.stringify(data));
-    setLoading(false);
-
-    if (response.status !== 'y') {
-      toast.error(response.msg);
-      return;
-    }
-    // const districts = StorageService.getJwtCookieData(response.data);
-    const districtsArr = Object.entries(response.data).map(([key, value]) => ({ key, value }));
-    setDistricts(districtsArr);
-
-  };
-
-  const getCircles = async (d: any) => {
-    resetField('circle');
-    const data = {
-      // api_key:Constants.API_SECRET,
-      dist_code: d
-    };
-    setLoading(true);
-    const response = await ApiService.get('get_circles', JSON.stringify(data));
-    setLoading(false);
-
-    if (response.status !== 'y') {
-      toast.error(response.msg);
-      return;
-    }
-    // const circles = StorageService.getJwtCookieData(response.data);
-    setCircles(response.data);
-  };
 
   const getMouza = async (c: any) => {
     resetField('mouza');
-    const data = {
-      // api_key:Constants.API_SECRET,
-      cir_code: c
-    };
-    setLoading(true);
-    const response = await ApiService.get('get_mouzas', JSON.stringify(data));
-    setLoading(false);
-
-    if (response.status !== 'y') {
-      toast.error(response.msg);
-      return;
-    }
-
-    setMouzas(response.data);
-    // console.log(response);
-
+    getMouzas(c);
   };
 
   const getLot = async (m: any) => {
     resetField('lot');
-    const data = {
-      mouza_pargona_code: m
-    };
-    setLoading(true);
-    const response = await ApiService.get('get_lots', JSON.stringify(data));
-    setLoading(false);
-
-    if (response.status !== 'y') {
-      toast.error(response.msg);
-      return;
-    }
-
-    setLots(response.data);
-
-    // console.log(response);
+    getLots(m);
   };
 
   const getVillage = async (l: any) => {
     resetField('vill');
-    const data = {
-      lot_no: l
-    };
-    setLoading(true);
-    const response = await ApiService.get('get_vills', JSON.stringify(data));
-    setLoading(false);
-
-    if (response.status !== 'y') {
-      toast.error(response.msg);
-      return;
-    }
-
-    // console.log(response.data);
-
-    setVillages(response.data);
+    getVillages(l);
   };
 
   const getDags = async (v: any) => {
