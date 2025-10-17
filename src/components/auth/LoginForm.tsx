@@ -44,10 +44,10 @@ export default function LoginForm() {
         
         return;
     }
-    // if(!validateCaptcha(captcha)) {
-    //     toast.error("Captcha does not match!");
-    //     return;
-    // }
+    if(!validateCaptcha(captcha)) {
+        toast.error("Captcha does not match!");
+        return;
+    }
     loadCaptchaEnginge(6);
     setCaptcha('');
     
