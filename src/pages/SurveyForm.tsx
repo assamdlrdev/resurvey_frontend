@@ -53,7 +53,13 @@ export default function SurveyData() {
   const [mapGeoJson, setMapGeoJson] = useState<string>('');
 
   useEffect(() => {
-    if (location.pathname == '/survey-form') {
+    if (location.pathname == '/survey-form' || location.pathname == '/resurvey/survey-form') {
+      resetDagData();
+      getDistricts();
+    }
+  }, []);
+  useEffect(() => {
+    if (location.pathname == '/survey-form' || location.pathname == '/resurvey/survey-form') {
       resetDagData();
       if (districts.length == 0) {
         resetField('dist');
