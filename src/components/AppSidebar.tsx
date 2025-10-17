@@ -171,7 +171,7 @@ export function AppSidebar() {
 
         {/* Navigation Groups */}
         <div className="">
-          {(userData.usertype == '1' || userData.usertype == '11') && <SidebarGroup>
+          {(userData.usertype == '1' || userData.usertype == '11' || userData.usertype == '14') && <SidebarGroup>
             {renderCollapsibleGroup("Survey", mainItems, "main")}
           </SidebarGroup>}
 
