@@ -29,7 +29,7 @@ const mainItems = [
 ];
 
 const analyticsItems = [
-  { title: "Survey Reports", url: "/survey-reports", icon: BarChart3 },
+  { title: "Survey Reports", url: "/reports", icon: BarChart3 },
   // { title: "Analytics", url: "/analytics", icon: Activity },
 ];
 
@@ -175,7 +175,7 @@ export function AppSidebar() {
             {renderCollapsibleGroup("Survey", mainItems, "main")}
           </SidebarGroup>}
 
-          {(userData.usertype == '1' || userData.usertype == '11') && <SidebarGroup>
+          {(userData.usertype == '1' || userData.usertype == '11' || userData.usertype == '14') && <SidebarGroup>
             {renderCollapsibleGroup("Reports", analyticsItems, "analytics")}
           </SidebarGroup>}
           {userData.usertype == '4' && <SidebarGroup>

@@ -134,7 +134,8 @@ interface DagState {
 
 interface TransferType { value: string; label: string }
 
-interface FilterLocationState{
+interface FilterLocationState {
+    isLoadingLoc: boolean;
     distCode: string;
     subdivCode: string;
     cirCode: string;
@@ -159,6 +160,20 @@ interface FilterLocationState{
     setMouzas: (mouzas: any[]) => void;
     setLots: (lots: any[]) => void;
     setVillages: (villages: any[]) => void;
+    getDistricts: () => Promise<void>;
+    getCircles: (distCode: string) => Promise<void>;
+    getMouzas: (cirCode: string) => Promise<void>;
+    getLots: (mouzaPargonaCode: string) => Promise<void>;
+    getVillages: (lotNo: string) => Promise<void>;
+}
+interface MasterDataState {
+    isLoadingMaster: boolean,
+    distCode: string | null,
+    landClasses: LandClass[];
+    landGroups: LandGroup[];
+    pattaTypes: PattaType[];
+    transferTypes: TransferType[];
+    getMasterData: (distCode: string) => Promise<void>;
 }
 
 export const useDagStore = create<DagState>()(
@@ -218,16 +233,6 @@ export const useDagStore = create<DagState>()(
     )
 );
 
-interface MasterDataState {
-    isLoadingMaster: boolean,
-    distCode: string | null,
-    landClasses: LandClass[];
-    landGroups: LandGroup[];
-    pattaTypes: PattaType[];
-    transferTypes: TransferType[];
-    getMasterData: (distCode: string) => Promise<void>;
-}
-
 export const useMasterDataStore = create<MasterDataState>()(
     persist(
         (set, get) => ({
@@ -284,7 +289,8 @@ export const useMasterDataStore = create<MasterDataState>()(
 
 export const FilterLocationStore = create<FilterLocationState>()(
     persist(
-        (set) => ({
+        (set, get) => ({
+            isLoadingLoc: false,
             distCode: '',
             subdivCode: '',
             cirCode: '',
@@ -309,6 +315,81 @@ export const FilterLocationStore = create<FilterLocationState>()(
             setMouzas: (mouzas: any[]) => set({ mouzas }),
             setLots: (lots: any[]) => set({ lots }),
             setVillages: (villages: any[]) => set({ villages }),
+            getDistricts: async () => {
+                const data = {
+                };
+                set({ isLoadingLoc: true });
+                const response = await ApiService.get('get_districts', JSON.stringify(data));
+                set({ isLoadingLoc: false });
+
+                if (response.status !== 'y') {
+                    toast.error(response.msg);
+                    return;
+                }
+                const districtsArr = Object.entries(response.data).map(([key, value]) => ({ key, value }));
+                set({ districts: response.data });
+
+            },
+            getCircles: async (distCode: string) => {
+                const data = {
+                    dist_code: distCode
+                };
+                set({ isLoadingLoc: true });
+                const response = await ApiService.get('get_circles', JSON.stringify(data));
+                set({ isLoadingLoc: false });
+
+                if (response.status !== 'y') {
+                    toast.error(response.msg);
+                    return;
+                }
+                const circlesArr = Object.entries(response.data).map(([key, value]) => ({ key, value }));
+                set({ circles: response.data });
+            },
+            getMouzas: async (cirCode: string) => {
+                const data = {
+                    cir_code: cirCode
+                };
+                set({ isLoadingLoc: true });
+                const response = await ApiService.get('get_mouzas', JSON.stringify(data));
+                set({ isLoadingLoc: false });
+
+                if (response.status !== 'y') {
+                    toast.error(response.msg);
+                    return;
+                }
+                const mouzasArr = Object.entries(response.data).map(([key, value]) => ({ key, value }));
+                set({ mouzas: response.data });
+            },
+            getLots: async (mouzaPargonaCode: string) => {
+                const data = {
+                    mouza_pargona_code: mouzaPargonaCode
+                };
+                set({ isLoadingLoc: true });
+                const response = await ApiService.get('get_lots', JSON.stringify(data));
+                set({ isLoadingLoc: false });
+
+                if (response.status !== 'y') {
+                    toast.error(response.msg);
+                    return;
+                }
+                const lotsArr = Object.entries(response.data).map(([key, value]) => ({ key, value }));
+                set({ lots: response.data });
+            },
+            getVillages: async (lotNo: string) => {
+                const data = {
+                    lot_no: lotNo
+                };
+                set({ isLoadingLoc: true });
+                const response = await ApiService.get('get_vills', JSON.stringify(data));
+                set({ isLoadingLoc: false });
+
+                if (response.status !== 'y') {
+                    toast.error(response.msg);
+                    return;
+                }
+                const villagesArr = Object.entries(response.data).map(([key, value]) => ({ key, value }));
+                set({ villages: response.data });
+            }
         }),
         {
             name: 'filter-location-storage', // key in localStorage

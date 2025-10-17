@@ -21,6 +21,7 @@ import CoSurveyReport from "./pages/co/SurveyReports";
 import DeedDocument from "./pages/DeedDocument";
 import LMDashboard from "./pages/lm/LMDashboard";
 import PartDagView from "./pages/reports/PartDagView";
+import Report from "./pages/reports/Report";
 
 function App() {
   const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ function App() {
                   <Route path="/district-report/:dist_code" element={<DistrictReport />} />
                   <Route path="/part-dag-view" element={<PartDagView />} />
                   <Route path="/deedDoc" element={<DeedDocument />} />
+                  <Route path="/reports" element={<Report />} />
                 </Route>
               </Route>
 
