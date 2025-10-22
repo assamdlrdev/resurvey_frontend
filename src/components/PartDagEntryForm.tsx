@@ -232,7 +232,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
         setLoading(false);
 
         if (response.status !== 'y') {
-            toast.error(response.msg);
+            // toast.error(response.msg);
             setDagLandRevenue(0);
             setDagLocalTax(0);
             return;
@@ -553,8 +553,20 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
         }
 
         // Append dynamic documents
+        var errors = [];
         documents.forEach((doc, index) => {
             // Append document metadata as a JSON string
+            if (!doc.document_name) {
+                errors.push(`Please fill name for document ${index + 1}`);
+            } else {
+                if (!doc.document_issue_date) {
+                    errors.push(`Please fill  document issue date for document ${doc.document_name}`);
+                }
+                if (!doc.file) {
+                    errors.push(`Please upload file for document ${doc.document_name}`);
+                }
+            }
+
             const docMetadata = {
                 document_name: doc.document_name,
                 document_no: doc.document_no,
@@ -568,6 +580,15 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                 formData.append(`document_file_${index}`, doc.file);
             }
         });
+        if (errors.length > 0) {
+            var err_string = '';
+            errors.forEach((err) => {
+                err_string += err + '\n';
+            });
+            toast.error(err_string);
+            setLoading(false);
+            return;
+        }
         setLoading(true);
         const response = await ApiService.postForm("submit_possessor", formData);
         setLoading(false);
@@ -747,16 +768,16 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
         newDocuments.forEach((doc, index) => {
             // Append document metadata as a JSON string
             const docMetadata = {
-            document_name: doc.document_name,
-            document_no: doc.document_no,
-            issuing_authority: doc.issuing_authority,
-            document_issue_date: doc.document_issue_date,
+                document_name: doc.document_name,
+                document_no: doc.document_no,
+                issuing_authority: doc.issuing_authority,
+                document_issue_date: doc.document_issue_date,
             };
             formData.append(`document_metadata_${index}`, JSON.stringify(docMetadata));
 
             // Append the actual file
             if (doc.file) {
-            formData.append(`document_file_${index}`, doc.file);
+                formData.append(`document_file_${index}`, doc.file);
             }
         });
 
@@ -1007,7 +1028,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                             <CardHeader className="border-b border-gray-100">
                                 <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
                                     Uploaded Deeds
-                                    
+
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-0">
@@ -1716,7 +1737,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                                                         className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-xl bg-gray-50 relative"
                                                     >
                                                         <div className="space-y-1">
-                                                            <Label>Document Name</Label>
+                                                            <Label>Document Name <span className="text-red-500">*</span></Label>
                                                             <Input
                                                                 type="text"
                                                                 placeholder="e.g. Sale Deed"
@@ -1746,7 +1767,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                                                         </div>
 
                                                         <div className="space-y-1">
-                                                            <Label>Issue Date</Label>
+                                                            <Label>Issue Date <span className="text-red-500">*</span></Label>
                                                             <Input
                                                                 type="date"
                                                                 value={doc.document_issue_date}
@@ -1755,7 +1776,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                                                         </div>
 
                                                         <div className="space-y-1">
-                                                            <Label>Upload</Label>
+                                                            <Label>Upload <span className="text-red-500">*</span></Label>
                                                             <Input
                                                                 type="file"
                                                                 accept=".pdf,image/*"
