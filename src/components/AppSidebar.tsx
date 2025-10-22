@@ -30,7 +30,7 @@ const mainItems = [
 
 const analyticsItems = [
   { title: "Survey Reports", url: "/reports", icon: BarChart3 },
-  // { title: "Analytics", url: "/analytics", icon: Activity },
+  { title: "Area Difference Report", url: "/area-difference-report", icon: Activity },
 ];
 
 const coItems = [
