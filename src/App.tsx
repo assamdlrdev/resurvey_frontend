@@ -22,6 +22,7 @@ import DeedDocument from "./pages/DeedDocument";
 import LMDashboard from "./pages/lm/LMDashboard";
 import PartDagView from "./pages/reports/PartDagView";
 import Report from "./pages/reports/Report";
+import AreaReport from "./pages/reports/AreaDiffReport";
 
 function App() {
   const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ function App() {
                   <Route path="/part-dag-view" element={<PartDagView />} />
                   <Route path="/deedDoc" element={<DeedDocument />} />
                   <Route path="/reports" element={<Report />} />
+                  <Route path="/area-difference-report" element={<AreaReport />} />
                 </Route>
               </Route>
 
