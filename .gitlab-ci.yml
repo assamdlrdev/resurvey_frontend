@@ -13,8 +13,9 @@ deploy_prod:
 deploy_stage:
   stage: deploy_stage
   script:
-    - echo "Deploying to stage server...!!"
-    - ssh -v opc@172.16.3.214 'sudo chown -R opc:opc /var/www/html/resurvey && cd /var/www/html/resurvey && git checkout stage && git reset --hard origin/stage && git pull origin stage && sudo chown -R apache:apache /var/www/html/resurvey'
+    - echo "Deploying dist/ contents to /var/www/html/resurvey ..."
+    - rsync -avz --delete dist/ opc@172.16.3.214:/var/www/html/resurvey_test/
+    - ssh -v opc@172.16.3.214 "sudo chown -R apache:apache /var/www/html/resurvey_test"
     - echo "Deployment successful for stage!!!!!"
   only:
     - stage
