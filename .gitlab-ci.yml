@@ -11,13 +11,13 @@ deploy_prod:
     - main
 
 deploy_stage:
- script:
+  stage: deploy_stage
+  script:
     - echo "Deploying dist/ contents to /var/www/html/resurvey ..."
-    # Rsync only the CONTENTS of dist/ (not the dist folder itself)
     - rsync -avz --delete dist/ opc@172.16.3.214:/var/www/html/resurvey_test/
     - ssh -v opc@172.16.3.214 "sudo chown -R apache:apache /var/www/html/resurvey_test"
-    - echo "Deployment successful for stage!"
-only:
+    - echo "Deployment successful for stage!!!!!"
+  only:
     - stage
 
 deploy_dev:
