@@ -17,7 +17,6 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import StorageService from "@/services/StorageService";
-import { title } from "process";
 
 const authItems = [
   { title: "Login", url: "/login", icon: LogIn },
@@ -47,6 +46,7 @@ export function AppSidebar() {
     auth: true,
     main: true,
     analytics: false,
+    co: false,
   });
   const navigate = useNavigate();
 
@@ -105,11 +105,10 @@ export function AppSidebar() {
   const renderCollapsibleGroup = (
     title: string,
     items: typeof authItems,
-    groupKey: string,
-    defaultOpen = true
+    groupKey: string
   ) => (
     <Collapsible
-      open={openGroups[groupKey]}
+      open={!!openGroups[groupKey]}
       onOpenChange={() => toggleGroup(groupKey)}
     >
       <CollapsibleTrigger asChild>
@@ -138,15 +137,14 @@ export function AppSidebar() {
   const logout = async () => {
     StorageService.jwtRemove();
     goTo('/login');
-
   };
 
   return (
     <Sidebar className={cn(
-      "border-r border-medical-200 bg-white shadow-sm transition-all duration-300",
+      "border-r border-medical-200 bg-white shadow-sm transition-all duration-300 h-screen",
       isCollapsed ? "w-16" : "w-64"
     )}>
-      <SidebarContent className="py-4 bg-white">
+      <SidebarContent className="py-4 bg-white flex flex-col h-full">
         {/* Logo/Brand Section */}
         <div className={cn(
           "px-4 pb-4 mb-4 border-b border-medical-100",
@@ -155,7 +153,7 @@ export function AppSidebar() {
           {!isCollapsed ? (
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-br from-medical-500 to-medical-600 rounded-lg flex items-center justify-center">
-                {/* <Activity className="h-4 w-4 text-white" /> */}
+                {/* logo placeholder */}
               </div>
               <div>
                 <h2 className="font-bold text-medical-900 text-lg leading-none">Resurvey</h2>
@@ -169,8 +167,8 @@ export function AppSidebar() {
           )}
         </div>
 
-        {/* Navigation Groups */}
-        <div className="">
+        {/* Navigation Groups (scrollable) */}
+        <div className="flex-1 overflow-y-auto px-2">
           {(userData.usertype == '1' || userData.usertype == '11' || userData.usertype == '14') && <SidebarGroup>
             {renderCollapsibleGroup("Survey", mainItems, "main")}
           </SidebarGroup>}
@@ -178,39 +176,46 @@ export function AppSidebar() {
           {(userData.usertype == '1' || userData.usertype == '11' || userData.usertype == '14') && <SidebarGroup>
             {renderCollapsibleGroup("Reports", analyticsItems, "analytics")}
           </SidebarGroup>}
+
           {userData.usertype == '4' && <SidebarGroup>
             {renderCollapsibleGroup("CO Panel", coItems, "co")}
           </SidebarGroup>}
 
-          {/* Settings Section */}
+          {/* Optional Auth group */}
+          {(!user || !userData) && <SidebarGroup>
+            {renderCollapsibleGroup("Auth", authItems, "auth")}
+          </SidebarGroup>}
+        </div>
+
+        {/* Footer / Logout pushed to bottom */}
+        <div className="mt-4 px-3 pt-3 border-t border-medical-100">
           <SidebarGroup>
-            <SidebarGroupLabel className={cn(
-              "px-3 py-2 text-xs font-semibold tracking-wider uppercase",
-              "text-medical-600"
-            )}>
-              {!isCollapsed ? "System" : "S"}
-            </SidebarGroupLabel>
-            <SidebarGroupContent className="mt-2">
+            <SidebarGroupContent className="mt-0">
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <button className={cn(
-                      "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 w-full",
-                      "text-medical-700 hover:bg-medical-100 hover:text-medical-800"
-                    )}>
-                      <Settings className="h-4 w-4 text-medical-600" />
-                      {!isCollapsed && (
-                        <ConfirmDialog
-                          trigger={<span className="font-medium text-sm">Sign Out</span>}
-                          title="Logout"
-                          description="Are you sure you want to logout of the current session?"
-                          confirmText="Yes"
-                          cancelText="No"
-                          onConfirm={logout}
-                        />
-                        // <span className="font-medium text-sm" onClick={logout}>Sign Out</span>
-                      )}
-                    </button>
+                    <div className="w-full">
+                      <ConfirmDialog
+                        trigger={
+                          <button
+                            className={cn(
+                              "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 w-full",
+                              "text-medical-700 hover:bg-medical-100 hover:text-medical-800"
+                            )}
+                          >
+                            <Settings className={cn("h-4 w-4", isCollapsed ? "mx-auto" : "text-red-500")} />
+                            {!isCollapsed && (
+                              <span className="font-medium text-sm text-red-500">Log Out</span>
+                            )}
+                          </button>
+                        }
+                        title="Logout"
+                        description="Are you sure you want to logout of the current session?"
+                        confirmText="Yes"
+                        cancelText="No"
+                        onConfirm={logout}
+                      />
+                    </div>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
