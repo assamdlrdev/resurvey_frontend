@@ -21,7 +21,7 @@ export default function SurveyorLayout() {
     }
 
     // if(userData.usertype == )
-    if (userData.usertype !== '11' && userData.usertype !== '1' && userData.usertype !== '14') {
+    if (userData.usertype !== '11' && userData.usertype !== '1' && userData.usertype !== '14' && userData.usertype !== '2' && userData.usertype !== '9') {
         return <Navigate to="/login" replace />;
     }
 
