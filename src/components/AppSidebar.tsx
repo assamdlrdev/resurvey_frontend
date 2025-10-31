@@ -87,7 +87,7 @@ export function AppSidebar() {
       visible: () => true,
       items: [
         {
-          title: "Sign Out",
+          title: "Sign Out"+ (userData?.usercode ? ` (${userData.usercode})` : ""),
           icon: Settings,
           onClick: logout,
         },
