@@ -5,6 +5,7 @@ import {
   GeoJSON,
   Marker,
   useMap,
+  WMSTileLayer,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css"; // ✅ required for map styling
 import {
@@ -94,7 +95,13 @@ export default function MapViewCom(mapdata: any) {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
-
+      <WMSTileLayer
+        url="https://landhub.assam.gov.in/ori/resurvey/wms"
+        layers="resurvey:corrected_resurvey"
+        format="image/png"
+        transparent={true}
+        attribution="WMS Data &copy; Bhunaksha"
+      />
       <FitBounds geojson={convertedGeojson} />
 
       {convertedGeojson && (
@@ -102,18 +109,18 @@ export default function MapViewCom(mapdata: any) {
           key="village-geojson"
           data={convertedGeojson}
           style={() => ({
-            color: "#374151", // dark gray border
+            color: "red", // dark gray border
             weight: 1.5,
             fillColor: "#86efac", // soft green fill
-            fillOpacity: 0.6,
+            fillOpacity: 0,
           })}
           onEachFeature={(feature, layer) => {
             // Popup info
             if (feature.properties) {
               let content = "<b>Parcel Info</b><br/>";
               // for (const [key, value] of Object.entries(feature.properties)) {
-                content += `<b>Survey Number:</b> ${feature.properties.kide || ""}<br/>`;
-                content += `<b>Area (sqm):</b> ${feature.properties.area_sqm || ""}m²<br/>`;
+              content += `<b>Survey Number:</b> ${feature.properties.kide || ""}<br/>`;
+              content += `<b>Area (sqm):</b> ${feature.properties.area_sqm || ""}m²<br/>`;
 
               // }
               layer.bindPopup(content);
@@ -124,13 +131,13 @@ export default function MapViewCom(mapdata: any) {
               mouseover: (e) => {
                 e.target.setStyle({
                   fillColor: "#fbbf24", // amber fill on hover
-                  fillOpacity: 0.8,
+                  fillOpacity: 0.3,
                 });
               },
               mouseout: (e) => {
                 e.target.setStyle({
                   fillColor: "#86efac", // reset to default green
-                  fillOpacity: 0.6,
+                  fillOpacity: 0,
                 });
               },
             });
@@ -168,7 +175,7 @@ export default function MapViewCom(mapdata: any) {
       {!isFullscreen && (
         <Card className="relative">
           <CardHeader className="py-1 flex items-center justify-between">
-           
+
             <Button
               variant="outline"
               size="icon"
