@@ -32,7 +32,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter basename="/resurvey">
+        <BrowserRouter basename="/resurvey_preprod">
           <main className="flex-1 bg-medical-50">
             <Routes>
               <Route element={<AuthLayout />}>
