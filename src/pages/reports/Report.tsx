@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Map, MapIcon, MapPinIcon } from "lucide-react";
 import ApiService from "@/services/ApiService";
 import { motion, AnimatePresence } from "framer-motion";
 import area from "@turf/area";
@@ -207,24 +207,24 @@ const AreaReport: React.FC = () => {
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-pink-600 to-yellow-500 capitalize">
+                    <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-pink-600 to-yellow-500 capitalize">
                         {level === "district" ? "Districts" :
                             level === "circle" ? "Circles" :
                                 level === "mouza" ? "Mouzas" :
                                     level === "lot" ? "Lots" :
                                         level === "village" ? "Villages" : "Village Report"}
                     </h1>
-                    <p className="text-gray-500 text-sm mt-1">
+                    <p className="text-gray-500 text-md mt-1">
                         Navigate step by step to view survey data summary
                     </p>
 
                     {/* Path pills */}
                     <div className="mt-3 flex flex-wrap gap-2">
-                        {path.district_name && <span className="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">District: {path.district_name}</span>}
-                        {path.circle_name && <span className="text-xs px-2 py-1 rounded-full bg-yellow-50 text-yellow-800 border border-yellow-100">Circle: {path.circle_name}</span>}
-                        {path.mouza_name && <span className="text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">Mouza: {path.mouza_name}</span>}
-                        {path.lot_name && <span className="text-xs px-2 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-100">Lot: {path.lot_name}</span>}
-                        {path.village_name && <span className="text-xs px-2 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-100">Village: {path.village_name}</span>}
+                        {path.district_name && <span className=" px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">District: {path.district_name}</span>}
+                        {path.circle_name && <span className=" px-2 py-1 rounded-full bg-yellow-50 text-yellow-800 border border-yellow-100">Circle: {path.circle_name}</span>}
+                        {path.mouza_name && <span className=" px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">Mouza: {path.mouza_name}</span>}
+                        {path.lot_name && <span className=" px-2 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-100">Lot: {path.lot_name}</span>}
+                        {path.village_name && <span className=" px-2 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-100">Village: {path.village_name}</span>}
                     </div>
                 </div>
 
@@ -342,31 +342,84 @@ const AreaReport: React.FC = () => {
                     >
                         {/* Totals / Summary */}
                         <div className="p-4 border-b bg-gradient-to-r from-slate-50 to-white">
-                            <div className="grid grid-cols-1 sm:grid-cols-6 gap-4 items-center">
+                            <div className="grid grid-cols-1 sm:grid-cols-7 gap-2 items-center">
                                 <div className="p-3 rounded-md border-l-4 border-indigo-400 bg-indigo-50">
-                                    <div className="text-xs text-indigo-700">Total DAGs in Dharitree</div>
+                                    <div className="text-xs text-indigo-700">DAGs in Dharitree</div>
                                     <div className="mt-1 text-lg font-bold text-indigo-900">{report.length}</div>
                                 </div>
-                                <div className="p-3 rounded-md border-l-4 border-pink-400 bg-pink-50">
-                                    <div className="text-xs text-pink-700">Total DAG Area in Dharitree (m²)</div>
-                                    <div className="mt-1 text-lg font-bold text-pink-900">{Number(total_dags_area_sqm || 0).toFixed(2)}</div>
+                                <div className="p-3 rounded-md border-l-4 border-purple-400 bg-purple-50">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <div className="text-xs text-purple-700">Plots in Bhunaksha</div>
+                                            <div className="mt-1 text-lg font-bold text-purple-900">{map_geojson?.length}</div>
+                                        </div>
+
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            title="Open map view"
+                                            onClick={() => {
+                                                const r = report[0];
+                                                if (!r) return;
+                                                const url = `/resurvey/village-map?loc=${r.dist_code}-${r.subdiv_code}-${r.cir_code}-${r.mouza_pargona_code}-${r.lot_no}-${r.vill_townprt_code}`;
+                                                const w = window.open(url, "_blank");
+                                                if (w) w.opener = null;
+                                            }}
+                                            className="ml-3 p-2 rounded-md border border-transparent hover:bg-gray-50"
+                                        >
+                                            <MapPinIcon className="w-4 h-4 text-purple-600" />
+                                        </Button>
+                                    </div>
                                 </div>
                                 <div className="p-3 rounded-md border-l-4 border-emerald-400 bg-emerald-50">
-                                    <div className="text-xs text-emerald-700">Total Part Dags Entered</div>
+                                    <div className="text-xs text-emerald-700">Part Dags Entered</div>
                                     <div className="mt-1 text-lg font-bold text-emerald-900">{total_part_dags_entered}</div>
                                 </div>
+                                <div className="p-3 rounded-md border-l-4 border-pink-400 bg-pink-50">
+                                    <div className="text-xs text-pink-700">DAG Area in Dharitree (m²)</div>
+                                    <div className="mt-1 text-lg font-bold text-pink-900">{Number(total_dags_area_sqm || 0).toFixed(2)}</div>
+                                </div>
                                 <div className="p-3 rounded-md border-l-4 border-amber-400 bg-amber-50">
-                                    <div className="text-xs text-amber-700">Total Entered Part DAGs Area (m²)</div>
+                                    <div className="text-xs text-amber-700">Entered Part DAGs Area (m²)</div>
                                     <div className="mt-1 text-lg font-bold text-amber-900">{Number(total_splitted_dags_area_sqm || 0).toFixed(2)}</div>
                                 </div>
 
-                                <div className="p-3 rounded-md border-l-4 border-sky-400 bg-sky-50 col-span-2">
-                                    <div className="text-xs text-sky-700">Total Area according to Bhunaksha (m²)</div>
+                                <div className="p-3 rounded-md border-l-4 border-sky-400 bg-sky-50">
+                                    <div className="text-xs text-sky-700">Area in Bhunaksha (m²)</div>
                                     <div className="mt-1 text-lg font-bold text-sky-900">{Number(total_area_bhunaksha || 0).toFixed(2)}</div>
                                 </div>
-                            </div>
 
-                           
+                                <div className="p-3 rounded-md border-l-4 border-emerald-400 bg-emerald-50">
+                                    <div className="text-xs text-emerald-700 flex items-center gap-2">
+                                        <span>Area Difference (%)</span>
+                                        <span
+                                            title="Percentage difference between Entered Part DAGs Area and DAG Area in Dharitree. Calculated as ((EnteredArea - DharitreeArea) / DharitreeArea) × 100. Positive = entered area is more; negative = entered area is less. If Dharitree area is 0 and entered area is also 0, shows 0.00% (equal). If Dharitree area is 0 and entered area is non-zero, shows N/A."
+                                            aria-label="Area difference tooltip"
+                                            className="text-blue-400 hover:text-blue-600 cursor-help"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
+                                            </svg>
+                                        </span>
+                                    </div>
+                                    <div className="mt-1 text-lg font-bold text-emerald-900">
+                                        {(() => {
+                                            const base = Number(total_dags_area_sqm || 0);
+                                            const splitted = Number(total_splitted_dags_area_sqm || 0);
+
+                                            if (base === 0) {
+                                                // If both zero, show 0%, otherwise cannot compute percentage
+                                                return base === 0 && splitted === 0 ? "0.00% (equal)" : "N/A";
+                                            }
+
+                                            const diff = splitted - base;
+                                            const pct = (diff / base) * 100;
+                                            const label = pct >= 0 ? "more" : "less";
+                                            return `${Math.abs(pct).toFixed(2)}% ${label}`;
+                                        })()}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <table className="min-w-full text-sm text-gray-700">
