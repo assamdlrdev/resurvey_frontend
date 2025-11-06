@@ -1,4 +1,4 @@
-import { Home, Users, FileText, Database, LogIn, UserPlus, Settings, Activity, BarChart3, ChevronDown, FileTextIcon } from "lucide-react";
+import { Home, Users, FileText, Database, LogIn, UserPlus, Settings, Activity, BarChart3, ChevronDown, FileTextIcon, MapPinCheck } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -53,7 +53,7 @@ export function AppSidebar() {
     {
       key: "main",
       title: "Survey",
-      collapsible: true,
+      collapsible: false,
       visible: () => ["1", "11", "14", "2"].includes(userData?.usertype),
       items: [
         { title: "Survey Form", url: "/survey-form", icon: FileTextIcon },
@@ -78,6 +78,15 @@ export function AppSidebar() {
         { title: "CO Dashboard", url: "/co-dashboard", icon: Home },
         { title: "Survey Reports", url: "/co-survey-reports", icon: FileText },
         { title: "Mutation", url: "/co-mutation", icon: FileText },
+      ],
+    },
+    {
+      key: "Maps",
+      title: "Maps",
+      collapsible: false,
+      visible: () => true,
+      items: [
+        { title: "Village Map View", url: "/village-map", icon: MapPinCheck },
       ],
     },
     {

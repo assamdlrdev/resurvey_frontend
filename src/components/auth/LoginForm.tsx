@@ -44,10 +44,10 @@ export default function LoginForm() {
         
         return;
     }
-    if(!validateCaptcha(captcha)) {
-        toast.error("Captcha does not match!");
-        return;
-    }
+    // if(!validateCaptcha(captcha)) {
+    //     toast.error("Captcha does not match!");
+    //     return;
+    // }
     loadCaptchaEnginge(6);
     setCaptcha('');
     
@@ -68,7 +68,14 @@ export default function LoginForm() {
     }
     StorageService.jwtSave(response.data);
     toast.success(response.msg);
-    goTo('/survey-form');
+
+    const user = StorageService.getJwtCookie();
+    const userData: any = StorageService.getJwtCookieData(user);
+    if(userData.usertype == '14'){
+      goTo('/survey-form');
+    }else{
+      goTo('/reports');
+    }
   };
 
   return (
