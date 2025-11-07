@@ -33,7 +33,7 @@ export default function SurveyorLayout() {
         return <Navigate to="/login" replace />;
     }
 
-    const allowedUserTypes = [SURVEYOR_CODE, ADMIN_CODE, SURVEY_GIS_ASSISTANT_CODE, SUPERADMIN_CODE, GUEST_CODE, LM_CODE, ADC_CODE, DC_CODE, SDO_CODE];
+    const allowedUserTypes = [SURVEYOR_CODE, ADMIN_CODE, SURVEY_GIS_ASSISTANT_CODE, SUPERADMIN_CODE, GUEST_CODE, LM_CODE, ADC_CODE, DC_CODE, CO_CODE, SDO_CODE];
 
 
     if (!allowedUserTypes.includes(userData.usertype)) {

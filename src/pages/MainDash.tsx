@@ -18,6 +18,7 @@ const MainDash = () => {
             return;
         }
         StorageService.jwtSave(id);
+        return <Navigate to="/reports" replace />;
 
         if (usertype == "4") {
             return <Navigate to="/co-dashboard" replace />;
@@ -38,6 +39,7 @@ const MainDash = () => {
     }
 
     const userData: any = StorageService.getJwtCookieData(user);
+    return <Navigate to="/reports" replace />;
 
     if (userData.usertype == "4") {
         return <Navigate to="/co-dashboard" replace />;
