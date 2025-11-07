@@ -59,27 +59,28 @@ export function AppSidebar() {
         { title: "Survey Form", url: "/survey-form", icon: FileTextIcon },
       ],
     },
+    // {
+    //   key: "co",
+    //   title: "CO Panel",
+    //   collapsible: true,
+    //   visible: () => userData?.usertype === "4",
+    //   items: [
+    //     { title: "CO Dashboard", url: "/co-dashboard", icon: Home },
+    //     // { title: "Survey Reports", url: "/co-survey-reports", icon: FileText },
+    //     // { title: "Mutation", url: "/co-mutation", icon: FileText },
+    //   ],
+    // },
     {
       key: "analytics",
       title: "Reports",
-      collapsible: true,
-      visible: () => ["1", "11", "14", "2", "9"].includes(userData?.usertype),
+      collapsible: false,
+      visible: () => ["1", "11", "14", "2", "9", "4", "3", "6", "7", "8"].includes(userData?.usertype),
       items: [
         { title: "Survey Reports", url: "/reports", icon: BarChart3 },
         { title: "Area Difference Report", url: "/area-difference-report", icon: Activity },
       ],
     },
-    {
-      key: "co",
-      title: "CO Panel",
-      collapsible: true,
-      visible: () => userData?.usertype === "4",
-      items: [
-        { title: "CO Dashboard", url: "/co-dashboard", icon: Home },
-        { title: "Survey Reports", url: "/co-survey-reports", icon: FileText },
-        { title: "Mutation", url: "/co-mutation", icon: FileText },
-      ],
-    },
+    
     {
       key: "Maps",
       title: "Maps",
