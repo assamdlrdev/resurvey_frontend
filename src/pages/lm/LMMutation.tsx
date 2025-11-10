@@ -108,6 +108,9 @@ const LMMutation: React.FC = () => {
             setDagData([]);
         }
         else {
+            setApplicantData([]);
+            setDagNos([]);
+            setDagData([]);
             getDagData();
         }
     }, [pattaNo]);
@@ -317,8 +320,6 @@ const LMMutation: React.FC = () => {
     };
 
     const getDagData = async () => {
-        setApplicantData([]);
-        setDagNos([]);
         const data = {
             vill_townprt_code: villCode,
             patta_type_code: pattaType,
@@ -346,6 +347,11 @@ const LMMutation: React.FC = () => {
 
     const getPattaNos = async() => {
         setPattaNo('');
+        if(villCode == '') {
+            setPattaNoData([]);
+            toast.error('No village selected!');
+            return;
+        }
         const data = {
             vill_townprt_code: villCode,
             patta_type_code: pattaType 
@@ -667,6 +673,11 @@ const LMMutation: React.FC = () => {
                     <h1 className="text-3xl font-bold text-medical-900 mb-2">Mutation</h1>
                 </div>
                 <div className="w-full bg-white rounded-lg shadow p-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-4 my-4">
+                        <div className="text-center">
+                             <Label htmlFor="district" className="text-xl font-bold">Location</Label>
+                        </div>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
                             <Label htmlFor="district">Villages</Label>
@@ -708,13 +719,32 @@ const LMMutation: React.FC = () => {
                         </div>
                     </div>
                 </div>
-                <div className="w-full bg-white rounded-lg shadow p-4 mb-4">
+                {dagData && dagData.length > 0 && <div className="w-full bg-white rounded-lg shadow p-4 mb-4">
+                    <div className="w-full p-2 text-center">
+                        <Label className="text-xl font-bold">Select Dag Nos</Label>
+                    </div>
+                    <div className="w-full h-64 overflow-y-auto border p-4">
+                        <div className="w-full flex flex-row gap-4">
+                            <div className="w-1/3 p-4"><strong>Dag No</strong></div>
+                            <div className="w-1/3 p-4"><strong>Total Area</strong></div>
+                            <div className="w-1/3 p-4"><strong>Action</strong></div>
+                        </div>
+                        {dagData.map((dag, index) => (
+                            <div key={index} className="w-full flex flex-row gap-4">
+                                <div className="w-1/3 p-4">{dag.dag_no}</div>
+                                <div className="w-1/3 p-4">{['21', '22', '23'].includes(dag.dist_code) ? dag.dag_area_b + 'B-' + dag.dag_area_k + 'K-' + dag.dag_area_lc + 'C-' + dag.dag_area_g + 'G' : dag.dag_area_b + 'B-' + dag.dag_area_k + 'K-' + dag.dag_area_lc + 'L'}</div>
+                                <div className="w-1/3 p-4"><input type="checkbox" onChange={(e: any) => checkHandler(e, dag.dag_no)} className="w-6 h-6 text-blue-600 border-gray-300 rounded focus:ring-blue-500" /></div>
+                            </div>
+                        ))}
+                    </div>
+                </div>}
+                {dagNos && dagNos.length > 0 && <div className="w-full bg-white rounded-lg shadow p-4 mb-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                         <div>
-                            <Label htmlFor="district">Applicants</Label>
+                            <Label className="text-xl font-bold" htmlFor="district">Applicants</Label>
                         </div>
                         {dagNos && dagNos.length > 0 && <div className="flex justify-end">
-                            <Button onClick={addApplicantModal}>Add</Button>
+                            <Button onClick={addApplicantModal} className="bg-green-600 hover:bg-green-700">Add</Button>
                         </div>}
                     </div>
                     {(applicantData && applicantData.length > 0) ? (<div className="w-full bg-white rounded-lg shadow p-4 mb-4">
@@ -757,29 +787,10 @@ const LMMutation: React.FC = () => {
                                 <div className="w-1/6 p-4"></div>
                             </div>
                     </div>)}
-                </div>
-                {dagData && dagData.length > 0 && <div className="w-full bg-white rounded-lg shadow p-4 mb-4">
-                    <div className="w-full p-2">
-                        <Label>Select Dag Nos</Label>
-                    </div>
-                    <div className="w-full h-64 overflow-y-auto border p-4">
-                        <div className="w-full flex flex-row gap-4">
-                            <div className="w-1/3 p-4"><strong>Dag No</strong></div>
-                            <div className="w-1/3 p-4"><strong>Total Area</strong></div>
-                            <div className="w-1/3 p-4"><strong>Action</strong></div>
-                        </div>
-                        {dagData.map((dag, index) => (
-                            <div key={index} className="w-full flex flex-row gap-4">
-                                <div className="w-1/3 p-4">{dag.dag_no}</div>
-                                <div className="w-1/3 p-4">{(dag.dist_code == '21' || dag.dist_code == '22' || dag.dist_code == '23') ? dag.dag_area_b + 'B-' + dag.dag_area_k + 'K-' + dag.dag_area_lc + 'C-' + dag.dag_area_g + 'G' : dag.dag_area_b + 'B-' + dag.dag_area_k + 'K-' + dag.dag_area_lc + 'L'}</div>
-                                <div className="w-1/3 p-4"><input type="checkbox" onChange={(e: any) => checkHandler(e, dag.dag_no)} className="w-6 h-6 text-blue-600 border-gray-300 rounded focus:ring-blue-500" /></div>
-                            </div>
-                        ))}
-                    </div>
                 </div>}
                 {pattadarData && pattadarData.length > 0 && <div className="w-full bg-white rounded-lg shadow p-4 mb-4">
-                    <div className="w-full p-2">
-                        <Label>Select Pattadars</Label>
+                    <div className="w-full p-2 text-center">
+                        <Label className="text-xl font-bold">Select Pattadars</Label>
                     </div>
                     <div className="w-full h-64 overflow-y-auto border p-4">
                         <div className="w-full flex flex-row gap-4">
@@ -800,8 +811,8 @@ const LMMutation: React.FC = () => {
                     </div>
                 </div>}
                 {pdarInplaceAlongData && pdarInplaceAlongData.length > 0 && <div className="w-full bg-white rounded-lg shadow p-4 mb-4">
-                    <div className="w-full p-2">
-                        <Label>Inplace Alongwith Status</Label>
+                    <div className="w-full p-2 text-center">
+                        <Label className="text-xl font-bold">Inplace Alongwith Status</Label>
                     </div>
                     <div className="w-full h-64 overflow-y-auto border p-4">
                         <div className="w-full flex flex-row gap-4">
@@ -979,9 +990,9 @@ const LMMutation: React.FC = () => {
                         </div>
                     </div>
                 </div>
-                <div className="w-full bg-white rounded-lg shadow p-4 mb-4">
-                    {showButton && <Button onClick={submitForm}>Forward to CO</Button>}
-                </div>
+                {dagNos && dagNos.length > 0 && <div className="w-full bg-white rounded-lg shadow p-4 mb-4 text-center">
+                    {showButton && <Button onClick={submitForm} className="bg-green-600 hover:bg-green-700">Forward to CO</Button>}
+                </div>}
             </div>
 
 

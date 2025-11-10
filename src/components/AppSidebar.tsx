@@ -17,6 +17,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import StorageService from "@/services/StorageService";
+import Constants from "@/config/Constants";
 
 export function AppSidebar() {
   const { state, isMobile, toggleSidebar } = useSidebar();
@@ -34,7 +35,12 @@ export function AppSidebar() {
 
   const logout = async () => {
     StorageService.jwtRemove();
-    goTo("/login");
+    if(userData.usertype == '4' || userData.usertype == '3') {
+      window.location.href = Constants.SINGLESIGN_URL;
+    }
+    else {
+      goTo('/login');
+    }
   };
 
   // Single centralized config. Edit this array to add/remove groups/items.
