@@ -20,9 +20,15 @@ import CODashboard from "./pages/co/CODashboard";
 import CoSurveyReport from "./pages/co/SurveyReports";
 import DeedDocument from "./pages/DeedDocument";
 import LMDashboard from "./pages/lm/LMDashboard";
+import LMLayout from "./layouts/LMLayout";
+import LMMutation from "./pages/lm/LMMutation";
+import LMMutationCases from "./pages/lm/LMMutationCases";
+import CoMutation from "./pages/co/CoMutation";
+import CoMutDetails from "./pages/co/CoMutDetails";
 import PartDagView from "./pages/reports/PartDagView";
 import Report from "./pages/reports/Report";
 import AreaReport from "./pages/reports/AreaDiffReport";
+import VillageMap from "./pages/VillageMap";
 
 function App() {
   const queryClient = new QueryClient();
@@ -50,6 +56,7 @@ function App() {
                   <Route path="/deedDoc" element={<DeedDocument />} />
                   <Route path="/reports" element={<Report />} />
                   <Route path="/area-difference-report" element={<AreaReport />} />
+                  <Route path="/village-map" element={<VillageMap />} />
                 </Route>
               </Route>
 
@@ -57,13 +64,19 @@ function App() {
                 <Route element={<DashboardLayout />}>
                   <Route path="/co-dashboard" element={<CODashboard />} />
                   <Route path="/co-survey-reports" element={<CoSurveyReport />} />
+                  <Route path="/co-mutation" element={<CoMutation />} />
+                  <Route path="/co-mut-details" element={<CoMutDetails />} />
+                </Route>
+              </Route>
+              <Route element={<LMLayout />}>
+                <Route element={<DashboardLayout />}>
+                  <Route path="/lm-dashboard" element={<LMDashboard />} />
+                  <Route path="/lm-mutation" element={<LMMutation />} />
+                  <Route path="/lm-mutation-cases" element={<LMMutationCases />} />
                   <Route path="/part-dag-view" element={<PartDagView />} />
                 </Route>
               </Route>
-              <Route element={<DashboardLayout />}>
-                <Route path="/lm-dashboard" element={<LMDashboard />} />
-                <Route path="/part-dag-view" element={<PartDagView />} />
-              </Route>
+              
               <Route path="*" element={<NotFound />} />
               <Route path="/chitha-view" element={<Chitha />} />
               <Route path="/dashboard" element={<MainDash />} />
