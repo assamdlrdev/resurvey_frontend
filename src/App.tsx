@@ -25,7 +25,10 @@ import LMMutation from "./pages/lm/LMMutation";
 import LMMutationCases from "./pages/lm/LMMutationCases";
 import CoMutation from "./pages/co/CoMutation";
 import CoMutDetails from "./pages/co/CoMutDetails";
-
+import PartDagView from "./pages/reports/PartDagView";
+import Report from "./pages/reports/Report";
+import AreaReport from "./pages/reports/AreaDiffReport";
+import VillageMap from "./pages/VillageMap";
 
 function App() {
   const queryClient = new QueryClient();
@@ -49,7 +52,11 @@ function App() {
                   <Route path="/survey-reports" element={<SurveyReports />} />
                   <Route path="/survey-dashboard" element={<SurveyDashboard />} />
                   <Route path="/district-report/:dist_code" element={<DistrictReport />} />
+                  <Route path="/part-dag-view" element={<PartDagView />} />
                   <Route path="/deedDoc" element={<DeedDocument />} />
+                  <Route path="/reports" element={<Report />} />
+                  <Route path="/area-difference-report" element={<AreaReport />} />
+                  <Route path="/village-map" element={<VillageMap />} />
                 </Route>
               </Route>
 
@@ -66,6 +73,7 @@ function App() {
                   <Route path="/lm-dashboard" element={<LMDashboard />} />
                   <Route path="/lm-mutation" element={<LMMutation />} />
                   <Route path="/lm-mutation-cases" element={<LMMutationCases />} />
+                  <Route path="/part-dag-view" element={<PartDagView />} />
                 </Route>
               </Route>
               
