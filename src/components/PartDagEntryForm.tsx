@@ -26,9 +26,9 @@ import { useNavigate } from "react-router-dom";
 
 interface Props {
     dagNo: string;
-    setDagNo: Dispatch<SetStateAction<string>>,
+    setDagNo: Dispatch<SetStateAction<string>>;
     vill: string;
-    setVill: Dispatch<SetStateAction<string>>,
+    setVill: Dispatch<SetStateAction<string>>;
     mapdata: any
 }
 

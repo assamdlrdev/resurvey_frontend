@@ -18,6 +18,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { cn } from "@/lib/utils";
 import StorageService from "@/services/StorageService";
 import { title } from "process";
+import Constants from "@/config/Constants";
 
 const authItems = [
   { title: "Login", url: "/login", icon: LogIn },
@@ -37,6 +38,13 @@ const coItems = [
   { title: "CO Dashboard", url: "/co-dashboard", icon: Home },
   { title: "Survey Reports", url: "/co-survey-reports", icon: FileText },
   { title: "Mutation", url: "/co-mutation", icon: FileText}
+];
+
+const lmItems = [
+  { title: "LM Dashboard", url: "/lm-dashboard", icon: Home },
+  // { title: "Survey Reports", url: "/co-survey-reports", icon: FileText },
+  { title: "Mutation", url: "/lm-mutation", icon: FileText},
+  { title: "Mutation Cases", url: "/lm-mutation-cases", icon: FileText},
 ];
 
 export function AppSidebar() {
@@ -137,8 +145,12 @@ export function AppSidebar() {
 
   const logout = async () => {
     StorageService.jwtRemove();
-    goTo('/login');
-
+    if(userData.usertype == '4' || userData.usertype == '3') {
+      window.location.href = Constants.SINGLESIGN_URL;
+    }
+    else {
+      goTo('/login');
+    }
   };
 
   return (
@@ -180,6 +192,9 @@ export function AppSidebar() {
           </SidebarGroup>}
           {userData.usertype == '4' && <SidebarGroup>
             {renderCollapsibleGroup("CO Panel", coItems, "co")}
+          </SidebarGroup>}
+          {userData.usertype == '3' && <SidebarGroup>
+            {renderCollapsibleGroup("LM Panel", lmItems, "lm")}
           </SidebarGroup>}
 
           {/* Settings Section */}
