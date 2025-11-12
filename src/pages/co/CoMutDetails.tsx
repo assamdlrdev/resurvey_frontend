@@ -323,17 +323,17 @@ const CoMutDetails: React.FC = () => {
 
                         </table>
                     </div>
-                    <div className="py-2">
+                    {(caseDetails && caseStatus && dagDetails && pattadars && petitioners) && <div className="py-2">
                         <ConfirmDialog
-                            trigger={<Button>Submit</Button>}
+                            trigger={<Button className="bg-green-600 hover:bg-green-700">Submit</Button>}
                             title="Submit"
                             description="Are you sure you want to proceed to the Auto updation of the mutation process?"
                             confirmText="Yes"
                             cancelText="No"
                             onConfirm={submitCase}
+                            buttonStyle="green"
                         />
-                        {/* <Button onClick={submitCase}>Submit</Button> */}
-                    </div>
+                    </div>}
                     
                 </div>
             </div>

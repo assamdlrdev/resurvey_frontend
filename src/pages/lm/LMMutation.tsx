@@ -2,6 +2,7 @@
 import Loader from "@/components/Loader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea";
@@ -127,6 +128,8 @@ const LMMutation: React.FC = () => {
             setPattadarData([]);
         }
         else {
+            // setPattadars([]);
+            // setPattadarData([]);
             updatePattadars();
         }
     }, [dagNos]);
@@ -991,7 +994,19 @@ const LMMutation: React.FC = () => {
                     </div>
                 </div>
                 {dagNos && dagNos.length > 0 && <div className="w-full bg-white rounded-lg shadow p-4 mb-4 text-center">
-                    {showButton && <Button onClick={submitForm} className="bg-green-600 hover:bg-green-700">Forward to CO</Button>}
+                    {showButton && 
+                    
+                    (<ConfirmDialog
+                        trigger={(<Button className="bg-green-600 hover:bg-green-700">Forward to CO</Button>)}
+                        title="Submit"
+                        description="Are you sure you want to generate and send the case to the CO?"
+                        confirmText="Yes"
+                        cancelText="No"
+                        onConfirm={submitForm}
+                        buttonStyle="green"
+                    />)}
+
+                   
                 </div>}
             </div>
 
