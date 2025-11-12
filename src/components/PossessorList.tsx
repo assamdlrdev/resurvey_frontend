@@ -73,6 +73,7 @@ export default function PossessorsList({
                             `${p.dist_code}-${p.subdiv_code}-${p.cir_code}-${p.mouza_pargona_code}-${p.lot_no}-${p.vill_townprt_code}-${p.old_dag_no}-${p.part_dag}-${p.possessor_id}`
                           )
                         }
+                        buttonStyle="red"
                       />
                       <Button
                         className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-md px-3 py-1"

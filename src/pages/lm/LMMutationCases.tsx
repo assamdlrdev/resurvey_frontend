@@ -61,7 +61,7 @@ const LMMutationCases: React.FC = () => {
                                             <th className="px-2 py-2 border">Case No</th>
                                             <th className="px-2 py-2 border">Petition No</th>
                                             <th className="px-2 py-2 border">Village</th>
-                                            <th className="px-2 py-2 border">Area (B-K-L-G)</th>
+                                            <th className="px-2 py-2 border">Mutated Area (B-K-L-G)</th>
                                             <th className="px-2 py-2 border">Submitted On</th>
                                             <th className="px-2 py-2 border">Status</th>
                                             {/* <th className="px-2 py-2 border">Actions</th> */}

@@ -10,6 +10,7 @@ interface ConfirmDialogProps {
   confirmText?: string;             // Confirm button text
   cancelText?: string;              // Cancel button text
   onConfirm: () => void | Promise<void>;  // Action on confirm
+  buttonStyle: string;
 }
 
 export function ConfirmDialog({
@@ -18,6 +19,7 @@ export function ConfirmDialog({
   description = "This action cannot be undone.",
   confirmText = "Confirm",
   cancelText = "Cancel",
+  buttonStyle = "red",
   onConfirm,
 }: ConfirmDialogProps) {
   return (
@@ -42,7 +44,7 @@ export function ConfirmDialog({
             <AlertDialog.Action asChild>
               <button
                 onClick={onConfirm}
-                className="rounded-lg bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+                className={`rounded-lg bg-${buttonStyle}-600 px-4 py-2 text-sm text-white hover:bg-${buttonStyle}-700`}
               >
                 {confirmText}
               </button>
