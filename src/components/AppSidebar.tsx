@@ -114,6 +114,12 @@ export function AppSidebar() {
           icon: Settings,
           // onClick: logout,
         },
+        {
+          title: "Partition",
+          url: "/partition-form",
+          icon: Settings,
+          // onClick: logout,
+        },
       ],
     },
     {

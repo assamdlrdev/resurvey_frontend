@@ -29,6 +29,7 @@ import PartDagView from "./pages/reports/PartDagView";
 import Report from "./pages/reports/Report";
 import AreaReport from "./pages/reports/AreaDiffReport";
 import VillageMap from "./pages/VillageMap";
+import Partition from "./pages/lm/Partition";
 
 function App() {
   const queryClient = new QueryClient();
@@ -71,6 +72,7 @@ function App() {
               <Route element={<LMLayout />}>
                 <Route element={<DashboardLayout />}>
                   <Route path="/lm-dashboard" element={<LMDashboard />} />
+                  <Route path="/partition-form" element={<Partition />} />
                   <Route path="/lm-mutation" element={<LMMutation />} />
                   <Route path="/lm-mutation-cases" element={<LMMutationCases />} />
                   <Route path="/part-dag-view" element={<PartDagView />} />
