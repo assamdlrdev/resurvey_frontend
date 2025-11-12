@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
-  base: "/resurvey_preprod/",
+  base: "/resurvey/",
   plugins: [
     react(),
     mode === 'development' &&
