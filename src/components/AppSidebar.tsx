@@ -199,21 +199,21 @@ export function AppSidebar() {
                 to={item.url}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group",
-                  isActive(item.url || "") ? "bg-medical-600 text-white shadow-sm" : "text-medical-700 hover:bg-medical-100 hover:text-medical-800"
+                  isActive(item.url || "") ? "bg-red-600 text-white shadow-sm" : "text-red-700 hover:bg-red-100 hover:text-red-800"
                 )}
               >
-                {item.icon && <item.icon className={cn("h-4 w-4 transition-colors", isActive(item.url || "") ? "text-white" : "text-medical-600 group-hover:text-medical-700")} />}
-                {!isCollapsed && <span className={cn("font-medium text-sm", isActive(item.url || "") ? "text-white" : "text-medical-600")}>{item.title}</span>}
+                {item.icon && <item.icon className={cn("h-4 w-4 transition-colors", isActive(item.url || "") ? "text-white" : "text-red-600 group-hover:text-red-700")} />}
+                {!isCollapsed && <span className={cn("font-medium text-sm", isActive(item.url || "") ? "text-white" : "text-red-600")}>{item.title}</span>}
               </NavLink>
             ) : (
               <button
                 onClick={() => handleNavClick(undefined, item.onClick)}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 w-full",
-                  "text-medical-700 hover:bg-medical-100 hover:text-medical-800"
+                  "text-red-700 hover:bg-red-100 hover:text-red-800"
                 )}
               >
-                {item.icon && <item.icon className="h-4 w-4 text-medical-600" />}
+                {item.icon && <item.icon className="h-4 w-4 text-red-600" />}
                 {!isCollapsed && <span className="font-medium text-sm">{item.title}</span>}
               </button>
             )}
