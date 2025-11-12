@@ -996,6 +996,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                                 confirmText="Yes, delete"
                                 cancelText="No, keep it"
                                 onConfirm={handlePartDagDelete}
+                                buttonStyle="red"
                             />
                             <Button type="button" className="" onClick={() => nextPartDag()}>
                                 Next Dag
