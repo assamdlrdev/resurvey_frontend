@@ -1029,6 +1029,9 @@ const LMMutation: React.FC = () => {
                     </div>
                 </div>
                 {dagNos && dagNos.length > 0 && <div className="w-full bg-white rounded-lg shadow p-4 mb-4">
+                    <div className="w-full p-2 text-center">
+                        <Label className="text-xl font-bold">Upload Documents</Label>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 mt-4">
                         <div>
                             <Label htmlFor="">Deed Copy:</Label>
