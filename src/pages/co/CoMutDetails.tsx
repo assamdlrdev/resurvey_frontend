@@ -1,6 +1,7 @@
 import Loader from "@/components/Loader";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import Constants from "@/config/Constants";
 import ApiService from "@/services/ApiService";
 
 import { useEffect, useState } from "react";
@@ -113,6 +114,16 @@ interface PattadarType {
     striked_out: string;
 };
 
+interface MutDocsType {
+    full_path: string;
+    id: number;
+    case_no: string;
+    file_name: string;
+    file_type: string;
+    file_path: string;
+    fetch_file_name: string;
+};
+
 
 
 const CoMutDetails: React.FC = () => {
@@ -126,6 +137,7 @@ const CoMutDetails: React.FC = () => {
     const [dagDetails, setDagDetails] = useState<DagDetailsType[]>([]);
     const [pattadars, setPattadars] = useState<any[]>([]);
     const [petitioners, setPetitioners] = useState<PetitionerType[]>([]);
+    const [mutDocs, setMutDocs] = useState<MutDocsType[]>([]);
     const navigate = useNavigate();
     
     useEffect(() => {
@@ -187,6 +199,7 @@ const CoMutDetails: React.FC = () => {
         setDagDetails(response.data.dag_details);
         setPattadars(response.data.pattadars);
         setPetitioners(response.data.petitioners);
+        setMutDocs(response.data.mut_docs);
     };
 
     const submitCase = async () => {
@@ -311,8 +324,21 @@ const CoMutDetails: React.FC = () => {
                                     <td colSpan={2} className="px-2 py-4 border text-center"><strong>Deed No: </strong>{caseDetails.reg_deed_no}</td>
                                     <td colSpan={2} className="px-2 py-4 border text-center"><strong>Deed Date: </strong>{caseDetails.reg_deed_date}</td>
                                     <td colSpan={1} className="px-2 py-4 border text-center"><strong>Deed Value: </strong> {caseDetails.deed_value}</td>
-                                </tr>
-                                }
+                                </tr>}
+                                {mutDocs && mutDocs.length > 0 && <tr>
+                                    <td colSpan={5} className="px-2 py-4 border text-center"><strong><p>Uploaded Documents</p></strong></td>
+                                </tr>}
+                                 {/* {mutDocs && mutDocs.length > 0 && <tr>
+                                        <td colSpan={1} className="px-2 py-2 border text-center"><strong>Deed Copy</strong></td>
+                                        <td colSpan={1} className="px-2 py-2 border text-center"><strong>Land Revenue Receipt</strong></td>
+                                        <td colSpan={1} className="px-2 py-2 border text-center"><strong>Self Declarative</strong></td>
+                                </tr>} */}
+                                {mutDocs && mutDocs.length > 0 && mutDocs.map((mutDoc, index) => (
+                                    <tr key={index}>
+                                        <td colSpan={1} className="px-2 py-2 border text-center"><strong>{mutDoc.file_name == 'DEED_COPY' ? 'Deed Copy' : mutDoc.file_name == 'RECEIPT' ? 'Land Revenue Receipt' : mutDoc.file_name == 'SELF_DECLARATION' ? 'Self Declaration' : 'Uploaded Docs'}</strong></td>
+                                        <td colSpan={4} className="px-2 py-4 border text-center"><a className="bg-green-600 hover:bg-green-700 border-round p-2 text-white rounded-md" href={Constants.API_BASE_URL_ASSET + mutDoc.full_path} target="_blank">View</a></td>
+                                    </tr>
+                                ))}
                             </tbody>) : (
                                 <tbody>
                                     <tr>
@@ -323,7 +349,7 @@ const CoMutDetails: React.FC = () => {
 
                         </table>
                     </div>
-                    {(caseDetails && caseStatus && dagDetails && pattadars && petitioners) && <div className="py-2">
+                    {(caseDetails && caseStatus && dagDetails && pattadars && petitioners) && <div className="py-3 text-center">
                         <ConfirmDialog
                             trigger={<Button className="bg-green-600 hover:bg-green-700">Submit</Button>}
                             title="Submit"
