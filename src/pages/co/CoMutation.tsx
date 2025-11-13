@@ -75,7 +75,7 @@ const CoMutation: React.FC = () => {
                                             <td className="px-2 py-2 border text-center">{cdata.vill_townprt_name}</td>
                                             <td className="px-2 py-2 border text-center">{cdata.date_entry_name}</td>
                                             <td className="px-2 py-2 border text-center">
-                                                {cdata.status == 0 ? (<Link to={`/co-mut-details?case_no=${cdata.case_no}`} className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">Proceed</Link>) : `Order Passed`}
+                                                {cdata.status == 0 ? (<Link to={`/co-mut-details?case_no=${cdata.case_no}`} className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded">Proceed</Link>) : `Order Passed`}
                                             </td>
                                            </tr>)
                                         ) : (
