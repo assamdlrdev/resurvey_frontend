@@ -27,7 +27,7 @@ deploy_stage:
   variables:
     VITE_BASE_URL: "https://chithastage.assam.gov.in/resurvey/"
     VITE_APP_NAME: "Resurvey"
-    VITE_API_BASE_URL: "https://chithastage.assam.gov.in/chithzzaapi/index.php/"
+    VITE_API_BASE_URL: "https://chithastage.assam.gov.in/chithaapi/index.php/"
     VITE_API_SECRET: "CHITHARESURVEY12345678"
     VITE_SERVICE_PERCENTAGE: 5
     VITE_SINGLESIGN_URL: "https://dharitreestage.assam.gov.in/single_dev/"
