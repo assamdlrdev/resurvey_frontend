@@ -17,6 +17,8 @@ deploy_stage:
   stage: deploy_stage
   script:
     - echo "Deploying dist/ contents to /var/www/html/resurvey ..."
+    - npm install
+    - npm run build --mode staging
     - rsync -avz --delete dist/ opc@172.16.3.214:/var/www/html/resurvey/
     - ssh -v opc@172.16.3.214 "sudo chmod -R 755 /var/www/html/resurvey/assets"
     - echo "Deployment successful for stage!!!!!"
