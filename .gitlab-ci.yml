@@ -11,7 +11,7 @@ deploy_prod:
     - npm run build
     - ssh -v opc@172.16.3.235 "ts=\$(date +%Y%m%d_%H%M%S); cp -r /var/www/html/resurvey /home/opc/deployment_backups/resurvey/resurvey_\$ts && echo Backup created at /home/backups/resurvey/resurvey_\$ts"
     - rsync -avz --delete dist/ opc@172.16.3.235:/var/www/html/resurvey/
-    - ssh -v opc@172.16.3.235 "sudo chmod -R 755 /var/www/html/resurvey/assets"
+    - ssh -v opc@172.16.3.235 "sudo chmod -R 755 /var/www/html/resurvey/assets && cp /opt/resurvey/.htaccess /var/www/html/resurvey/"
     - echo "Deployment successful for production!!!!!"
   only:
     - main
