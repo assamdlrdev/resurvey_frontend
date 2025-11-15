@@ -12,13 +12,7 @@ const MainDash = () => {
     const usertype = params.get('usertype');
 
     if (id && usertype) {
-        if (!id) {
-            // return <Navigate to="/login" replace />;
-            window.location.href = Constants.SINGLESIGN_URL;
-            return;
-        }
         StorageService.jwtSave(id);
-        return <Navigate to="/reports" replace />;
 
         if (usertype == "4") {
             return <Navigate to="/co-dashboard" replace />;
@@ -37,28 +31,33 @@ const MainDash = () => {
             return;
         }
     }
-
-    const userData: any = StorageService.getJwtCookieData(user);
-    return <Navigate to="/reports" replace />;
-
-    if (userData.usertype == "4") {
-        return <Navigate to="/co-dashboard" replace />;
-    }
-    else if (userData.usertype == "3") {
-        return <Navigate to="/lm-dashboard" replace />;
-    }
-    else if (userData.usertype == '5') {
-        return <Navigate to="/sk-dashboard" replace />;
-    }
-    else if (userData.usertype == '6') {
-        return <Navigate to="/adc-dashboard" replace />;
-    }
     else {
-        // return <Navigate to="/login" replace />;
-        // window.location.href = Constants.SINGLESIGN_URL;
-        console.log(userData);
-        return;
+        const userData: any = StorageService.getJwtCookieData(user);
+        if (userData.usertype == "4") {
+            return <Navigate to="/co-dashboard" replace />;
+        }
+        else if (userData.usertype == "3") {
+            return <Navigate to="/lm-dashboard" replace />;
+        }
+        else if (userData.usertype == '5') {
+            return <Navigate to="/sk-dashboard" replace />;
+        }
+        else if (userData.usertype == '6') {
+            return <Navigate to="/adc-dashboard" replace />;
+        }
+        else if(userData.usertype == '11' || userData.usertype == '1') {
+            return <Navigate to="/reports" replace />;
+        }
+        else {
+            return <Navigate to="/login" replace />;
+            // window.location.href = Constants.SINGLESIGN_URL;
+        }
     }
+
+    
+    // 
+
+    
 };
 
 export default MainDash;
