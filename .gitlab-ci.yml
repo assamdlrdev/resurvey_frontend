@@ -7,11 +7,22 @@ deploy_prod:
   stage: deploy_prod
   script:
     - echo "Deploying dist/ contents to /var/www/html/resurvey_preprod ..."
+    - npm install
+    - npm run build
+    - ssh -v opc@172.16.3.235 "ts=\$(date +%Y%m%d_%H%M%S); cp -r /var/www/html/resurvey_preprod /home/opc/deployment_backups/resurvey/resurvey_preprod_\$ts && echo Backup created at /home/backups/resurvey/resurvey_preprod_\$ts"
     - rsync -avz --delete dist/ opc@172.16.3.235:/var/www/html/resurvey_preprod/
     - ssh -v opc@172.16.3.235 "sudo chmod -R 755 /var/www/html/resurvey_preprod/assets"
     - echo "Deployment successful for production!!!!!"
   only:
     - main
+  variables:
+    VITE_BASE_URL: "https://chitha.assam.gov.in/resurvey/"
+    VITE_APP_NAME: "Resurvey"
+    VITE_API_BASE_URL: "https://chitha.assam.gov.in/chithaapi/index.php/"
+    VITE_API_SECRET: "CHITHARESURVEY12345678"
+    VITE_SERVICE_PERCENTAGE: 5
+    VITE_SINGLESIGN_URL: "https://dharitree.assam.gov.in/Singlesign/"
+
 
 deploy_stage:
   stage: deploy_stage
