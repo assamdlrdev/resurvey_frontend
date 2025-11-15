@@ -199,21 +199,21 @@ export function AppSidebar() {
                 to={item.url}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 group",
-                  isActive(item.url || "") ? "bg-medical-600 text-white shadow-sm" : "text-medical-700 hover:bg-medical-100 hover:text-medical-800"
+                  isActive(item.url || "") ? "bg-red-600 text-white shadow-sm" : "text-red-700 hover:bg-red-100 hover:text-red-800"
                 )}
               >
-                {item.icon && <item.icon className={cn("h-4 w-4 transition-colors", isActive(item.url || "") ? "text-white" : "text-medical-600 group-hover:text-medical-700")} />}
-                {!isCollapsed && <span className={cn("font-medium text-sm", isActive(item.url || "") ? "text-white" : "text-medical-600")}>{item.title}</span>}
+                {item.icon && <item.icon className={cn("h-4 w-4 transition-colors", isActive(item.url || "") ? "text-white" : "text-red-600 group-hover:text-red-700")} />}
+                {!isCollapsed && <span className={cn("font-medium text-sm", isActive(item.url || "") ? "text-white" : "text-red-600")}>{item.title}</span>}
               </NavLink>
             ) : (
               <button
                 onClick={() => handleNavClick(undefined, item.onClick)}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 w-full",
-                  "text-medical-700 hover:bg-medical-100 hover:text-medical-800"
+                  "text-red-700 hover:bg-red-100 hover:text-red-800"
                 )}
               >
-                {item.icon && <item.icon className="h-4 w-4 text-medical-600" />}
+                {item.icon && <item.icon className="h-4 w-4 text-red-600" />}
                 {!isCollapsed && <span className="font-medium text-sm">{item.title}</span>}
               </button>
             )}
@@ -224,20 +224,20 @@ export function AppSidebar() {
   );
 
   return (
-    <Sidebar className={cn("border-r border-medical-200 bg-white shadow-sm transition-all duration-300", isCollapsed ? "w-16" : "w-64")}>
+    <Sidebar className={cn("border-r border-red-200 bg-white shadow-sm transition-all duration-300", isCollapsed ? "w-16" : "w-64")}>
       <SidebarContent className="py-4 bg-white">
         {/* Logo/Brand Section */}
-        <div className={cn("px-4 pb-4 mb-4 border-b border-medical-100", isCollapsed && "px-2")}>
+        <div className={cn("px-4 pb-4 mb-4 border-b border-red-100", isCollapsed && "px-2")}>
           {!isCollapsed ? (
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-medical-500 to-medical-600 rounded-lg flex items-center justify-center"></div>
+              <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center"></div>
               <div>
-                <h2 className="font-bold text-medical-900 text-lg leading-none">Resurvey</h2>
-                <p className="text-xs text-medical-600 mt-0.5"></p>
+                <h2 className="font-bold text-red-900 text-lg leading-none">Resurvey</h2>
+                <p className="text-xs text-red-600 mt-0.5"></p>
               </div>
             </div>
           ) : (
-            <div className="w-8 h-8 bg-gradient-to-br from-medical-500 to-medical-600 rounded-lg flex items-center justify-center mx-auto">
+            <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center mx-auto">
               <Activity className="h-4 w-4 text-white" />
             </div>
           )}
@@ -249,7 +249,7 @@ export function AppSidebar() {
             <SidebarGroup key={group.key}>
               {group.collapsible === false ? (
                 <>
-                  <SidebarGroupLabel className={cn("px-3 py-2 text-xs font-semibold tracking-wider uppercase", "text-medical-600")}>
+                  <SidebarGroupLabel className={cn("px-3 py-2 text-xs font-semibold tracking-wider uppercase", "text-red-600")}>
                     {!isCollapsed ? group.title : group.title.charAt(0)}
                   </SidebarGroupLabel>
                   <SidebarGroupContent className="mt-2">
@@ -261,8 +261,8 @@ export function AppSidebar() {
                   <CollapsibleTrigger asChild>
                     <SidebarGroupLabel className={cn(
                       "flex items-center justify-between w-full px-3 py-2 text-xs font-semibold tracking-wider uppercase cursor-pointer transition-colors",
-                      "text-medical-600 hover:text-medical-800",
-                      !isCollapsed && "hover:bg-medical-50 rounded-md"
+                      "text-red-600 hover:text-red-800",
+                      !isCollapsed && "hover:bg-red-50 rounded-md"
                     )}>
                       <span>{!isCollapsed ? group.title : group.title.charAt(0)}</span>
                       {!isCollapsed && (
