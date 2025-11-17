@@ -65,7 +65,7 @@ const CoMutation: React.FC = () => {
                                             <th className="px-2 py-2 border">Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody className="overflow-y-auto">
                                         {(caseData && caseData.length > 0) ? (
                                            caseData.map((cdata, index) => <tr key={index}>
                                             <td className="px-2 py-2 border text-center">{cdata.case_no}</td>
