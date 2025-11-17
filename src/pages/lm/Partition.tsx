@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { toast } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import ApiService from "@/services/ApiService";
 import Loader from "@/components/Loader";
 
@@ -36,12 +36,74 @@ export default function Partition() {
         totalLessa: 0,
     });
 
+    const [remarks, setRemarks] = useState("");
+
     const location = useLocation();
     const selectedPattaType = pattaTypes.find((p) => p.type_code === selectedPatta);
+
+
+    function showCopyToast(message, copyData) {
+        toast.custom(
+            (t) => (
+                <div
+                    className={`${t.visible ? "animate-enter" : "animate-leave"
+                        } max-w-xs w-full bg-white shadow-lg rounded-lg pointer-events-auto flex p-3`}
+                >
+                    <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">{message}</p>
+                        <button
+                            onClick={() => {
+                                navigator.clipboard.writeText(copyData);
+                                toast.success("Copied!");
+                            }}
+                            className="mt-2 px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded"
+                        >
+                            Copy
+                        </button>
+                    </div>
+                    <button
+                        onClick={() => toast.dismiss(t.id)}
+                        className="ml-2 text-gray-500 hover:text-gray-700"
+                    >
+                        ✕
+                    </button>
+                </div>
+            ),
+            { duration: 6000 }
+        );
+    }
+
 
     // ----------------------------
     //  Handlers
     // ----------------------------
+    const resetForm = () => {
+        setLoading(false);
+        setSelectedVillage("");
+
+        setSelectedPatta("");
+        setPattaNumbers([]);
+        setSelectedPattaNumber("");
+
+        setDagNumbers([]);
+        setSelectedDagNumber("");
+
+        setDagPattadarInfo([]);
+        setSelectedApplicantsIds([]);
+
+        setLandAreaInfo({
+            bigha: 0,
+            katha: 0,
+            lessa: 0,
+            totalBigha: 0,
+            totalKatha: 0,
+            totalLessa: 0,
+        });
+
+        setRemarks("");
+    };
+
+
     const handleLandAreaInfoChange = (e) => {
         const { name, value } = e.target;
         setLandAreaInfo((prev) => ({
@@ -58,6 +120,59 @@ export default function Partition() {
                 : [...prev, index];
         });
     };
+
+    //submit form
+    const handleSubmit = async () => {
+
+        if (!selectedVillage || !selectedPatta || !selectedPattaNumber || !selectedDagNumber || !selectedApplicantsIds) return;
+
+        if (!remarks.trim()) {
+            alert("Please enter remarks.");
+            return;
+        }
+
+        const selectedApplicants = selectedApplicantsIds.map(
+            (index) => dagPattadarInfo[index]
+        );
+
+        try {
+            setLoading(true);
+
+            const payload = {
+                villages: selectedVillage,
+                patta_type_code: selectedPatta,
+                patta_no: selectedPattaNumber,
+                dag_no: selectedDagNumber,
+                applicants: JSON.stringify(selectedApplicants),
+                land_area_info: JSON.stringify(landAreaInfo),
+                remarks: remarks
+            };
+
+            const res = await ApiService.get("partition_lra", JSON.stringify(payload));
+            if (res.status !== "y") {
+                toast.error(res.msg);
+                return;
+            } else {
+                // toast.success(res.msg, {
+                //     duration: 4000, // 4 seconds
+                // });
+
+                showCopyToast(res.msg, res.data.case_num);
+
+                resetForm();
+            }
+
+            console.log(JSON.stringify(res));
+
+        } catch (error) {
+            console.error("Submit error:", error);
+            alert("Network error. Please try again.");
+        }
+        finally {
+            setLoading(false);
+        }
+    };
+
 
     // ----------------------------
     //  Derived Values
@@ -84,7 +199,7 @@ export default function Partition() {
             const res = await ApiService.get("get_lm_villages", JSON.stringify({}));
             setLoading(false);
 
-            if (res.status !== "y") {
+            if (res.status !== "Y") {
                 toast.error(res.msg);
                 setVillages([]);
                 return;
@@ -217,12 +332,27 @@ export default function Partition() {
         }
     }, [selectedVillage, selectedPatta, selectedPattaNumber, selectedDagNumber]);
 
+
+    //TESTING
+    useEffect(() => {
+        console.log('Test: ');
+        console.log('SelectedVillage: ' + selectedVillage);
+        console.log('selectedPattaType: ' + selectedPatta);
+        console.log('selectedPattaNumber: ' + selectedPattaNumber);
+        console.log('selectedDagNumber: ' + selectedDagNumber);
+        console.log('selectedApplicantsIds: ' + selectedApplicantsIds);
+        console.log('landAreaInfo: ' + JSON.stringify(landAreaInfo));
+        console.log('dagPattadarInfo: ' + JSON.stringify(dagPattadarInfo));
+    }, [remarks]);
+
     // ----------------------------
     //  Render
     // ----------------------------
     return (
         <div className="min-h-screen bg-gradient-to-br from-medical-50 to-medical-100 p-4">
             {loading && <Loader loading={loading} />}
+
+            <Toaster position="top-center" />
 
             <div className="sm:max-w-3xl lg:max-w-screen-2xl mx-auto space-y-4">
                 <h4 className="text font-bold mb-6 text-center text-gray-800">Partition Form</h4>
@@ -316,8 +446,8 @@ export default function Partition() {
                         </label>
 
                         <textarea
-                            // value={value}
-                            // onChange={(e) => onRemarksChangeHandler(e.target.value)}
+                            value={remarks}
+                            onChange={(e) => setRemarks(e.target.value)}
                             placeholder="Enter Remarks here..."
                             rows={3}
                             className="w-full rounded-lg border border-gray-300 p-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-200"
@@ -325,7 +455,7 @@ export default function Partition() {
 
                         <div className="flex justify-center">
                             <button
-                                // onClick={handleSubmit}
+                                onClick={handleSubmit}
                                 className="mt-3 px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-300"
                             >
                                 Submit
@@ -333,7 +463,7 @@ export default function Partition() {
                         </div>
                     </div>
 
-                )};
+                )}
 
             </div>
         </div>
