@@ -23,4 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 package-lock.json
-src/config/*
+# src/config/*
+.env
+.env.*.local
+.env.local

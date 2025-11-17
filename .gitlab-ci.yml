@@ -6,22 +6,44 @@ stages:
 deploy_prod:
   stage: deploy_prod
   script:
-    - echo "Deploying dist/ contents to /var/www/html/resurvey_preprod ..."
-    - rsync -avz --delete dist/ opc@172.16.3.235:/var/www/html/resurvey_preprod/
-    - ssh -v opc@172.16.3.235 "sudo chmod -R 755 /var/www/html/resurvey_preprod/assets"
+    - echo "Deploying dist/ contents to /var/www/html/resurvey ..."
+    - npm install
+    - npm run build
+    - ssh -v opc@172.16.3.235 "ts=\$(date +%Y%m%d_%H%M%S); cp -r /var/www/html/resurvey /home/opc/deployment_backups/resurvey/resurvey_\$ts && echo Backup created at /home/backups/resurvey/resurvey_\$ts"
+    - rsync -avz --delete dist/ opc@172.16.3.235:/var/www/html/resurvey/
+    - ssh -v opc@172.16.3.235 "sudo chmod -R 755 /var/www/html/resurvey/assets && cp /opt/resurvey/.htaccess /var/www/html/resurvey/"
     - echo "Deployment successful for production!!!!!"
   only:
     - main
+  variables:
+    VITE_BASE_URL: "https://chitha.assam.gov.in/resurvey/"
+    VITE_APP_NAME: "Assam Resurvey"
+    VITE_COVER: "cover.jpg"
+    VITE_API_BASE_URL: "https://chitha.assam.gov.in/chithaapi/index.php/"
+    VITE_API_BASE_URL_ASSET: "https://chitha.assam.gov.in/chithaapi/"
+    VITE_API_SECRET: "CHITHARESURVEY12345678"
+    VITE_SERVICE_PERCENTAGE: 5
+    VITE_SINGLESIGN_URL: "https://dharitree.assam.gov.in/Singlesign/"
+
 
 deploy_stage:
   stage: deploy_stage
   script:
     - echo "Deploying dist/ contents to /var/www/html/resurvey ..."
+    - npm install
+    - npm run build
     - rsync -avz --delete dist/ opc@172.16.3.214:/var/www/html/resurvey/
     - ssh -v opc@172.16.3.214 "sudo chmod -R 755 /var/www/html/resurvey/assets"
     - echo "Deployment successful for stage!!!!!"
   only:
     - stage
+  variables:
+    VITE_BASE_URL: "https://chithastage.assam.gov.in/resurvey/"
+    VITE_APP_NAME: "Resurvey"
+    VITE_API_BASE_URL: "https://chithastage.assam.gov.in/chithaapi/index.php/"
+    VITE_API_SECRET: "CHITHARESURVEY12345678"
+    VITE_SERVICE_PERCENTAGE: 5
+    VITE_SINGLESIGN_URL: "https://dharitreestage.assam.gov.in/single_dev/"
 
 deploy_dev:
   stage: deploy_dev
