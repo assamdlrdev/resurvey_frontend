@@ -64,8 +64,10 @@ const LMMutation: React.FC = () => {
     const [dispute, setDispute] = useState<string>('n');
     const [applicantPossession, setApplicantPossession] = useState<string>('y');
     const [remarks, setRemarks] = useState<string>('');
-
     const [inplaceAlongwith, setInplaceAlongwith] = useState<any[]>([]);
+    const [deedCopy, setDeedCopy] = useState<File>(null);
+    const [receipt, setReceipt] = useState<File>(null);
+    const [selfDeclaration, setSelfDeclaration] = useState<File>(null);
 
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [iAModalOpen, setIAModalOpen] = useState<boolean>(false);
@@ -600,6 +602,22 @@ const LMMutation: React.FC = () => {
             toast.error('Applicant details not set!');
             return;
         }
+        // if(!deedCopy) {
+        //     setShowButton(true);
+        //     toast.error('Deed Copy not set!');
+        //     return;
+        // }
+        // if(!receipt) {
+        //     setShowButton(true);
+        //     toast.error('Land Revenue Receipt not set!');
+        //     return;
+        // }
+        // if(!selfDeclaration) {
+        //     setShowButton(true);
+        //     toast.error('Self Declaration not set!');
+        //     return;
+        // }
+
         const locArr = villCode.split('-');
         const distCode = locArr[0];
         if(distCode == '21' || distCode == '22' || distCode == '23') {
@@ -632,9 +650,9 @@ const LMMutation: React.FC = () => {
             location: villCode,
             patta_type_code: pattaType,
             patta_no: pattaNo,
-            dag_nos: dagNos,
-            pattadars: pattadars,
-            inplace_alongwith: inplaceAlongwith,
+            dag_nos: JSON.stringify(dagNos),
+            pattadars: JSON.stringify(pattadars),
+            inplace_alongwith: JSON.stringify(inplaceAlongwith),
             transfer_type: transferType,
             deed_date: deedDate,
             deed_no: deedNo,
@@ -647,11 +665,14 @@ const LMMutation: React.FC = () => {
             m_katha: mKatha,
             m_lessa_chatak: mLessaChatak,
             m_ganda: mGanda,
-            applicants: applicantData
+            applicants: JSON.stringify(applicantData),
+            deed_copy: deedCopy,
+            receipt: receipt,
+            self_declaration: selfDeclaration
         };
 
         setLoading(true);
-        const response = await ApiService.get('lm_mut_submit', JSON.stringify(data));
+        const response = await ApiService.upload('lm_mut_submit', data);
         setLoading(false);
 
         if (response.status !== 'y') {
@@ -666,6 +687,20 @@ const LMMutation: React.FC = () => {
         initialize();
 
         // console.log(response);
+    };
+
+    const handleDeedCopy = (e: any) => {
+        // console.log(e.currentTarget.files[0]);
+        setDeedCopy(e.currentTarget.files[0]);
+    };
+
+    const handleReceipt = (e: any) => {
+        // console.log(e.currentTarget.files[0]);
+        setReceipt(e.currentTarget.files[0]);
+    };
+
+    const handleSelfDeclaration = (e: any) => {
+        setSelfDeclaration(e.currentTarget.files[0]);
     };
 
 
@@ -993,6 +1028,43 @@ const LMMutation: React.FC = () => {
                         </div>
                     </div>
                 </div>
+                {dagNos && dagNos.length > 0 && <div className="w-full bg-white rounded-lg shadow p-4 mb-4">
+                    <div className="w-full p-2 text-center">
+                        <Label className="text-xl font-bold">Upload Documents</Label>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 mt-4">
+                        <div>
+                            <Label htmlFor="">Deed Copy:</Label>
+                            <Input
+                                id="deed_copy"
+                                type="file"
+                                accept=".jpg,.jpeg,.pdf"
+                                className=""
+                                onChange={handleDeedCopy}
+                            />
+                        </div>
+                        <div>
+                            <Label htmlFor="">Land Revenue Receipt:</Label>
+                            <Input
+                                id="land_revenue_receipt"
+                                type="file"
+                                accept=".jpg,.jpeg,.pdf"
+                                className=""
+                                onChange={handleReceipt}
+                            />
+                        </div>
+                        <div>
+                            <Label htmlFor="">Self Declaration:</Label>
+                            <Input
+                                id="self_declaration"
+                                type="file"
+                                accept=".jpg,.jpeg,.pdf"
+                                className=""
+                                onChange={handleSelfDeclaration}
+                            />
+                        </div>
+                    </div>
+                </div>}
                 {dagNos && dagNos.length > 0 && <div className="w-full bg-white rounded-lg shadow p-4 mb-4 text-center">
                     {showButton && 
                     
