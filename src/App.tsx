@@ -27,6 +27,7 @@ import CoMutation from "./pages/co/CoMutation";
 import CoMutDetails from "./pages/co/CoMutDetails";
 import PartDagView from "./pages/reports/PartDagView";
 import Report from "./pages/reports/Report";
+import UserCreate from "./pages/usermanagement/UserCreate";
 import AreaReport from "./pages/reports/AreaDiffReport";
 import VillageMap from "./pages/VillageMap";
 
@@ -55,6 +56,7 @@ function App() {
                   <Route path="/part-dag-view" element={<PartDagView />} />
                   <Route path="/deedDoc" element={<DeedDocument />} />
                   <Route path="/reports" element={<Report />} />
+                  <Route path="/user-create" element={<UserCreate />} />
                   <Route path="/area-difference-report" element={<AreaReport />} />
                   <Route path="/village-map" element={<VillageMap />} />
                 </Route>
