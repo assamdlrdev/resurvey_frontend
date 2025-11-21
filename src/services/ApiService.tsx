@@ -5,7 +5,12 @@ import { jwtDecode } from "jwt-decode";
 const ApiService = {
     upload: async (endpoint: string, data: any) => {
         let parsedData = data;
-        parsedData.token = await StorageService.getJwtCookie();
+        // parsedData.token = await StorageService.getJwtCookie();
+        var headers = {};
+        const token = await StorageService.getJwtCookie();
+        if (token && token !== 'undefined') {
+            Object.assign(headers, { 'Authorization': `Bearer ${token}` });
+        }
         const formData = new FormData();
         Object.keys(parsedData).forEach((key: string) => {
             formData.append(key, parsedData[key]);
@@ -14,6 +19,7 @@ const ApiService = {
             const result = await fetch(`${Constants.API_BASE_URL + endpoint}`
                 , {
                     method: 'POST',
+                    headers: headers,
                     body: formData
                 }
             );
