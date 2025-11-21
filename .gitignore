@@ -8,8 +8,8 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-!build/
-# !dist/
+dist
+dist-ssr
 *.local
 
 # Editor directories and files
@@ -24,7 +24,6 @@ node_modules
 *.sw?
 package-lock.json
 # src/config/*
-
 .env
-.env.test
-.env.production
+.env.*.local
+.env.local

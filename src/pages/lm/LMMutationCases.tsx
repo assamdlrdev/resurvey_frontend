@@ -67,7 +67,7 @@ const LMMutationCases: React.FC = () => {
                                             {/* <th className="px-2 py-2 border">Actions</th> */}
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody className="overflow-y-auto">
                                         {(mutCases && mutCases.length > 0) ? (
                                             mutCases.map((mutCase, index) => <tr key={index}>
                                                 <td className="px-2 py-2 border text-center">{mutCase.case_no}</td>
@@ -75,7 +75,7 @@ const LMMutationCases: React.FC = () => {
                                                 <td className="px-2 py-2 border text-center">{mutCase.vill_townprt_name}</td>
                                                 <td className="px-2 py-2 border text-center">{mutCase.m_dag_area_b + 'B-' + mutCase.m_dag_area_k + 'K-' + mutCase.m_dag_area_lc + 'L'}</td>
                                                 <td className="px-2 py-2 border text-center">{mutCase.date_entry_name}</td>
-                                                <td className="px-2 py-2 border text-center">{mutCase.status}</td>
+                                                <td className={`px-2 py-2 border text-center text-${mutCase.status_flag}-500`}><p>{mutCase.status}</p></td>
                                                 {/* <td className="px-2 py-2 border text-center"></td> */}
                                             </tr>)
                                         ) : (
