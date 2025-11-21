@@ -24,3 +24,7 @@ node_modules
 *.sw?
 package-lock.json
 # src/config/*
+
+.env
+.env.test
+.env.production
