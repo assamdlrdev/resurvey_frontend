@@ -162,8 +162,14 @@ export default function UserListView(): JSX.Element {
 
                 {/* District - Circle */}
                 <td className="py-3 px-4 text-sm text-gray-700">
-                  {u?.district?.locname_eng
-                    ? `${u.district.locname_eng}${u?.circle?.locname_eng ? ` - ${u.circle.locname_eng}` : ""}`
+                    {u?.district
+                        ? `${
+                            u.district.locname_eng?.trim() || u.district.loc_name?.trim() || "N/A"
+                        }${
+                            u?.circle
+                            ? ` - ${u.circle.locname_eng?.trim() || u.circle.loc_name?.trim() || ""}`
+                            : ""
+                        }`
                     : "N/A"}
                 </td>
 

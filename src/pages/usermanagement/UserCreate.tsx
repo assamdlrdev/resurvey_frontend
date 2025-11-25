@@ -5,7 +5,9 @@ import { motion } from "framer-motion";
 import StorageService from "@/services/StorageService";
 import Constants from "../../config/Constants";
 
- const user = StorageService.getJwtCookie();
+
+console.log("Rendering UserCreateForm");
+const user = StorageService.getJwtCookie();
 const userData: any = StorageService.getJwtCookieData(user);
 
 type Role = { id: string; name: string };
@@ -35,6 +37,7 @@ function cn(...parts: Array<string | false | null | undefined>) {
 }
 
 export default function UserCreateForm(): JSX.Element {
+  console.log("userData in create", userData.usertype);
   const { districts, circles, getDistricts, getCircles, setCircles } = FilterLocationStore();
 
   const [roles, setRoles] = useState<Role[]>([]);

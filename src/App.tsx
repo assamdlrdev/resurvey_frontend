@@ -32,6 +32,7 @@ import UserList from "./pages/usermanagement/UserList";
 import UserUpdate from "./pages/usermanagement/UserUpdate";
 import AreaReport from "./pages/reports/AreaDiffReport";
 import VillageMap from "./pages/VillageMap";
+import ProtectedRoute from "./components/auth/ProtectedRoutes";
 
 function App() {
   const queryClient = new QueryClient();
@@ -58,9 +59,15 @@ function App() {
                   <Route path="/part-dag-view" element={<PartDagView />} />
                   <Route path="/deedDoc" element={<DeedDocument />} />
                   <Route path="/reports" element={<Report />} />
-                  <Route path="/user-create" element={<UserCreate />} />
-                  <Route path="/user-list" element={<UserList />} />
-                  <Route path="/user-update/:id" element={<UserUpdate />} />
+                  <Route path="/user-create" element={
+                    <ProtectedRoute><UserCreate /></ProtectedRoute>
+                  }/>
+                  <Route path="/user-list" element={
+                     <ProtectedRoute><UserList /></ProtectedRoute>
+                    } />
+                  <Route path="/user-update/:id" element={
+                    <ProtectedRoute><UserUpdate /></ProtectedRoute>
+                    } />
                   <Route path="/area-difference-report" element={<AreaReport />} />
                   <Route path="/village-map" element={<VillageMap />} />
                 </Route>

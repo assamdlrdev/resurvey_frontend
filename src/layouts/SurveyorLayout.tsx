@@ -27,13 +27,13 @@ export default function SurveyorLayout() {
 
     const userData: any = StorageService.getJwtCookieData(user);
 
-
+    console.log("SurveyorLayout userData", userData);
 
     if (!userData) {
         return <Navigate to="/login" replace />;
     }
 
-    const allowedUserTypes = [SURVEYOR_CODE, ADMIN_CODE, SURVEY_GIS_ASSISTANT_CODE, SUPERADMIN_CODE, GUEST_CODE, LM_CODE, ADC_CODE, DC_CODE, CO_CODE, SDO_CODE];
+    const allowedUserTypes = [SURVEYOR_CODE, ADMIN_CODE, SURVEY_GIS_ASSISTANT_CODE, SUPERADMIN_CODE, GUEST_CODE, LM_CODE, ADC_CODE, DC_CODE, CO_CODE, SDO_CODE,SUPERVISOR_CODE];
 
 
     if (!allowedUserTypes.includes(userData.usertype)) {
