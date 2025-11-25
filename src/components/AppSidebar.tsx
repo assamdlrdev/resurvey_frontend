@@ -93,6 +93,7 @@ export function AppSidebar() {
       visible: () => ["1", "2", "10"].includes(userData?.usertype),
       items: [
         { title: "User Create", url: "/user-create", icon: Users },
+        { title: "User List", url: "/user-list", icon: Users },
       ],
     },
     
