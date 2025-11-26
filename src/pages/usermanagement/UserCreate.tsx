@@ -1,46 +1,47 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { FilterLocationStore } from "@/store/SurveyStore";
-import { Eye, EyeOff, Check, X, User, Lock, Phone, Mail, MapPin, Grid } from "lucide-react";
+import { Eye, EyeOff, Check, X, User, MapPin, Grid } from "lucide-react";
 import { motion } from "framer-motion";
 import StorageService from "@/services/StorageService";
 import Constants from "../../config/Constants";
-
-
-console.log("Rendering UserCreateForm");
-const user = StorageService.getJwtCookie();
-const userData: any = StorageService.getJwtCookieData(user);
-
-type Role = { id: string; name: string };
-
-const ALPHANUMERIC_RE = /^[a-zA-Z0-9]*$/;
-const PHONE_RE = /^\d{10}$/;
-
-const STATIC_ROLES: Role[] =
-userData.usertype === "1" || userData.usertype === "2"
-? [
-{ id: "00", name: "DEO" },
-{ id: "9",  name: "GUEST" },
-{ id: "10", name: "SUPERVISOR" },
-{ id: "11", name: "SURVEYOR" },
-{ id: "14", name: "SURVEY_GIS_ASSISTANT" },
-]
-: userData.usertype === "10"
-? [
-{ id: "11", name: "SURVEYOR" },
-{ id: "14", name: "SURVEY_GIS_ASSISTANT" },
-]
-: [];
-
 
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-export default function UserCreateForm(): JSX.Element {
-  console.log("userData in create", userData.usertype);
-  const { districts, circles, getDistricts, getCircles, setCircles } = FilterLocationStore();
+type Role = { id: string; name: string };
 
+export default function UserCreateForm(): JSX.Element {
+  // --- user & role handling moved inside component ---
+  const [userData, setUserData] = useState<any | null>(null);
+
+  // derive roles from userData (memoized)
+  const derivedRoles = useMemo<Role[]>(() => {
+    const ud = userData;
+    if (!ud || !ud.usertype) return [];
+    if (ud.usertype === "1" || ud.usertype === "2") {
+      return [
+        { id: "00", name: "DEO" },
+        { id: "9", name: "GUEST" },
+        { id: "10", name: "SUPERVISOR" },
+        { id: "11", name: "SURVEYOR" },
+        { id: "14", name: "SURVEY_GIS_ASSISTANT" },
+      ];
+    }
+    if (ud.usertype === "10") {
+      return [
+        { id: "11", name: "SURVEYOR" },
+        { id: "14", name: "SURVEY_GIS_ASSISTANT" },
+      ];
+    }
+    return [];
+  }, [userData]);
+
+  // roles state so UI updates when derivedRoles changes
   const [roles, setRoles] = useState<Role[]>([]);
+
+  // location store
+  const { districts, circles, getDistricts, getCircles, setCircles } = FilterLocationStore();
 
   const [form, setForm] = useState({
     district: "",
@@ -60,11 +61,36 @@ export default function UserCreateForm(): JSX.Element {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
+  // regexes
+  const ALPHANUMERIC_RE = /^[a-zA-Z0-9]*$/;
+  const PHONE_RE = /^\d{10}$/;
+
+  // read JWT cookie once on mount (safe for client-side)
   useEffect(() => {
-    getDistricts();
-    setRoles(STATIC_ROLES);
+    try {
+      const token = StorageService.getJwtCookie();
+      const data = StorageService.getJwtCookieData(token);
+      // StorageService may return null/undefined when token missing or invalid
+      setUserData(data ?? null);
+    } catch (err) {
+      // be defensive: don't crash the component
+      console.warn("UserCreateForm: failed to read userData", err);
+      setUserData(null);
+    }
   }, []);
 
+  // apply derived roles into state when they change
+  useEffect(() => {
+    setRoles(derivedRoles);
+  }, [derivedRoles]);
+
+  // load districts once
+  useEffect(() => {
+    getDistricts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // when district changes, load circles
   useEffect(() => {
     if (!form.district) {
       setCircles([]);
@@ -105,81 +131,75 @@ export default function UserCreateForm(): JSX.Element {
     return Object.keys(e).length === 0;
   }
 
- async function handleSubmit(e: React.FormEvent) {
-  e.preventDefault();
-  setSuccess(null);
-  setSubmitError(null);
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSuccess(null);
+    setSubmitError(null);
 
-  if (!validate()) return;
+    if (!validate()) return;
 
-  setLoading(true);
-  const headers: Record<string, string> = {};
-  const token = await StorageService.getJwtCookie();
-  if (token && token !== "undefined") {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-  headers["Content-Type"] = "application/json";
+    setLoading(true);
+    const headers: Record<string, string> = {};
+    const token = await StorageService.getJwtCookie();
+    if (token && token !== "undefined") {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    headers["Content-Type"] = "application/json";
 
-  try {
-    const payload = {
-      dist_code: form.district,
-      cir_code: form.circle,
-      user_role: form.role,
-      username: form.username,
-      password: form.password,
-      name: form.name,
-      phone_no: form.phone_no,
-      email: form.email,
-    };
+    try {
+      const payload = {
+        dist_code: form.district,
+        cir_code: form.circle,
+        user_role: form.role,
+        username: form.username,
+        password: form.password,
+        name: form.name,
+        phone_no: form.phone_no,
+        email: form.email,
+      };
 
-    const res = await fetch(`${Constants.API_BASE_URL}/api/users/create`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(payload),
-    });
+      const res = await fetch(`${Constants.API_BASE_URL}/api/users/create`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+      });
 
-    if (!res.ok) {
-      // try to parse JSON error body
-      const body = await res.json().catch(() => null);
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
 
-      // If server returned { message, errors: { field: "msg" } }
-      if (body && body.errors && typeof body.errors === "object") {
-        // show per-field errors in the form
-        setErrors(body.errors);
-      } else {
-        // clear previous field errors if none returned
-        setErrors({});
+        if (body && body.errors && typeof body.errors === "object") {
+          setErrors(body.errors);
+        } else {
+          setErrors({});
+        }
+
+        const topMsg =
+          (body && (body.message || Object.values(body.errors || {})[0])) ||
+          res.statusText ||
+          "Failed to create user";
+        throw new Error(topMsg);
       }
 
-      // set a top-level submit error message (either message or first field error)
-      const topMsg =
-        (body && (body.message || Object.values(body.errors || {})[0])) ||
-        res.statusText ||
-        "Failed to create user";
-      throw new Error(topMsg);
+      setSuccess("User created successfully");
+      setForm({
+        district: "",
+        circle: "",
+        role: "",
+        username: "",
+        password: "",
+        confirm_password: "",
+        name: "",
+        phone_no: "",
+        email: "",
+      });
+      setCircles([]);
+      setErrors({});
+    } catch (err: any) {
+      setSubmitError(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
-
-    setSuccess("User created successfully");
-    setForm({
-      district: "",
-      circle: "",
-      role: "",
-      username: "",
-      password: "",
-      confirm_password: "",
-      name: "",
-      phone_no: "",
-      email: "",
-    });
-    setCircles([]);
-    setErrors({});
-  } catch (err: any) {
-    // if we already set per-field errors above, keep them; add a submitError too
-    setSubmitError(err.message || "Something went wrong");
-  } finally {
-    setLoading(false);
   }
-}
 
   const passwordMatch = form.confirm_password ? form.password === form.confirm_password : null;
 
@@ -193,14 +213,7 @@ export default function UserCreateForm(): JSX.Element {
       <header className="flex items-start justify-between gap-6 mb-6">
         <div>
           <h2 className="text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-pink-600 to-rose-500">Create User</h2>
-          {/* <p className="text-sm text-gray-600 mt-1">Create and manage system users — colorful UI with stronger feedback and confirm password.</p> */}
         </div>
-        {/* <div className="flex items-center gap-2">
-          <div className="text-xs text-gray-500">Status</div>
-          <div className="inline-flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-green-100 to-green-50 text-green-800 rounded-full shadow-sm">
-            <Check size={14} /> <span className="text-xs">Ready</span>
-          </div>
-        </div> */}
       </header>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -268,17 +281,27 @@ export default function UserCreateForm(): JSX.Element {
               value={form.role}
               onChange={(e) => setForm({ ...form, role: e.target.value })}
             >
-              <option value="">Select role</option>
-              {roles.map((r) => (
-                <option key={r.id} value={r.id}>{r.name}</option>
-              ))}
+              {/* helpful placeholder while roles load */}
+              {roles.length === 0 ? (
+                <option value="">{userData ? "No roles available" : "Loading roles..."}</option>
+              ) : (
+                <>
+                  <option value="">Select role</option>
+                  {roles.map((r) => (
+                    <option key={r.id} value={r.id}>{r.name}</option>
+                  ))}
+                </>
+              )}
             </select>
             {errors.role && <span className="text-red-500 text-xs mt-1">{errors.role}</span>}
           </label>
         </div>
 
-        {/* Move fullname/phone/email above username/password */}
+        {/* the rest of the form unchanged... */}
+        {/* Keep your existing input JSX as in your current file (full name, phone, email, username, password, confirm) */}
+        {/* For brevity I omitted repeating unchanged parts; paste your existing input blocks below this comment if needed */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Full name, phone, email */}
           <label className="flex flex-col">
             <span className="text-xs font-medium text-gray-700">Full name</span>
             <input
@@ -328,7 +351,7 @@ export default function UserCreateForm(): JSX.Element {
           </label>
         </div>
 
-        {/* Username / Passwords in one line */}
+        {/* Username / Passwords */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <label className="flex flex-col">
             <span className="text-xs font-medium text-gray-700">Username</span>
@@ -446,8 +469,6 @@ export default function UserCreateForm(): JSX.Element {
             )}
           </div>
         </div>
-
-        {/* <div className="mt-2 text-xs text-gray-600">* Passwords are stored securely on the server. Replace endpoints to match your API.</div> */}
       </form>
     </motion.div>
   );
