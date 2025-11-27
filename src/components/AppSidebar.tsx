@@ -86,6 +86,16 @@ export function AppSidebar() {
         { title: "Area Difference Report", url: "/area-difference-report", icon: Activity },
       ],
     },
+    {
+      key: "User Management",
+      title: "User Management",
+      collapsible: false,
+      visible: () => ["1", "2", "10"].includes(userData?.usertype),
+      items: [
+        { title: "User Create", url: "/user-create", icon: Users },
+        { title: "User List", url: "/user-list", icon: Users },
+      ],
+    },
     
     {
       key: "Maps",
