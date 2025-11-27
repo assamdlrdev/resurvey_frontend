@@ -10,6 +10,7 @@ function cn(...parts: Array<string | false | null | undefined>) {
 }
 
 type Role = { id: string; name: string };
+type Designation = { id: string | number; title: string };
 
 export default function UserCreateForm(): JSX.Element {
   // --- user & role handling moved inside component ---
@@ -21,17 +22,17 @@ export default function UserCreateForm(): JSX.Element {
     if (!ud || !ud.usertype) return [];
     if (ud.usertype === "1" || ud.usertype === "2") {
       return [
-        { id: "00", name: "DEO" },
-        { id: "9", name: "GUEST" },
         { id: "10", name: "SUPERVISOR" },
+        { id: "15", name: "STATE_GIS" },
+        { id: "14", name: "CIRCLE_GIS" },
         { id: "11", name: "SURVEYOR" },
-        { id: "14", name: "SURVEY_GIS_ASSISTANT" },
       ];
     }
     if (ud.usertype === "10") {
       return [
+        { id: "15", name: "STATE_GIS" },
+        { id: "14", name: "CIRCLE_GIS" },
         { id: "11", name: "SURVEYOR" },
-        { id: "14", name: "SURVEY_GIS_ASSISTANT" },
       ];
     }
     return [];
@@ -47,6 +48,7 @@ export default function UserCreateForm(): JSX.Element {
     district: "",
     circle: "",
     role: "",
+    designation: "", // <-- new field
     username: "",
     password: "",
     confirm_password: "",
@@ -54,6 +56,11 @@ export default function UserCreateForm(): JSX.Element {
     phone_no: "",
     email: "",
   });
+
+  const [designations, setDesignations] = useState<Designation[]>([]);
+  const [designationsLoading, setDesignationsLoading] = useState(false);
+  const [designationsError, setDesignationsError] = useState<string | null>(null);
+  const designationsAbortRef = React.useRef<AbortController | null>(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -70,10 +77,8 @@ export default function UserCreateForm(): JSX.Element {
     try {
       const token = StorageService.getJwtCookie();
       const data = StorageService.getJwtCookieData(token);
-      // StorageService may return null/undefined when token missing or invalid
       setUserData(data ?? null);
     } catch (err) {
-      // be defensive: don't crash the component
       console.warn("UserCreateForm: failed to read userData", err);
       setUserData(null);
     }
@@ -101,6 +106,84 @@ export default function UserCreateForm(): JSX.Element {
     setForm((s) => ({ ...s, circle: "" }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.district]);
+
+  // --- NEW: fetch designations when role changes ---
+  useEffect(() => {
+    // clear previous controller
+    if (designationsAbortRef.current) {
+      designationsAbortRef.current.abort();
+      designationsAbortRef.current = null;
+    }
+
+    // clear state if role empty
+    if (!form.role) {
+      setDesignations([]);
+      setDesignationsError(null);
+      setDesignationsLoading(false);
+      // clear selected designation in form
+      setForm((s) => ({ ...s, designation: "" }));
+      return;
+    }
+
+    const controller = new AbortController();
+    designationsAbortRef.current = controller;
+
+    async function load() {
+      setDesignationsLoading(true);
+      setDesignationsError(null);
+
+      const headers: Record<string, string> = {};
+      try {
+        const token = await StorageService.getJwtCookie();
+        if (token && token !== "undefined") {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+      } catch (e) {
+        // ignore
+      }
+      headers["Content-Type"] = "application/json";
+
+      const url = `${Constants.API_BASE_URL.replace(/\/$/, "")}/api/designations?role=${encodeURIComponent(
+        form.role
+      )}`;
+
+      try {
+        const res = await fetch(url, { method: "GET", headers, signal: controller.signal });
+        if (!res.ok) {
+          const body = await res.json().catch(() => null);
+          const msg = (body && (body.message || JSON.stringify(body))) || res.statusText || "Failed to load designations";
+          throw new Error(msg);
+        }
+        const data = await res.json();
+        // Expecting either array or { data: [...] }
+        const list: any[] = Array.isArray(data) ? data : Array.isArray(data.data) ? data.data : [];
+
+        // map API shape -> { id, title }
+        const normalized = list.map((it: any) => ({
+          id: it.designation_code ?? it.id ?? it.desig_id ?? String(it.designation_code ?? it.id ?? ""),
+          title: it.designation_name ?? it.title ?? it.desig_name ?? String(it.designation_name ?? it.title ?? ""),
+          role_code: it.role_code ?? undefined, // optional if you later need it
+        }));
+
+        setDesignations(normalized);
+      } catch (err: any) {
+        if (err.name === "AbortError") return;
+        setDesignations([]);
+        setDesignationsError(err.message || "Unable to load designations");
+      } finally {
+        setDesignationsLoading(false);
+      }
+    }
+
+    load();
+
+    return () => {
+      if (designationsAbortRef.current) {
+        designationsAbortRef.current.abort();
+        designationsAbortRef.current = null;
+      }
+    };
+  }, [form.role]);
 
   function validate() {
     const e: Record<string, string> = {};
@@ -151,6 +234,7 @@ export default function UserCreateForm(): JSX.Element {
         dist_code: form.district,
         cir_code: form.circle,
         user_role: form.role,
+        designation: form.designation, // include designation if backend expects it
         username: form.username,
         password: form.password,
         name: form.name,
@@ -185,6 +269,7 @@ export default function UserCreateForm(): JSX.Element {
         district: "",
         circle: "",
         role: "",
+        designation: "",
         username: "",
         password: "",
         confirm_password: "",
@@ -194,6 +279,7 @@ export default function UserCreateForm(): JSX.Element {
       });
       setCircles([]);
       setErrors({});
+      setDesignations([]);
     } catch (err: any) {
       setSubmitError(err.message || "Something went wrong");
     } finally {
@@ -281,7 +367,6 @@ export default function UserCreateForm(): JSX.Element {
               value={form.role}
               onChange={(e) => setForm({ ...form, role: e.target.value })}
             >
-              {/* helpful placeholder while roles load */}
               {roles.length === 0 ? (
                 <option value="">{userData ? "No roles available" : "Loading roles..."}</option>
               ) : (
@@ -297,13 +382,12 @@ export default function UserCreateForm(): JSX.Element {
           </label>
         </div>
 
-        {/* the rest of the form unchanged... */}
-        {/* Keep your existing input JSX as in your current file (full name, phone, email, username, password, confirm) */}
-        {/* For brevity I omitted repeating unchanged parts; paste your existing input blocks below this comment if needed */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Full name, phone, email */}
-          <label className="flex flex-col">
-            <span className="text-xs font-medium text-gray-700">Full name</span>
+        {/* Full name + Designation + Phone + Email in a single row */}
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+
+          {/* Full Name */}
+          <div className="flex flex-col">
+            <label className="text-xs font-medium text-gray-700">Full name</label>
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -313,10 +397,43 @@ export default function UserCreateForm(): JSX.Element {
               )}
             />
             {errors.name && <span className="text-red-500 text-xs mt-1">{errors.name}</span>}
-          </label>
+          </div>
 
-          <label className="flex flex-col">
-            <span className="text-xs font-medium text-gray-700">Phone number</span>
+          {/* Designation */}
+          <div className="flex flex-col">
+            <label className="text-xs font-medium text-gray-700">Designation</label>
+            <select
+              className={cn(
+                "mt-2 px-3 py-2 rounded-lg border w-full focus:outline-none focus:ring-4 focus:ring-slate-100 transition",
+                designationsError ? "border-red-400" : "border-slate-200"
+              )}
+              value={form.designation}
+              onChange={(e) => setForm({ ...form, designation: e.target.value })}
+              disabled={!form.role || designationsLoading || designations.length === 0}
+            >
+              {!form.role ? (
+                <option value="">Select role first</option>
+              ) : designationsLoading ? (
+                <option value="">Loading...</option>
+              ) : designations.length === 0 ? (
+                <option value="">{designationsError ? "Failed to load" : "No designations"}</option>
+              ) : (
+                <>
+                  <option value="">Select designation</option>
+                  {designations.map((d) => (
+                    <option key={d.id} value={d.id}>
+                      {d.title}
+                    </option>
+                  ))}
+                </>
+              )}
+            </select>
+            {designationsError && <span className="text-red-500 text-xs mt-1">{designationsError}</span>}
+          </div>
+
+          {/* Phone Number */}
+          <div className="flex flex-col">
+            <label className="text-xs font-medium text-gray-700">Phone number</label>
             <div className="mt-2 relative">
               <input
                 value={form.phone_no}
@@ -334,10 +451,11 @@ export default function UserCreateForm(): JSX.Element {
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">10</div>
             </div>
             {errors.phone_no && <span className="text-red-500 text-xs mt-1">{errors.phone_no}</span>}
-          </label>
+          </div>
 
-          <label className="flex flex-col">
-            <span className="text-xs font-medium text-gray-700">Email</span>
+          {/* Email */}
+          <div className="flex flex-col">
+            <label className="text-xs font-medium text-gray-700">Email</label>
             <input
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -348,8 +466,10 @@ export default function UserCreateForm(): JSX.Element {
               )}
             />
             {errors.email && <span className="text-red-500 text-xs mt-1">{errors.email}</span>}
-          </label>
+          </div>
+
         </div>
+
 
         {/* Username / Passwords */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -445,11 +565,12 @@ export default function UserCreateForm(): JSX.Element {
           <button
             type="button"
             onClick={() => {
-              setForm({ district: "", circle: "", role: "", username: "", password: "", confirm_password: "", name: "", phone_no: "", email: "" });
+              setForm({ district: "", circle: "", role: "", designation: "", username: "", password: "", confirm_password: "", name: "", phone_no: "", email: "" });
               setErrors({});
               setSubmitError(null);
               setSuccess(null);
               setCircles([]);
+              setDesignations([]);
             }}
             className="px-4 py-2 bg-white border rounded-lg shadow-sm hover:bg-gray-50"
           >
