@@ -1,25 +1,12 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { useForm } from "react-hook-form";
-// import { useToast } from "@/hooks/use-toast";
-import ChithaView from "@/components/ChithaView";
 import { toast, Toaster } from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router-dom";
-import Constants from "@/config/Constants";
 import ApiService from "@/services/ApiService";
-import StorageService from "@/services/StorageService";
-import Loader from "@/components/Loader";
 import PartDagEntryForm from "@/components/PartDagEntryForm";
 import { useDagStore } from "@/store/SurveyStore";
-import PartDagsView from "@/components/PartDagsView";
 import { useMasterDataStore } from "@/store/SurveyStore";
-import MapView from "@/components/MapView";
-import MapViewCom from "@/components/MapView";
 import { FilterLocationStore } from "@/store/SurveyStore";
 
 interface DagType {
@@ -177,40 +164,48 @@ export default function SurveyData() {
 
   const dagNoUpdated = (new_dag_no: string) => {
     setDagNo(new_dag_no);
-    setSurveyFormMode('reference');
+    setSurveyFormMode('input');
   }
 
   const resetField = (type: string) => {
     if (type == 'circle') {
+      setCircles([]);
       setMouzas([]);
       setLots([]);
       setVillages([]);
       setDagNos([]);
 
+      setCirCode('');
+      setMouzaPargonaCode('');
+      setLotNo('');
+      setVillTownprtCode('');
       setDagNo('');
-      // setVillTownprtCode('');
-      // setLotNo('');
-      // setMouzaPargonaCode('');
     }
     else if (type == 'mouza') {
+      setMouzas([]);
       setLots([]);
       setVillages([]);
       setDagNos([]);
 
+      setMouzaPargonaCode('');
+      setLotNo('');
+      setVillTownprtCode('');
       setDagNo('');
-      // setVillTownprtCode('');
-      // setLotNo('');
     }
     else if (type == 'lot') {
+      setLots([]);
       setVillages([]);
       setDagNos([]);
 
+      setLotNo('');
+      setVillTownprtCode('');
       setDagNo('');
-      // setVillTownprtCode('');
     }
     else if (type == 'vill') {
       setDagNos([]);
+      setVillages([]);
 
+      setVillTownprtCode('');
       setDagNo('');
     }
     else if (type == 'dist') {
@@ -220,12 +215,11 @@ export default function SurveyData() {
       setVillages([]);
       setDagNos([]);
 
+      setCirCode('');
+      setMouzaPargonaCode('');
+      setLotNo('');
+      setVillTownprtCode('');
       setDagNo('');
-      // setVillTownprtCode('');
-      // setLotNo('');
-      // setMouzaPargonaCode('');
-      // setCirCode('');
-
     }
   };
 
@@ -386,80 +380,18 @@ export default function SurveyData() {
             )}
           </div>
         </div>
-        <div className="flex justify-center">
-          <ToggleGroup
-            type="single"
-            value={surveyFormMode}
-            onValueChange={(val) => setSurveyFormMode(val)}
-            className="bg-white rounded-lg p-1 shadow-sm 
-               flex flex-wrap gap-2 sm:flex-nowrap sm:gap-0"
-          >
-            <ToggleGroupItem
-              value="reference"
-              className="px-4 py-2 text-sm sm:px-6 sm:py-2 w-full sm:w-auto"
-            >
-              Dharitry Data
-            </ToggleGroupItem>
-
-            <ToggleGroupItem
-              disabled={!dagNo}
-              value="input"
-              className="px-4 py-2 text-sm sm:px-6 sm:py-2 w-full sm:w-auto"
-            >
-              Enter Possessor Details
-            </ToggleGroupItem>
-
-            <ToggleGroupItem
-              value="part_dags"
-              className="px-4 py-2 text-sm sm:px-6 sm:py-2 w-full sm:w-auto"
-            >
-              Existing Part Dags{" "}
-              <span className="text-gray-500">({getCreatedPartDags().length})</span>
-            </ToggleGroupItem>
-
-            {(mapGeoJson && villTownprtCode) && (
-              <ToggleGroupItem
-                value="map_view"
-                className="px-4 py-2 text-sm sm:px-6 sm:py-2 w-full sm:w-auto"
-              >
-                Draft Bhunaksa Map
-              </ToggleGroupItem>
-            )}
-          </ToggleGroup>
-        </div>
 
 
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="flex justify-center">
-              {surveyFormMode === "reference"
-                ? "Dharitry Data"
-                : surveyFormMode === "input"
-                  ? "Possessor Details Entry"
-                  : surveyFormMode == 'map_view'
-                    ? 'Draft Bhunaksa MAp View'
-                    : "Existing Part Dags"}
-            </CardTitle>
-          </CardHeader>
 
-          <CardContent>
-            {surveyFormMode === "reference" && <ChithaView />}
-            {surveyFormMode === "input" && (
-              <PartDagEntryForm
-                dagNo={dagNo}
-                setDagNo={setDagNo}
-                vill={villTownprtCode}
-                mapdata={mapGeoJson}
-                setVill={setVillTownprtCode}
-              />
-            )}
-            {surveyFormMode === "part_dags" && <PartDagsView />}
-            {(surveyFormMode === 'map_view' && mapGeoJson && villTownprtCode) && <MapViewCom mapdata={mapGeoJson} />}
-          </CardContent>
-        </Card>
-
+        <PartDagEntryForm
+          dagNo={dagNo}
+          setDagNo={setDagNo}
+          vill={villTownprtCode}
+          mapdata={mapGeoJson}
+          setVill={setVillTownprtCode}
+        />
         <Toaster position="top-center" />
-        <Loader loading={isLoading} />
+        {/* <Loader loading={isLoading} /> */}
       </div>
     </div>
   );
