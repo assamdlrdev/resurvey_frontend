@@ -12,23 +12,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useDagStore } from "@/store/SurveyStore";
 import { useMasterDataStore } from "@/store/SurveyStore";
-import { Plus, Users } from "lucide-react";
-import { validatePossessorCreateForm } from "@/services/FormValidation.service";
+import { Users } from "lucide-react";
+import { validatePartDagSubmitForm, validatePossessorForm } from "@/services/FormValidation.service";
 import PossessorsList from "./PossessorList";
-import TenantsList from "./TenantsList";
-import PattadarsList from "./PattadarsList";
 import { calculateAreaByKide } from "@/lib/utils";
 import SelectFromMapComp from "./SelectFromMapComp";
 import DeedList from "./DeedList";
 import Constants from "@/config/Constants";
-import { set } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { getOrdinal } from "@/services/HelperService";
+import DisplayFeatureComp from "./DisplayFeatureComp";
+
 
 interface Props {
     dagNo: string;
-    setDagNo: Dispatch<SetStateAction<string>>;
+    setDagNo: Dispatch<SetStateAction<string>>,
     vill: string;
-    setVill: Dispatch<SetStateAction<string>>;
+    setVill: Dispatch<SetStateAction<string>>,
     mapdata: any
 }
 
@@ -47,35 +47,38 @@ interface InputFormData {
     pattadars: any[]
 }
 
-interface OptionType {
-    value: string;
-    label: string;
-}
-
-interface DagDataType {
-    land_class_code: string;
-    patta_no: string;
-    patta_type_code: string;
-
-}
-
-interface ErrorType {
-    type: string;
-    msg: string;
-}
 
 const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, setVill }) => {
-    const { register, handleSubmit, reset, formState: { errors } } = useForm<InputFormData>();
+    const { formState: { errors } } = useForm<InputFormData>();
     const { isLoading, getData, setLoading, partDags, dharDagData, dharPattadars, dharTenants, dharDeeds } = useDagStore();
-    const { landClasses, landGroups, pattaTypes, transferTypes } = useMasterDataStore();
+    const { landGroups, transferTypes } = useMasterDataStore();
+    const [isPartDagInfoLoading, setIsPartDagInfoLoading] = useState<boolean>(false);
+    const [isPartDagExists, setIsPartDagExists] = useState<boolean>(false);
 
     const [partDag, setPartDag] = useState<string>('');
     const [bhunaksaSurveyNo, setBhunaksaSurveyNo] = useState<string>('');
     const [matchedFeatureWithArea, setMatchedFeatureWithArea] = useState<any>('');
+    const [selectedFeature, setSelectedFeature] = useState<any>(null);
+
+
+    // useEffect(() => {
+    //     nextPartDag();
+    // }, []);
 
     useEffect(() => {
         nextPartDag();
-    }, []);
+    }, [partDags]);
+
+    const goToNext = async () => {
+        await setTimeout(() => {
+            getData(dagNo, vill);
+        }, 500);
+        nextPartDag();
+    }
+
+
+
+
 
     const nextPartDag = () => {
         if (!dagNo) return;
@@ -98,41 +101,265 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
 
     const [currLandClass, setCurrLandClass] = useState<string | number>('');
     const [areaSm, setAreaSm] = useState<number>(0);
-    // const [surveyNo, setSurveyNo] = useState<string>('');
-    const [pattaNo, setPattaNo] = useState<string>('');
-    const [pattaTypeCode, setPattaTypeCode] = useState<string>('');
     const [dagLandRevenue, setDagLandRevenue] = useState<number>(0);
     const [dagLocalTax, setDagLocalTax] = useState<number>(0);
     const [pattadars, setPattadars] = useState(null);
     const [deeds, setDeeds] = useState(null);
     const [tenants, setTenants] = useState(null);
+    const [possessors, setPossessors] = useState<any[]>([]);
     const [triggerLandRevenue, setTriggerLandRevenue] = useState<string>('');
-    const [errorTag, setErrorTag] = useState<ErrorType[]>([]);
-
 
     const [finalPartDag, setFinalPartDag] = useState<string>('');
-    const [possessors, setPossessors] = useState<any[]>([]);
-    const [isOpen, setIsOpen] = useState<boolean>(false);
-
-    //Modal Inputs
-    const [posName, setPosName] = useState<string>('');
-    const [posGuardianName, setPosGuardianName] = useState<string>('');
-    const [posGuardianRelation, setPosGuardianRelation] = useState<string>('');
-    const [posPattadarRelation, setPosPattadarRelation] = useState<string>('');
-    const [posModeOfAcquisition, setPosModeOfAcquisition] = useState<string>('');
-    const [posNameMut, setPosNameMut] = useState<string>('');
-    const [posFatherNameMut, setPosFatherNameMut] = useState<string>('');
-    const [posAddressMut, setPosAddressMut] = useState<string>('');
-    const [posTenantRelation, setPosTenantRelation] = useState<string>('');
-    const [posRemark, setPosRemark] = useState<string>('');
-    const [posGender, setPosGender] = useState<string>('male');
-    const [posDob, setPosDob] = useState<string>('');
-    const [posMobileNo, setPosMobileNo] = useState<string>('');
-    const [posAdhaar, setPosAdhaar] = useState<string>('');
-    const [posEmail, setPosEmail] = useState<string>('');
-    const [posPhoto, setPosPhoto] = useState<string | null>(null);
-    const [documents, setDocuments] = useState<any[]>([]);
     const [updateButton, setUpdateButton] = useState<boolean>(false);
+
+
+    const [otp, setOtp] = useState(""); // OTP input field state
+    const [isOtpSent, setIsOtpSent] = useState(false); // Track OTP sent status
+    const [isOtpVerified, setIsOtpVerified] = useState(false); // Track OTP verification status
+
+
+
+    //possessor fields start
+    const [showPossesorForm, setShowPossessorForm] = useState(false);
+    const [possessor, setPossessor] = useState({
+        name: "",
+        guardianName: "",
+        guardianRelation: "",
+        pattadarRelation: "",
+        modeOfAcquisition: "",
+        nameMut: "",
+        fatherNameMut: "",
+        addressMut: "",
+        remark: "",
+        gender: "male",
+        dob: "",
+        mobileNo: "",
+        adhaar: "",
+        email: "",
+        photo: null,
+        photo_preview: null,
+        documents: [],
+    });
+    const handlePossessorChange = (field, value) => {
+        setPossessor(prev => ({ ...prev, [field]: value }));
+    };
+
+    useEffect(() => {
+        setShowPossessorForm(false);
+        setSelectedFeature('');
+    }, [finalPartDag]);
+
+    const handleDocumentChange = (
+        docIndex: number,
+        field: string,
+        value: string
+    ) => {
+        setPossessor(prev => {
+            const updatedDocuments = [...prev.documents];
+            updatedDocuments[docIndex] = {
+                ...updatedDocuments[docIndex],
+                [field]: value, // Update the specific field of the document
+            };
+            return { ...prev, documents: updatedDocuments };
+        });
+    };
+    // const handleSendOtp = () => {
+    //     console.log(`Sending OTP to mobile number: ${otp}`);
+    //     setIsOtpSent(true); // Mark OTP as sent
+    // };
+
+    // const handleVerifyOtp = () => {
+    //     console.log(`Verifying OTP: ${otp}`);
+    //     if (otp === "123456") {  // This should be replaced with actual OTP validation logic
+    //         setIsOtpVerified(true);
+    //         alert("OTP Verified Successfully");
+    //     } else {
+    //         alert("Invalid OTP, please try again");
+    //     }
+    // };
+
+
+    const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPossessor(prev => ({
+                    ...prev,
+                    photo: (reader.result as string).split(",")[1],// strip "data:image/jpeg;base64,"
+                    photo_preview: URL.createObjectURL(file), // Preview URL for the photo
+                }));
+            };
+            reader.readAsDataURL(file); // Convert file to Base64
+        }
+    };
+
+    const handleDocumentFileChange = (docIndex: number, file: File | null) => {
+        if (file) {
+            setPossessor(prev => {
+                const updatedDocuments = [...prev.documents];
+                updatedDocuments[docIndex] = {
+                    ...updatedDocuments[docIndex],
+                    file: file, // Store the file object directly
+                };
+                return { ...prev, documents: updatedDocuments };
+            });
+        }
+    };
+
+
+    const addDocument = () => {
+        setPossessor(prev => ({
+            ...prev,
+            documents: [
+                ...prev.documents,
+                {
+                    document_name: "",
+                    document_no: "",
+                    issuing_authority: "",
+                    document_issue_date: "",
+                    file: null, // To handle file input
+                },
+            ],
+        }));
+    };
+
+    const removeDocument = (docIndex: number) => {
+        setPossessor(prev => ({
+            ...prev,
+            documents: prev.documents.filter((_, index) => index !== docIndex),
+        }));
+    };
+
+    const submitPossessor = async () => {
+        const formData = new FormData();
+
+        formData.append("vill_townprt_code", vill);
+        formData.append("dag_no", dagNo);
+        formData.append("part_dag", finalPartDag);
+        formData.append("possessor_name", possessor.name);
+        formData.append("possessor_guardian_name", possessor.guardianName);
+        formData.append("possessor_guardian_relation", possessor.guardianRelation);
+        formData.append("possessor_mode_of_acquisition", possessor.modeOfAcquisition);
+        formData.append("possessor_name_mut", possessor.nameMut);
+        formData.append("possessor_father_name_mut", possessor.fatherNameMut);
+        formData.append("possessor_address_mut", possessor.addressMut);
+        formData.append("possessor_remark", possessor.remark);
+        formData.append("possessor_gender", possessor.gender);
+        formData.append("possessor_dob", possessor.dob);
+        formData.append("possessor_mobile_no", possessor.mobileNo);
+        formData.append("possessor_aadhaar", possessor.adhaar);
+        formData.append("possessor_email", possessor.email);
+
+        if (possessor.photo) {
+            formData.append("possessor_photo", possessor.photo); // file
+        }
+
+        // Append dynamic documents
+        possessor.documents.forEach((doc, index) => {
+            const docMetadata = {
+                document_name: doc.document_name,
+                document_no: doc.document_no,
+                issuing_authority: doc.issuing_authority,
+                document_issue_date: doc.document_issue_date,
+            };
+            formData.append(`document_metadata_${index}`, JSON.stringify(docMetadata));
+            formData.append(`document_file_${index}`, doc.file);
+        });
+
+
+        setLoading(true);
+        const response = await ApiService.postForm("submit_possessor", formData);
+        setLoading(false);
+
+        if (response.status !== "y") {
+            toast.error(response.msg);
+            return;
+        }
+
+        toast.success(response.msg);
+        getPartDagInfo();
+        resetPossessorAdd();
+        setShowPossessorForm(false);
+    };
+
+    const getSaveButtonText = () => {
+        if (showPossesorForm) {
+            return 'Save Part Dag & Possessor';
+        } else {
+            if (possessors.length == 0) {
+                return 'Add Possessor';
+            } else {
+                return 'Add More Possessor';
+            }
+        }
+    }
+
+    const addMorePossessor = async () => {
+        if (!isPartDagExists) {
+            // create the part dag first
+            const formData = new FormData();
+
+            // Append all the necessary fields
+            formData.append("vill_townprt_code", vill);
+            formData.append("dag_no", dagNo);
+            formData.append("part_dag", finalPartDag);
+            formData.append("bhunaksha_survey_no", bhunaksaSurveyNo);
+            formData.append("land_class_code", currLandClass.toString());
+            formData.append("area_sm", areaSm.toString());
+            formData.append("dag_land_revenue", dagLandRevenue.toString());
+            formData.append("dag_local_tax", dagLocalTax.toString());
+            formData.append("feature_geojson", JSON.stringify(selectedFeature));
+
+            // If these arrays exist, append them as JSON
+            if (dharPattadars?.length) formData.append("pattadars", JSON.stringify(dharPattadars));
+            if (dharTenants?.length) formData.append("tenants", JSON.stringify(dharTenants));
+
+            // Check if formData is not empty or undefined
+            if (!formData || formData.entries().next().done) {
+                toast.error("Form data is invalid or empty");
+                return;
+            }
+
+            // Validate form data
+            if (!validatePartDagSubmitForm(formData)) {
+                return; // Exit if validation fails
+            }
+
+            // Send the form data after validation
+            setLoading(true);
+            try {
+                const response = await ApiService.postForm("submit_part_dag", formData);
+                setLoading(false);
+
+                if (response.status !== 'y') {
+                    toast.error(response.msg);
+                    return;
+                } else {
+                    toast.success(response.msg);
+                    setIsPartDagExists(true);
+                    setShowPossessorForm(true);
+                }
+            } catch (error) {
+                setLoading(false);
+                toast.error("An error occurred while submitting the form.");
+            }
+
+        } else {
+            if (!showPossesorForm) {
+                //show form for first possessor
+                setShowPossessorForm(true);
+            } else {
+                if (!validatePossessorForm(possessor, possessors.length + 1)) {
+                    return;
+                } else {
+                    submitPossessor();
+                }
+            }
+        }
+    };
+
+
 
     //edit possessor
     const [selectedEditPossessor, setSelectedEditPossessor] = useState<any | null>(null);
@@ -146,7 +373,6 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
 
     useEffect(() => {
         if (dagNo != '' && vill != '') {
-            setPattaNo(dharDagData?.patta_no);
             setPattadars(dharPattadars);
             setDeeds(dharDeeds);
         }
@@ -186,13 +412,10 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
 
     const showPattadars = updateButton ? pattadars : dharPattadars;
     const showDeeds = updateButton ? deeds : dharDeeds;
-    const showTenants = updateButton ? tenants : dharTenants;
 
     const resetFields = () => {
         setCurrLandClass('');
         setAreaSm(0);
-        setPattaNo(dharDagData?.patta_no);
-        setPattaTypeCode(dharDagData?.patta_type_code);
         setDagLandRevenue(0);
         setDagLocalTax(0);
         setPattadars([]);
@@ -202,21 +425,25 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
     };
 
     const resetPossessorAdd = () => {
-        setPosName('');
-        setPosGuardianName('');
-        setPosGuardianRelation('');
-        setPosPattadarRelation('');
-        setPosModeOfAcquisition('');
-        setPosNameMut('');
-        setPosFatherNameMut('');
-        setPosAddressMut('');
-        setPosMobileNo('');
-        setPosAdhaar('');
-        setPosGender('male');
-        setPosRemark('');
-        setPosEmail('');
-        setPosPhoto(null);
-        setPosDob('');
+        setPossessor({
+            name: "",
+            guardianName: "",
+            guardianRelation: "",
+            pattadarRelation: "",
+            modeOfAcquisition: "",
+            nameMut: "",
+            fatherNameMut: "",
+            addressMut: "",
+            remark: "",
+            gender: "male",
+            dob: "",
+            mobileNo: "",
+            adhaar: "",
+            email: "",
+            photo: null,
+            photo_preview: null,
+            documents: [],
+        });
     };
 
     const getDharLandRevenue = async (area_sm: string) => {
@@ -253,23 +480,21 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
             part_dag: finalPartDag
         };
 
-        setLoading(true);
+        setIsPartDagInfoLoading(true);
         const response = await ApiService.get('get_partdag_data', JSON.stringify(data));
-        setLoading(false);
 
         if (response.status !== 'y') {
             toast.error(response.msg);
+            setIsPartDagInfoLoading(false);
             return;
         }
 
         const partDagDetails = response.data;
         // console.log(partDagDetails);
-        if (partDagDetails.from_chitha == 1) {
+        if (partDagDetails.is_exists == 'Y') {
             const dag_area_sqmtr = partDagDetails.dag_area_sqmtr ? partDagDetails.dag_area_sqmtr : 0;
             setAreaSm(dag_area_sqmtr);
             setCurrLandClass(partDagDetails.land_class_code);
-            setPattaNo(partDagDetails.patta_no);
-            setPattaTypeCode(partDagDetails.patta_type_code);
             setDagLandRevenue(partDagDetails.dag_revenue);
             setDagLocalTax(partDagDetails.dag_local_tax);
             setPattadars(partDagDetails.pattadars);
@@ -278,27 +503,10 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
             setUpdateButton(true);
             setPossessors(partDagDetails.possessors);
             setBhunaksaSurveyNo(partDagDetails.bhunaksha_survey_no);
-        }
-        if (partDagDetails.from_bhunaksha == 1) {
-            const dag_area_sqmtr = partDagDetails.dag_area_sqmtr ? partDagDetails.dag_area_sqmtr : 0;
-            setAreaSm(dag_area_sqmtr);
+            setIsPartDagExists(true);
+        } else {
+            setAreaSm(0);
             setCurrLandClass('');
-            setPattaNo(dharDagData?.patta_no);
-            setPattaTypeCode(dharDagData?.patta_type_code);
-            setTriggerLandRevenue(dag_area_sqmtr);
-            setPattadars([]);
-            setDeeds(dharDeeds);
-            setUpdateButton(false);
-            setPossessors([]);
-            // setDagLandRevenue(0);
-            // setDagLocalTax(0);
-        }
-        if (partDagDetails.from_chitha == 0 && partDagDetails.from_bhunaksha == 0) {
-            const dag_area_sqmtr = partDagDetails.dag_area_sqmtr ? partDagDetails.dag_area_sqmtr : 0;
-            setAreaSm(dag_area_sqmtr);
-            setCurrLandClass('');
-            setPattaNo(dharDagData?.patta_no);
-            setPattaTypeCode(dharDagData?.patta_type_code);
             setTriggerLandRevenue('');
             setDagLandRevenue(0);
             setDagLocalTax(0);
@@ -307,80 +515,15 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
             setUpdateButton(false);
             setPossessors([]);
             setBhunaksaSurveyNo('');
+            setIsPartDagExists(false);
         }
-    };
-
-
-    const handlePattadarSelect = (val: any) => {
-        setPattadars(val);
+        setIsPartDagInfoLoading(false);
     };
 
     const handleAreaSm = (e: any) => {
         setAreaSm(e.currentTarget.value);
         setTriggerLandRevenue(e.currentTarget.value);
     };
-
-    const handleDagLandRevenue = (e: any) => {
-        setDagLandRevenue(e.currentTarget.value);
-        setDagLocalTax(1 / 4 * e.currentTarget.value);
-    }
-
-
-
-    const onSubmit = async (data: InputFormData) => {
-        if (!finalPartDag || finalPartDag == '' || !currLandClass || currLandClass == '') {
-            toast.error('Missing Part Dag or Land Class!');
-            return;
-        }
-        // if(!areaSm || areaSm == 0) {
-        //     toast.error('Missing Area!');
-        //     return;
-        // }
-        // if(!dagLandRevenue || dagLandRevenue == 0) {
-        //     toast.error('Missing Land Revenue!');
-        //     return;
-        // }
-        // if(!dagLocalTax || dagLocalTax == 0) {
-        //     toast.error('Missing Land Revenue!');
-        //     return;
-        // }
-
-        const postData = {
-            vill_townprt_code: vill,
-            dag_no: dagNo,
-            part_dag: finalPartDag,
-            land_class_code: currLandClass,
-            area_sm: areaSm,
-            dag_land_revenue: dagLandRevenue,
-            dag_local_tax: dagLocalTax,
-            pattadars: dharPattadars,
-            tenants: dharTenants,
-            bhunaksha_survey_no: bhunaksaSurveyNo
-        };
-
-        setLoading(true);
-        const response = await ApiService.get('submit_part_dag', JSON.stringify(postData));
-        setLoading(false);
-
-        if (response.status !== 'y') {
-            toast.error(response.msg);
-            return;
-        }
-
-        toast.success(response.msg);
-
-        getPartDagInfo();
-
-        getData(dagNo, vill);
-    };
-
-
-
-    const modalOpen = (e: any) => {
-        resetPossessorAdd();
-        setIsOpen(true);
-    };
-
 
     const handleUpdatePartDag = async () => {
         if (!finalPartDag || finalPartDag == '' || !currLandClass || currLandClass == '') {
@@ -447,162 +590,22 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
         toast.success(response.msg);
         setFinalPartDag('');
         setPartDag('');
-        setUpdateButton(false);
+        setPossessors([]);
+        setAreaSm(0);
+        setCurrLandClass('');
+        setTriggerLandRevenue('');
+        setDagLandRevenue(0);
+        setDagLocalTax(0);
+        setPattadars([]);
+        setBhunaksaSurveyNo('');
+        setIsPartDagExists(false);
 
-
-
-        setTimeout(() => {
+        await setTimeout(() => {
             getData(dagNo, vill);
         }, 500);
-
+        nextPartDag();
+        setShowPossessorForm(false);
     };
-
-    const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64String = (reader.result as string).split(",")[1]; // strip "data:image/jpeg;base64,"
-                setPosPhoto(base64String);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-
-    // Handle input changes
-    const handleDocumentChange = (index: number, field: string, value: any) => {
-        const updated = [...documents];
-        updated[index][field] = value;
-        setDocuments(updated);
-    };
-
-    // Handle file change
-    const handleDocumentFileChange = (index: number, file: File | null) => {
-        const updated = [...documents];
-        updated[index].file = file;
-        setDocuments(updated);
-    };
-
-    // Add new document entry
-    const addDocument = () => {
-        setDocuments([
-            ...documents,
-            { document_name: "", document_no: "", issuing_authority: "", document_issue_date: "", file: null }
-        ]);
-    };
-
-    // Remove a document
-    const removeDocument = (index: number) => {
-        setDocuments(documents.filter((_, i) => i !== index));
-    };
-
-
-    const submitPossessor = async () => {
-        const formData = new FormData();
-
-        formData.append("vill_townprt_code", vill);
-        formData.append("dag_no", dagNo);
-        formData.append("part_dag", finalPartDag);
-        formData.append("possessor_name", posName);
-        formData.append("possessor_guardian_name", posGuardianName);
-        formData.append("possessor_guardian_relation", posGuardianRelation);
-        formData.append("possessor_pattadar_relation", posPattadarRelation);
-        formData.append("possessor_mode_of_acquisition", posModeOfAcquisition);
-        formData.append("possessor_name_mut", posNameMut);
-        formData.append("possessor_father_name_mut", posFatherNameMut);
-        formData.append("possessor_address_mut", posAddressMut);
-        formData.append("possessor_remark", posRemark);
-        formData.append("possessor_gender", posGender);
-        formData.append("possessor_dob", posDob);
-        formData.append("possessor_mobile_no", posMobileNo);
-        formData.append("possessor_aadhaar", posAdhaar);
-        formData.append("possessor_email", posEmail);
-
-        // validate before appending
-        const mobileRegex = /^[6-9]\d{9}$/;   // 10 digits, starts with 6-9
-        const aadhaarRegex = /^\d{12}$/;      // exactly 12 digits
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // simple email check
-
-        if (posMobileNo) {
-            if (!mobileRegex.test(posMobileNo)) {
-                alert("Invalid Mobile Number");
-                return;
-            }
-            formData.append("possessor_mobile_no", posMobileNo);
-        }
-
-        if (posAdhaar) {
-            if (!aadhaarRegex.test(posAdhaar)) {
-                alert("Invalid Aadhaar Number");
-                return;
-            }
-            formData.append("possessor_aadhaar", posAdhaar);
-        }
-
-        if (posEmail) {
-            if (!emailRegex.test(posEmail)) {
-                alert("Invalid Email Address");
-                return;
-            }
-            formData.append("possessor_email", posEmail);
-        }
-
-        if (posPhoto) {
-            formData.append("possessor_photo", posPhoto); // file
-        }
-
-        // Append dynamic documents
-        var errors = [];
-        documents.forEach((doc, index) => {
-            // Append document metadata as a JSON string
-            if (!doc.document_name) {
-                errors.push(`Please fill name for document ${index + 1}`);
-            } else {
-                if (!doc.document_issue_date) {
-                    errors.push(`Please fill  document issue date for document ${doc.document_name}`);
-                }
-                if (!doc.file) {
-                    errors.push(`Please upload file for document ${doc.document_name}`);
-                }
-            }
-
-            const docMetadata = {
-                document_name: doc.document_name,
-                document_no: doc.document_no,
-                issuing_authority: doc.issuing_authority,
-                document_issue_date: doc.document_issue_date,
-            };
-            formData.append(`document_metadata_${index}`, JSON.stringify(docMetadata));
-
-            // Append the actual file
-            if (doc.file) {
-                formData.append(`document_file_${index}`, doc.file);
-            }
-        });
-        if (errors.length > 0) {
-            var err_string = '';
-            errors.forEach((err) => {
-                err_string += err + '\n';
-            });
-            toast.error(err_string);
-            setLoading(false);
-            return;
-        }
-        setLoading(true);
-        const response = await ApiService.postForm("submit_possessor", formData);
-        setLoading(false);
-
-        if (response.status !== "y") {
-            toast.error(response.msg);
-            return;
-        }
-
-        toast.success(response.msg);
-        getPartDagInfo();
-        setIsOpen(false);
-    };
-
 
     const deletePossessor = async (possessor: any) => {
 
@@ -626,8 +629,9 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
 
     };
 
-    const handleSelectedFrmMap = (e) => {
-        setBhunaksaSurveyNo(e);
+    const handleSelectedFrmMap = (feature) => {
+        setBhunaksaSurveyNo(feature.properties?.kide);
+        setSelectedFeature(feature);
     }
 
     const onEditPossessor = (possessor) => {
@@ -635,7 +639,6 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
         setNewDocuments([]);
         setEditPosPhoto(null);
         setIsEditPosOpen(true);
-        console.log(possessor);
     }
 
     const handleEditPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -747,6 +750,14 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
 
     const updatePossessorDetails = async () => {
         // Prepare data for update
+        selectedEditPossessor.documents = newDocuments;
+        selectedEditPossessor.guardianName = selectedEditPossessor.guard_name;
+        selectedEditPossessor.guardianRelation = selectedEditPossessor.guard_relation;
+        selectedEditPossessor.mobileNo = selectedEditPossessor.mobile_no;
+        selectedEditPossessor.adhaar = (selectedEditPossessor.aadhaar_no || '').trim();
+        if (!validatePossessorForm(selectedEditPossessor)) {
+            return;
+        }
         const formData = new FormData();
         formData.append("dist_code", selectedEditPossessor.dist_code);
         formData.append("possessor_u_id", selectedEditPossessor.possessor_u_id);
@@ -796,12 +807,6 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
 
     }
 
-    const closeAddPosModal = () => {
-        setIsOpen(false);
-        resetPossessorAdd();
-        setDocuments([]);
-    }
-
     const viewDoc = (e: any) => {
         navigate(`/deedDoc?id=${e.currentTarget.id}`);
     }
@@ -810,17 +815,137 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
         <>
             {(dagNo && vill && dagNo != '' && vill != '') ?
                 (<div>
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="dag_no">পুৰণি দাগ নং (Old Dag No)</Label>
-                                <Input
-                                    id="dag_no"
-                                    className="w-full border rounded px-3 py-2 mt-1"
-                                    readOnly
-                                    value={dagNo}
-                                />
-                            </div>
+                    {/* Pattadars */}
+                    <div className="mt-6">
+                        <Card className="w-full shadow-lg border border-gray-200 rounded-xl">
+                            <CardHeader className="border-b border-gray-100">
+                                <CardTitle className="text-xl font-semibold text-gray-800 flex items-center justify-between">
+                                    পট্টাদাৰৰ তথ্য (Pattadars)
+                                    {showPattadars && (
+                                        <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                                            Total - {showPattadars.length}
+                                        </span>
+                                    )}
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                {/* Card Grid for Possessors */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                    {showPattadars?.length ? (
+                                        showPattadars.map((p, i) => (
+                                            <div
+                                                key={i}
+                                                className="bg-white shadow-lg rounded-xl border border-gray-200 p-4 space-y-4 hover:shadow-xl transition-all duration-300"
+                                            >
+                                                <div className="flex justify-between items-center">
+                                                    <span className="font-semibold text-gray-700">পট্টাদাৰৰ নাম:</span>
+                                                    <span className="text-gray-600">{p?.pdar_name || ""}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="font-semibold text-gray-700">পিতাৰ নাম:</span>
+                                                    <span className="text-gray-600">{p?.pdar_father_name || ""}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="font-semibold text-gray-700">ঠিকনা:</span>
+                                                    <span className="text-gray-600">
+                                                        {p?.pdar_add1 || ""}
+                                                        {p?.pdar_add2 ? `, ${p.pdar_add2}` : ""}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="col-span-full text-center text-gray-500 py-6">
+                                            📭 No Pattadar Data
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Tenants */}
+                    <div className="mt-6">
+                        <Card className="w-full shadow-lg border border-gray-200 rounded-xl">
+                            <CardHeader className="border-b border-gray-100">
+                                <CardTitle className="text-xl font-semibold text-gray-800 flex items-center justify-between">
+                                    ৰায়ত/ আধিয়াৰৰ তথ্য (Tenants)
+                                    {tenants && (
+                                        <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                                            Total - {tenants.length}
+                                        </span>
+                                    )}
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                {/* Card Grid for Tenants */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                    {tenants?.length ? (
+                                        tenants.map((t, i) => (
+                                            <div
+                                                key={i}
+                                                className="bg-white shadow-lg rounded-xl border border-gray-200 p-4 space-y-4 hover:shadow-xl transition-all duration-300"
+                                            >
+                                                <div className="flex justify-between items-center">
+                                                    <span className="font-semibold text-gray-700">ভাড়াতীয়ৰ নাম:</span>
+                                                    <span className="text-gray-600">{t?.tenant_name || "N/A"}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="font-semibold text-gray-700">পিতাৰ নাম:</span>
+                                                    <span className="text-gray-600">{t?.tenants_father || "N/A"}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="font-semibold text-gray-700">ঠিকনা:</span>
+                                                    <span className="text-gray-600">
+                                                        {t?.tenants_add1 || "N/A"}
+                                                        {t?.tenants_add2 ? `, ${t.tenants_add2}` : ""}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="font-semibold text-gray-700">খাতিয়ান নম্বৰ:</span>
+                                                    <span className="text-gray-600">{t?.khatian_no || "N/A"}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="font-semibold text-gray-700">ভাড়াতীয়া অৱস্থা:</span>
+                                                    <span className="text-gray-600">{t?.tenant_status || "N/A"}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="font-semibold text-gray-700">আয়তন:</span>
+                                                    <span className="text-gray-600">{t?.revenue_tenant || "N/A"}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                    <span className="font-semibold text-gray-700">মন্তব্য:</span>
+                                                    <span className="text-gray-600">{t?.remarks || "N/A"}</span>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="col-span-full text-center text-gray-500 py-6">
+                                            No Tenant Data
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {deeds && <div className="mt-6">
+                        <Card className="w-full shadow-sm border border-gray-200 rounded-xl">
+                            <CardHeader className="border-b border-gray-100">
+                                <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                                    Uploaded Deeds
+
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-0">
+
+                                <DeedList deeds={showDeeds} viewDoc={viewDoc} />
+
+                            </CardContent>
+                        </Card>
+                    </div>}
+                    <div className="p-5 sm:p-8 border-sm bg-white mt-5 rounded-lg shadow-md">
+                        <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
 
                             <div className="space-y-2">
                                 <Label htmlFor="part_dag">
@@ -833,9 +958,9 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                                     setFinalPartDag={setFinalPartDag}
                                 />
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-2 md:col-span-2">
                                 <Label htmlFor="part_dag">জৰীপ নম্বৰ(Survey Number) <span className="text-red-500" title="This field is required">*</span>
-                                    <SelectFromMapComp mapdata={mapdata} partDag={finalPartDag} villCode={vill} onSelect={(e) => handleSelectedFrmMap(e)} />
+                                    <SelectFromMapComp mapdata={mapdata} partDag={finalPartDag} villCode={vill} onSelect={(feature) => handleSelectedFrmMap(feature)} />
                                 </Label>
                                 <Input
                                     id="dag_no"
@@ -849,26 +974,7 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
 
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="o_land_class">পুৰণি মাটিৰ শ্ৰেণী (Old Land Class)</Label>
-                                <select
-                                    id="o_land_class"
-                                    className="w-full border rounded px-3 py-2 mt-1"
-                                    value={dharDagData?.land_class_code}
-                                    disabled
-                                >
-                                    <option value="">Select Land Class</option>
-                                    {landClasses &&
-                                        landClasses.length > 0 &&
-                                        landClasses.map((dharLandClass, index) => (
-                                            <option key={index} value={dharLandClass.class_code}>
-                                                {dharLandClass.land_type}
-                                            </option>
-                                        ))}
-                                </select>
-                            </div>
-
-                            <div className="space-y-2">
+                            <div className="space-y-2 md:col-span-2">
                                 <Label htmlFor="curr_land_use">বৰ্তমান মাটিৰ ব্যৱহাৰ (Current Land Use as) <span className="text-red-500" title="This field is required">*</span></Label>
                                 <select
                                     id="curr_land_use"
@@ -898,790 +1004,582 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                                     onInput={handleAreaSm}
                                 />
                             </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="patta_no">পুৰণি পট্টাৰ নং (Old Patta No)</Label>
-                                <Input
-                                    id="patta_no"
-                                    type="text"
-                                    value={dharDagData?.patta_no}
-                                    disabled
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="patta_type_code">পুৰণি পট্টাৰ প্ৰকাৰ (Old Patta Type)</Label>
-                                <select
-                                    id="patta_type_code"
-                                    className="w-full border rounded px-3 py-2 mt-1"
-                                    value={dharDagData?.patta_type_code}
-                                    disabled
-                                >
-                                    <option value="">Select Patta Type</option>
-                                    {pattaTypes &&
-                                        pattaTypes.length > 0 &&
-                                        pattaTypes.map((dharPattaType, index) => (
-                                            <option key={index} value={dharPattaType.type_code}>
-                                                {dharPattaType.patta_type}
-                                            </option>
-                                        ))}
-                                </select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="patta_no_new">নতুন পট্টাৰ নং (New Patta No)</Label>
-                                <Input
-                                    id="patta_no_new"
-                                    type="text"
-                                    value={pattaNo}
-                                    onInput={(e: any) => setPattaNo(e.currentTarget.value)}
-                                    disabled
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="patta_type_code_new">নতুন পট্টাৰ প্ৰকাৰ (New Patta Type)</Label>
-                                <select
-                                    id="patta_type_code_new"
-                                    className="w-full border rounded px-3 py-2 mt-1"
-                                    value={dharDagData?.patta_type_code}
-                                    disabled
-                                >
-                                    <option value="">Select Patta Type</option>
-                                    {pattaTypes &&
-                                        pattaTypes.length > 0 &&
-                                        pattaTypes.map((dharPattaType, index) => (
-                                            <option key={index} value={dharPattaType.type_code}>
-                                                {dharPattaType.patta_type}
-                                            </option>
-                                        ))}
-                                </select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="dag_land_revenue">ৰাজহ (টকা) (Dag Land Revenue)</Label>
-                                <Input
-                                    id="dag_land_revenue"
-                                    type="number"
-                                    placeholder="Enter Dag Land Revenue"
-                                    value={dagLandRevenue}
-                                    onInput={handleDagLandRevenue}
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="dag_local_tax">স্হানীয় কৰ (টকা) (Dag Local Tax)</Label>
-                                <Input
-                                    id="dag_local_tax"
-                                    type="number"
-                                    placeholder="Enter Dag Local Tax"
-                                    value={dagLocalTax}
-                                    onInput={(e: any) => setDagLocalTax(e.currentTarget.value)}
-                                />
-                            </div>
                         </div>
-                        {!updateButton && <div className="flex justify-end space-x-4">
-                            <Button type="submit" className="">
-                                Create
+                        {selectedFeature &&
+                            <DisplayFeatureComp geoJsonData={selectedFeature} />
+                        }
+                        <div className="flex items-center gap-2 mt-10 mb-3">
+                            <Users className="h-5 w-5 text-indigo-500" />
+                            <p className="text-md font-semibold text-medical-700">দখলদাৰ (Possessor)</p>
+
+                        </div>
+                        {possessors && possessors.length > 0 &&
+                            <PossessorsList possessors={possessors} onEditPossessor={(possessor) => onEditPossessor(possessor)} deletePossessor={deletePossessor} />
+                        }
+                        {showPossesorForm && (<>
+                            <p className="text-red-500 text-sm font-bold mt-2">
+                                (*) Fields are mandatory
+                            </p>
+
+                            <Card id="possessor-card" className="w-full my-4 bg-gray-100">
+                                <CardHeader className="flex-row items-center justify-between">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const el = document.getElementById("possessor-card");
+                                            if (el) {
+                                                el.classList.add("possessor-exit");
+                                                setTimeout(() => setShowPossessorForm(false), 260);
+                                            }
+                                        }}
+                                        className="text-white bg-red-500 hover:bg-red-700 px-2 py-1 rounded"
+                                    >
+                                        Delete
+                                    </button>
+
+                                    <CardTitle className="w-full text-center">
+                                        {`${getOrdinal(possessors.length + 1)} Possessor Details Form`}
+                                    </CardTitle>
+                                </CardHeader>
+
+                                <CardContent>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+
+                                        {/* NAME */}
+                                        <div className="space-y-2">
+                                            <Label>Possessor Name *</Label>
+                                            <Input
+                                                type="text"
+                                                placeholder="Enter Possessor Name"
+                                                value={possessor.name}
+                                                onInput={(e) => handlePossessorChange("name", e.currentTarget.value)}
+                                            />
+                                        </div>
+
+                                        {/* GUARDIAN NAME */}
+                                        <div className="space-y-2">
+                                            <Label>Guardian Name *</Label>
+                                            <Input
+                                                type="text"
+                                                value={possessor.guardianName}
+                                                placeholder="Enter Guardian Name"
+                                                onInput={(e) => handlePossessorChange("guardianName", e.currentTarget.value)}
+                                            />
+                                        </div>
+
+                                        {/* GUARDIAN RELATION */}
+                                        <div className="space-y-2">
+                                            <Label>Guardian Relation *</Label>
+                                            <select
+                                                className="w-full border rounded px-3 py-2"
+                                                value={possessor.guardianRelation}
+                                                onChange={(e) => handlePossessorChange("guardianRelation", e.currentTarget.value)}
+                                            >
+                                                <option value="">Select Relation</option>
+                                                <option value="f">পিতৃ</option>
+                                                <option value="m">মাতৃ</option>
+                                                <option value="h">পতি</option>
+                                                <option value="w">পত্নী</option>
+                                                <option value="u">অভিভাৱক</option>
+                                            </select>
+                                        </div>
+
+                                        {/* MODE OF ACQUISITION */}
+                                        <div className="space-y-2">
+                                            <Label>Mode of Acquisition *</Label>
+                                            <select
+                                                className="w-full border rounded px-3 py-2"
+                                                value={possessor.modeOfAcquisition}
+                                                onChange={(e) => handlePossessorChange("modeOfAcquisition", e.currentTarget.value)}
+                                            >
+                                                <option value="">Select Mode</option>
+                                                {transferTypes.map((type) => (
+                                                    <option key={type.value} value={type.value}>{type.label}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        {/* MUTATION NAME */}
+                                        <div className="space-y-2">
+                                            <Label>Possessor Name for Mutation</Label>
+                                            <Input
+                                                type="text"
+                                                value={possessor.nameMut}
+                                                placeholder="Possessor Name for Mutation"
+                                                onInput={(e) => handlePossessorChange("nameMut", e.currentTarget.value)}
+                                            />
+                                        </div>
+
+                                        {/* MUTATION FATHER */}
+                                        <div className="space-y-2">
+                                            <Label>Father Name for Mutation</Label>
+                                            <Input
+                                                type="text"
+                                                value={possessor.fatherNameMut}
+                                                placeholder="Father Name for Mutation"
+                                                onInput={(e) => handlePossessorChange("fatherNameMut", e.currentTarget.value)}
+                                            />
+                                        </div>
+
+                                        {/* MUTATION ADDRESS */}
+                                        <div className="space-y-2">
+                                            <Label>Address for Mutation</Label>
+                                            <Input
+                                                type="text"
+                                                value={possessor.addressMut}
+                                                placeholder="Address for Mutation"
+                                                onInput={(e) => handlePossessorChange("addressMut", e.currentTarget.value)}
+                                            />
+                                        </div>
+
+                                        {/* GENDER */}
+                                        <div className="space-y-2">
+                                            <Label>Gender *</Label>
+                                            <select
+                                                className="w-full border rounded px-3 py-2"
+                                                value={possessor.gender}
+                                                onChange={(e) => handlePossessorChange("gender", e.currentTarget.value)}
+                                            >
+                                                <option value="">--Select--</option>
+                                                <option value="male">Male</option>
+                                                <option value="female">Female</option>
+                                                <option value="third gender">Third Gender</option>
+                                                <option value="institute">Institute</option>
+                                            </select>
+                                        </div>
+
+                                        {/* AADHAAR */}
+                                        <div className="space-y-2">
+                                            <Label>Aadhaar Number</Label>
+                                            <Input
+                                                type="text"
+                                                value={possessor.adhaar}
+                                                placeholder="Enter Aadhaar Number"
+                                                onInput={(e) => handlePossessorChange("adhaar", e.currentTarget.value)}
+                                            />
+                                        </div>
+
+                                        {/* MOBILE + OTP */}
+                                        <div className="space-y-2">
+                                            <Label>Mobile *</Label>
+                                            <div className="flex items-center gap-2">
+                                                <Input
+                                                    type="text"
+                                                    value={possessor.mobileNo}
+                                                    placeholder="Enter Mobile"
+                                                    onInput={(e) => handlePossessorChange("mobileNo", e.currentTarget.value)}
+                                                />
+                                                {/* <Button type="button" onClick={handleSendOtp}>
+                                                            {isOtpSent ? "OTP Sent" : "Send OTP"}
+                                                        </Button> */}
+                                            </div>
+
+                                            {/* {isOtpSent && !isOtpVerified && (
+                                                        <div className="flex items-center gap-2 mt-2">
+                                                            <Input
+                                                                type="text"
+                                                                placeholder="Enter OTP"
+                                                                value={otp}
+                                                                onInput={(e) => setOtp(e.currentTarget.value)}
+                                                            />
+                                                            <Button onClick={handleVerifyOtp}>Verify</Button>
+                                                        </div>
+                                                    )} */}
+                                        </div>
+
+                                        {/* EMAIL */}
+                                        <div className="space-y-2">
+                                            <Label>Email</Label>
+                                            <Input
+                                                type="email"
+                                                value={possessor.email}
+                                                placeholder="Enter Email"
+                                                onInput={(e) => handlePossessorChange("email", e.currentTarget.value)}
+                                            />
+                                        </div>
+
+                                        {/* DOB */}
+                                        <div className="space-y-2">
+                                            <Label>Date of Birth</Label>
+                                            <Input
+                                                type="date"
+                                                value={possessor.dob}
+                                                onInput={(e) => handlePossessorChange("dob", e.currentTarget.value)}
+                                            />
+                                        </div>
+
+                                        {/* PHOTO UPLOAD */}
+                                        <div className="space-y-3">
+                                            <Label>Possessor Photo</Label>
+                                            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-2xl cursor-pointer">
+                                                <Input
+                                                    type="file"
+                                                    accept=".jpg,.jpeg"
+                                                    className="hidden"
+                                                    onChange={(e) => handlePhotoChange(e)}
+                                                />
+                                                <span className="text-sm text-gray-500">Upload Photo</span>
+                                            </label>
+
+                                            {possessor.photo_preview && (
+                                                <div className="w-40 h-40 border rounded-xl overflow-hidden">
+                                                    <img
+                                                        src={possessor.photo_preview}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* REMARK */}
+                                        <div className="space-y-2 md:col-span-2">
+                                            <Label>Remark</Label>
+                                            <Textarea
+                                                value={possessor.remark}
+                                                onInput={(e) => handlePossessorChange("remark", e.currentTarget.value)}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* DOCUMENTS */}
+                                    <div className="space-y-3 mt-10">
+                                        <Label>Ownership / Transfer Documents</Label>
+
+                                        {possessor.documents.map((doc, docIndex) => (
+                                            <div key={docIndex} className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-xl bg-gray-50 relative">
+
+                                                <div className="space-y-1">
+                                                    <Label>Document Name *</Label>
+                                                    <Input
+                                                        type="text"
+                                                        value={doc.document_name}
+                                                        onChange={(e) =>
+                                                            handleDocumentChange(docIndex, "document_name", e.target.value)
+                                                        }
+                                                        placeholder="Enter Document Name"
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-1">
+                                                    <Label>Document No *</Label>
+                                                    <Input
+                                                        type="text"
+                                                        value={doc.document_no}
+                                                        onChange={(e) =>
+                                                            handleDocumentChange(docIndex, "document_no", e.target.value)
+                                                        }
+                                                        placeholder="Enter Document No"
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-1">
+                                                    <Label>Issuing Authority</Label>
+                                                    <Input
+                                                        type="text"
+                                                        value={doc.issuing_authority}
+                                                        placeholder="Issuing Authority"
+                                                        onChange={(e) =>
+                                                            handleDocumentChange(docIndex, "issuing_authority", e.target.value)
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-1">
+                                                    <Label>Issue Date *</Label>
+                                                    <Input
+                                                        type="date"
+                                                        value={doc.document_issue_date}
+                                                        onChange={(e) =>
+                                                            handleDocumentChange(docIndex, "document_issue_date", e.target.value)
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-1">
+                                                    <Label>Upload *</Label>
+                                                    <Input
+                                                        type="file"
+                                                        accept=".pdf,image/*"
+                                                        onChange={(e) =>
+                                                            handleDocumentFileChange(docIndex, e.target.files?.[0] || null)
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <button
+                                                    type="button"
+                                                    className="absolute top-2 right-2 text-red-500"
+                                                    onClick={() => removeDocument(docIndex)}
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        ))}
+
+                                        <Button type="button" variant="outline" onClick={addDocument}>
+                                            + Add Document
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </>
+                        )}
+
+                        <div className="mt-4">
+                            <Button type="button" className={showPossesorForm ? 'bg-green-600 hover:bg-green-700 text-white' : ''} onClick={() => addMorePossessor()}>
+                                {getSaveButtonText()}
                             </Button>
-                        </div>}
-                        {updateButton && <div className="flex justify-end space-x-4">
-                            <Button type="button" className="" onClick={handleUpdatePartDag}>
-                                Update
-                            </Button>
+                        </div>
+
+                        {isPartDagExists && <div className="flex justify-end space-x-4">
                             <ConfirmDialog
-                                trigger={<Button type="button" className="bg-red-600 hover:bg-red-700 text-white">Delete</Button>}
+                                trigger={<Button type="button" className="bg-red-600 hover:bg-red-700 text-white">Delete Part Dag</Button>}
                                 title="Delete DAG"
                                 description="This will permanently delete the DAG record. Are you sure?"
                                 confirmText="Yes, delete"
                                 cancelText="No, keep it"
                                 onConfirm={handlePartDagDelete}
-                                buttonStyle="red"
                             />
-                            <Button type="button" className="" onClick={() => nextPartDag()}>
-                                Next Dag
+                            <Button type="button" className="" onClick={() => goToNext()}>
+                                Next Part Dag
                             </Button>
                         </div>}
-                    </form>
-
-                    {/* Pattadars */}
-                    <div className="mt-6">
-                        <Card className="w-full shadow-sm border border-gray-200 rounded-xl">
-                            <CardHeader className="border-b border-gray-100">
-                                <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                                    🧾পট্টাদাৰৰ তথ্য
-                                    (Pattadars)
-                                    {showPattadars && (
-                                        <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Total - {showPattadars.length}</span>
-                                    )}
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-0">
-
-                                <PattadarsList pattadars={showPattadars} />
-
-                            </CardContent>
-                        </Card>
                     </div>
-
-                    {deeds && <div className="mt-6">
-                        <Card className="w-full shadow-sm border border-gray-200 rounded-xl">
-                            <CardHeader className="border-b border-gray-100">
-                                <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                                    Uploaded Deeds
-
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-0">
-
-                                <DeedList deeds={showDeeds} viewDoc={viewDoc} />
-
-                            </CardContent>
-                        </Card>
-                    </div>}
-
-                    {/* Tenants */}
-                    <div className="mt-8">
-                        <Card className="w-full shadow-sm border border-gray-200 rounded-xl">
-                            <CardHeader className="border-b border-gray-100">
-                                <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                                    <Users className="h-5 w-5 text-indigo-500" />
-                                    ৰায়ত/ আধিয়াৰৰ তথ্য (Tenants)
-                                    {showTenants && (
-                                        <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Total - {showTenants.length}</span>
-                                    )}
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="p-0">
-                                <TenantsList tenants={showTenants} />
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    {/* Possessors */}
-                    {finalPartDag && (
-                        <div className="mt-6">
-                            <Card className="w-full shadow-sm border border-gray-200 rounded-xl">
-                                <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-gray-100">
-                                    {/* Title */}
-                                    <CardTitle className="text-base sm:text-lg font-semibold text-gray-800 flex items-center gap-2">
-                                        <Users className="h-5 w-5 text-indigo-500" />
-                                        <span>Possessors</span>
-                                        {possessors && (
-                                            <span className="bg-indigo-100 text-indigo-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Total - {possessors.length}</span>
-                                        )}
-                                    </CardTitle>
-
-                                    {/* Button */}
-                                    <Button
-                                        type="button"
-                                        id={finalPartDag}
-                                        onClick={modalOpen}
-                                        className="w-full sm:w-auto bg-indigo-500 hover:bg-indigo-600 text-white shadow-sm rounded-lg flex items-center justify-center gap-2 px-4 py-2 transition-all"
-                                    >
-                                        <Plus className="h-4 w-4" />
-                                        <span>Add Possessor</span>
-                                    </Button>
-                                </CardHeader>
-
-                                <CardContent className="p-0">
-                                    <PossessorsList possessors={possessors} onEditPossessor={onEditPossessor} deletePossessor={deletePossessor} />
-                                </CardContent>
-                            </Card>
-                        </div>
+                </div>
+                ) : (<div className="flex items-center justify-center p-7">
+                    {(!dagNo || dagNo.trim() === '') && (
+                        <p className="text-sm text-gray-500 mt-2">Please select a valid Dag No to proceed.</p>
                     )}
-
-                    {finalPartDag && finalPartDag !== '' && isEditPosOpen && selectedEditPossessor && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                            <div className="bg-white rounded-lg shadow-lg w-full max-w-5xl md:max-w-7xl p-6 relative overflow-y-auto max-h-[90vh]">
-                                <button
-                                    onClick={() => setIsEditPosOpen(false)}
-                                    className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-                                >
-                                    ✕
-                                </button>
-                                <Card className="w-full my-4">
-                                    <CardHeader className="flex-row items-center justify-between">
-                                        <CardTitle className="w-full text-center">Edit Possessor</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="edit_possessor_name">Possessor Name <span className="text-red-500">*</span></Label>
-                                                <Input
-                                                    id="edit_possessor_name"
-                                                    type="text"
-                                                    placeholder="Possessor Name"
-                                                    value={selectedEditPossessor.name || ''}
-                                                    onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, name: e.currentTarget.value })}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="edit_possessor_guard_name">Possessor's Guardian Name <span className="text-red-500">*</span></Label>
-                                                <Input
-                                                    id="edit_possessor_guard_name"
-                                                    type="text"
-                                                    placeholder="Possessor's Guardian Name"
-                                                    value={selectedEditPossessor.guard_name || ''}
-                                                    onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, guard_name: e.currentTarget.value })}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="edit_possessor_guard_relation">Possessor's Guardian Relation <span className="text-red-500">*</span></Label>
-                                                <select
-                                                    id="edit_possessor_guard_relation"
-                                                    className="w-full border rounded px-3 py-2 mt-1"
-                                                    value={selectedEditPossessor.guard_relation || ''}
-                                                    onChange={e => setSelectedEditPossessor({ ...selectedEditPossessor, guard_relation: e.currentTarget.value })}
-                                                >
-                                                    <option value="">Select Relation</option>
-                                                    <option value="f">পিতৃ</option>
-                                                    <option value="m">মাতৃ</option>
-                                                    <option value="h">পতি</option>
-                                                    <option value="w">পত্নী</option>
-                                                    <option value="u">অভিভাৱক</option>
-                                                </select>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="edit_mode_of_acquisition">Mode of Acquisition by possessor</Label>
-                                                <select
-                                                    id="edit_mode_of_acquisition"
-                                                    className="w-full border rounded px-3 py-2 mt-1"
-                                                    value={selectedEditPossessor.mode_of_acquisition || ''}
-                                                    onChange={e => setSelectedEditPossessor({ ...selectedEditPossessor, mode_of_acquisition: e.currentTarget.value })}
-                                                >
-                                                    <option value="">Select Mode</option>
-                                                    {transferTypes.map(type => (
-                                                        <option key={type.value} value={type.value}>
-                                                            {type.label}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="edit_possessor_mut_name">Possessor Name for Mutation (Optional)</Label>
-                                                <Input
-                                                    id="edit_possessor_mut_name"
-                                                    type="text"
-                                                    placeholder="Possessor Name for Mutation"
-                                                    value={selectedEditPossessor.mut_possessor_name || ''}
-                                                    onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, mut_possessor_name: e.currentTarget.value })}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="edit_possessor_father_mut_name">Possessor Father's Name for Mutation (Optional)</Label>
-                                                <Input
-                                                    id="edit_possessor_father_mut_name"
-                                                    type="text"
-                                                    placeholder="Possessor Father Name for Mutation"
-                                                    value={selectedEditPossessor.mut_possessor_father_name || ''}
-                                                    onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, mut_possessor_father_name: e.currentTarget.value })}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="edit_possessor_address_mut">Possessor Address for Mutation (Optional)</Label>
-                                                <Input
-                                                    id="edit_possessor_address_mut"
-                                                    type="text"
-                                                    placeholder="Possessor Address for Mutation"
-                                                    value={selectedEditPossessor.mut_possessor_address || ''}
-                                                    onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, mut_possessor_address: e.currentTarget.value })}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="edit_possessor_gender">Gender <span className="text-red-500">*</span> </Label>
-                                                <select
-                                                    id="edit_possessor_gender"
-                                                    value={selectedEditPossessor.gender || ''}
-                                                    onChange={e => setSelectedEditPossessor({ ...selectedEditPossessor, gender: e.currentTarget.value })}
-                                                    className="w-full border rounded px-3 py-2 mt-1"
-                                                >
-                                                    <option value="">--Select--</option>
-                                                    <option value="male">Male</option>
-                                                    <option value="female">Female</option>
-                                                    <option value="third gender">Third Gender</option>
-                                                    <option value="institute">Institute</option>
-                                                </select>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="edit_possessor_aadhaar">Aadhaar Number (optional)</Label>
-                                                <Input
-                                                    id="edit_possessor_aadhaar"
-                                                    type="text"
-                                                    placeholder="Aadhaar Number"
-                                                    value={selectedEditPossessor.aadhaar_no || ''}
-                                                    onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, aadhaar_no: e.currentTarget.value })}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="edit_possessor_mobile">Mobile Number <span className="text-red-500">*</span> </Label>
-                                                <Input
-                                                    id="edit_possessor_mobile"
-                                                    type="text"
-                                                    placeholder="Mobile Number"
-                                                    value={selectedEditPossessor.mobile_no || ''}
-                                                    onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, mobile_no: e.currentTarget.value })}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="edit_possessor_email">Email (optional)</Label>
-                                                <Input
-                                                    id="edit_possessor_email"
-                                                    type="email"
-                                                    placeholder="Email"
-                                                    value={selectedEditPossessor.email || ''}
-                                                    onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, email: e.currentTarget.value })}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="edit_possessor_dob">Date of Birth (optional)</Label>
-                                                <Input
-                                                    id="edit_possessor_dob"
-                                                    type="date"
-                                                    value={selectedEditPossessor.dob || ''}
-                                                    onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, dob: e.currentTarget.value })}
-                                                />
-                                            </div>
-                                            <div className="space-y-2 md:col-span-2">
-                                                <Label htmlFor="edit_possessor_remark">Remark (optional)</Label>
-                                                <Textarea
-                                                    id="edit_possessor_remark"
-                                                    value={selectedEditPossessor.remarks || ''}
-                                                    onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, remarks: e.currentTarget.value })}
-                                                />
-                                            </div>
-                                            {/* Edit Possessor Photo */}
-                                            <div className="space-y-2 md:col-span-2">
-                                                <Label htmlFor="edit_possessor_photo" className="text-gray-700 font-medium">
-                                                    Possessor Photo (optional)
-                                                </Label>
-                                                <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-                                                    {/* Photo Preview */}
-                                                    <div className="flex flex-col items-center gap-2">
-                                                        {editPosPhoto ? (
-                                                            <>
-                                                                <div className="w-40 h-40 border rounded-2xl overflow-hidden shadow-sm bg-gray-100 flex items-center justify-center">
-                                                                    <img
-                                                                        src={`data:image/jpeg;base64,${editPosPhoto}`}
-                                                                        alt="Possessor Photo"
-                                                                        className="w-full h-full object-cover"
-                                                                    />
-                                                                </div>
-                                                                <div className="flex gap-2 mt-2">
-                                                                    <Button
-                                                                        type="button"
-                                                                        className="bg-blue-600 text-white"
-                                                                        onClick={() => updatePossessorPhoto()}
-                                                                        disabled={updatingPhoto}
-                                                                    >
-                                                                        {updatingPhoto ? "Saving..." : "Save Photo"}
-                                                                    </Button>
-                                                                    <Button
-                                                                        type="button"
-                                                                        variant="outline"
-                                                                        className="border-red-500 text-red-600"
-                                                                        onClick={() => setEditPosPhoto(null)}
-                                                                    >
-                                                                        Remove Photo
-                                                                    </Button>
-                                                                </div>
-                                                            </>
-                                                        ) : selectedEditPossessor.photo_path ? (
-                                                            <>
-                                                                <div className="w-40 h-40 border rounded-2xl overflow-hidden shadow-sm bg-gray-100 flex items-center justify-center">
-                                                                    <img
-                                                                        src={`${Constants.API_BASE_URL_ASSET}${selectedEditPossessor.photo_path}`}
-                                                                        alt="Possessor Photo"
-                                                                        className="w-full h-full object-cover"
-                                                                    />
-                                                                </div>
-                                                                <div className="flex gap-2 mt-2">
-
-                                                                    <Button
-                                                                        type="button"
-                                                                        variant="outline"
-                                                                        className="border-red-500 text-red-600"
-                                                                        disabled={removingPossessorPhoto || updatingPhoto}
-                                                                        onClick={() => removePossessorPhoto()}
-                                                                    >
-                                                                        Remove Photo
-                                                                    </Button>
-                                                                </div>
-                                                            </>
-                                                        ) : (
-                                                            <div className="w-40 h-40 border rounded-2xl overflow-hidden shadow-sm bg-gray-50 flex items-center justify-center text-gray-400">
-                                                                No Photo
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    {/* File Input */}
-                                                    <div className="flex flex-col gap-2 w-full max-w-xs">
-                                                        <label
-                                                            htmlFor="edit_possessor_photo"
-                                                            className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-2xl cursor-pointer hover:bg-gray-50 transition p-4 text-gray-500"
-                                                        >
-                                                            <svg
-                                                                className="w-8 h-8 mb-2 text-gray-400"
-                                                                xmlns="http://www.w3.org/2000/svg"
-                                                                fill="none"
-                                                                viewBox="0 0 24 24"
-                                                                stroke="currentColor"
+                </div>)}
+            {/* <Toaster position="top-center" /> */}
+            <Loader loading={isLoading || isPartDagInfoLoading} />
+            {finalPartDag && finalPartDag !== '' && isEditPosOpen && selectedEditPossessor && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg shadow-lg w-full max-w-5xl md:max-w-7xl p-6 relative overflow-y-auto max-h-[90vh]">
+                        <button
+                            onClick={() => setIsEditPosOpen(false)}
+                            className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+                        >
+                            ✕
+                        </button>
+                        <Card className="w-full my-4">
+                            <CardHeader className="flex-row items-center justify-between">
+                                <CardTitle className="w-full text-center">Edit Possessor</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit_possessor_name">Possessor Name <span className="text-red-500">*</span></Label>
+                                        <Input
+                                            id="edit_possessor_name"
+                                            type="text"
+                                            placeholder="Possessor Name"
+                                            value={selectedEditPossessor.name || ''}
+                                            onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, name: e.currentTarget.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit_possessor_guard_name">Possessor's Guardian Name <span className="text-red-500">*</span></Label>
+                                        <Input
+                                            id="edit_possessor_guard_name"
+                                            type="text"
+                                            placeholder="Possessor's Guardian Name"
+                                            value={selectedEditPossessor.guard_name || ''}
+                                            onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, guard_name: e.currentTarget.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit_possessor_guard_relation">Possessor's Guardian Relation <span className="text-red-500">*</span></Label>
+                                        <select
+                                            id="edit_possessor_guard_relation"
+                                            className="w-full border rounded px-3 py-2 mt-1"
+                                            value={selectedEditPossessor.guard_relation || ''}
+                                            onChange={e => setSelectedEditPossessor({ ...selectedEditPossessor, guard_relation: e.currentTarget.value })}
+                                        >
+                                            <option value="">Select Relation</option>
+                                            <option value="f">পিতৃ</option>
+                                            <option value="m">মাতৃ</option>
+                                            <option value="h">পতি</option>
+                                            <option value="w">পত্নী</option>
+                                            <option value="u">অভিভাৱক</option>
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit_mode_of_acquisition">Mode of Acquisition by possessor</Label>
+                                        <select
+                                            id="edit_mode_of_acquisition"
+                                            className="w-full border rounded px-3 py-2 mt-1"
+                                            value={selectedEditPossessor.mode_of_acquisition || ''}
+                                            onChange={e => setSelectedEditPossessor({ ...selectedEditPossessor, mode_of_acquisition: e.currentTarget.value })}
+                                        >
+                                            <option value="">Select Mode</option>
+                                            {transferTypes.map(type => (
+                                                <option key={type.value} value={type.value}>
+                                                    {type.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit_possessor_mut_name">Possessor Name for Mutation (Optional)</Label>
+                                        <Input
+                                            id="edit_possessor_mut_name"
+                                            type="text"
+                                            placeholder="Possessor Name for Mutation"
+                                            value={selectedEditPossessor.mut_possessor_name || ''}
+                                            onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, mut_possessor_name: e.currentTarget.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit_possessor_father_mut_name">Possessor Father's Name for Mutation (Optional)</Label>
+                                        <Input
+                                            id="edit_possessor_father_mut_name"
+                                            type="text"
+                                            placeholder="Possessor Father Name for Mutation"
+                                            value={selectedEditPossessor.mut_possessor_father_name || ''}
+                                            onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, mut_possessor_father_name: e.currentTarget.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit_possessor_address_mut">Possessor Address for Mutation (Optional)</Label>
+                                        <Input
+                                            id="edit_possessor_address_mut"
+                                            type="text"
+                                            placeholder="Possessor Address for Mutation"
+                                            value={selectedEditPossessor.mut_possessor_address || ''}
+                                            onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, mut_possessor_address: e.currentTarget.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit_possessor_gender">Gender <span className="text-red-500">*</span> </Label>
+                                        <select
+                                            id="edit_possessor_gender"
+                                            value={selectedEditPossessor.gender || ''}
+                                            onChange={e => setSelectedEditPossessor({ ...selectedEditPossessor, gender: e.currentTarget.value })}
+                                            className="w-full border rounded px-3 py-2 mt-1"
+                                        >
+                                            <option value="">--Select--</option>
+                                            <option value="male">Male</option>
+                                            <option value="female">Female</option>
+                                            <option value="third gender">Third Gender</option>
+                                            <option value="institute">Institute</option>
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit_possessor_aadhaar">Aadhaar Number (optional)</Label>
+                                        <Input
+                                            id="edit_possessor_aadhaar"
+                                            type="text"
+                                            placeholder="Aadhaar Number"
+                                            value={selectedEditPossessor.aadhaar_no || ''}
+                                            onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, aadhaar_no: e.currentTarget.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit_possessor_mobile">Mobile Number <span className="text-red-500">*</span> </Label>
+                                        <Input
+                                            id="edit_possessor_mobile"
+                                            type="text"
+                                            placeholder="Mobile Number"
+                                            value={selectedEditPossessor.mobile_no || ''}
+                                            onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, mobile_no: e.currentTarget.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit_possessor_email">Email (optional)</Label>
+                                        <Input
+                                            id="edit_possessor_email"
+                                            type="email"
+                                            placeholder="Email"
+                                            value={selectedEditPossessor.email || ''}
+                                            onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, email: e.currentTarget.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit_possessor_dob">Date of Birth (optional)</Label>
+                                        <Input
+                                            id="edit_possessor_dob"
+                                            type="date"
+                                            value={selectedEditPossessor.dob || ''}
+                                            onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, dob: e.currentTarget.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2 md:col-span-2">
+                                        <Label htmlFor="edit_possessor_remark">Remark (optional)</Label>
+                                        <Textarea
+                                            id="edit_possessor_remark"
+                                            value={selectedEditPossessor.remarks || ''}
+                                            onInput={e => setSelectedEditPossessor({ ...selectedEditPossessor, remarks: e.currentTarget.value })}
+                                        />
+                                    </div>
+                                    {/* Edit Possessor Photo */}
+                                    <div className="space-y-2 md:col-span-2">
+                                        <Label htmlFor="edit_possessor_photo" className="text-gray-700 font-medium">
+                                            Possessor Photo (optional)
+                                        </Label>
+                                        <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+                                            {/* Photo Preview */}
+                                            <div className="flex flex-col items-center gap-2">
+                                                {editPosPhoto ? (
+                                                    <>
+                                                        <div className="w-40 h-40 border rounded-2xl overflow-hidden shadow-sm bg-gray-100 flex items-center justify-center">
+                                                            <img
+                                                                src={`data:image/jpeg;base64,${editPosPhoto}`}
+                                                                alt="Possessor Photo"
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </div>
+                                                        <div className="flex gap-2 mt-2">
+                                                            <Button
+                                                                type="button"
+                                                                className="bg-blue-600 text-white"
+                                                                onClick={() => updatePossessorPhoto()}
+                                                                disabled={updatingPhoto}
                                                             >
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4a1 1 0 011-1h8a1 1 0 011 1v12m-4 4h-4m0 0l-4-4m4 4l4-4" />
-                                                            </svg>
-                                                            <span className="text-sm">Click to upload or drag & drop</span>
-                                                            <span className="text-xs text-gray-400">JPG/JPEG up to 5MB</span>
-                                                            <Input
-                                                                id="edit_possessor_photo"
-                                                                type="file"
-                                                                accept=".jpg,.jpeg"
-                                                                className="hidden"
-                                                                onChange={handleEditPhotoChange}
-                                                            />
-                                                        </label>
-                                                        <span className="text-xs text-gray-400">Only JPG/JPEG allowed</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Edit Ownership / Transfer Documents */}
-                                            <div className="space-y-3 md:col-span-2">
-                                                <Label className="text-gray-700 font-medium">Ownership / Transfer Documents</Label>
-                                                {Array.isArray(selectedEditPossessor.ownership_documents) && selectedEditPossessor.ownership_documents.length > 0 ? (
-                                                    selectedEditPossessor.ownership_documents.map((doc, idx) => (
-                                                        <div
-                                                            key={idx}
-                                                            className="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 border rounded-xl bg-gray-50 relative"
-                                                        >
-                                                            <div className="space-y-1">
-                                                                <Label>Document Name</Label>
-                                                                <Input
-                                                                    type="text"
-                                                                    value={doc.document_name || ""}
-                                                                    readOnly
-                                                                />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <Label>Document No</Label>
-                                                                <Input
-                                                                    type="text"
-                                                                    value={doc.document_no || ""}
-                                                                    readOnly
-                                                                />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <Label>Issuing Authority</Label>
-                                                                <Input
-                                                                    type="text"
-                                                                    value={doc.issuing_authority || ""}
-                                                                    readOnly
-                                                                />
-                                                            </div>
-                                                            <div className="space-y-1">
-                                                                <Label>Issue Date</Label>
-                                                                <Input
-                                                                    type="date"
-                                                                    value={doc.document_issue_date || ""}
-                                                                    readOnly
-                                                                />
-                                                            </div>
-                                                            <div className="space-y-1 flex flex-col justify-center">
-                                                                <Label>File</Label>
-                                                                {doc.file_path ? (
-                                                                    <a
-                                                                        href={`${Constants.API_BASE_URL_ASSET}${doc.file_path}`}
-                                                                        target="_blank"
-                                                                        rel="noopener noreferrer"
-                                                                        className="text-blue-600 underline"
-                                                                    >
-                                                                        View
-                                                                    </a>
-                                                                ) : (
-                                                                    <span className="text-gray-400">No file</span>
-                                                                )}
-                                                            </div>
-                                                            <div className="space-y-1 flex flex-col justify-center">
-
-                                                                {/* Delete Document Button */}
-                                                                <button
-                                                                    type="button"
-                                                                    className="text-red-500 hover:text-red-700"
-                                                                    onClick={() => deletePossessorDocument(doc.id)}
-                                                                    title="Delete Document"
-                                                                >
-                                                                    Delete
-                                                                </button>
-                                                            </div>
+                                                                {updatingPhoto ? "Saving..." : "Save Photo"}
+                                                            </Button>
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                className="border-red-500 text-red-600"
+                                                                onClick={() => setEditPosPhoto(null)}
+                                                            >
+                                                                Remove Photo
+                                                            </Button>
                                                         </div>
-                                                    ))
+                                                    </>
+                                                ) : selectedEditPossessor.photo_path ? (
+                                                    <>
+                                                        <div className="w-40 h-40 border rounded-2xl overflow-hidden shadow-sm bg-gray-100 flex items-center justify-center">
+                                                            <img
+                                                                src={`${Constants.API_BASE_URL_ASSET}${selectedEditPossessor.photo_path}`}
+                                                                alt="Possessor Photo"
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </div>
+                                                        <div className="flex gap-2 mt-2">
+
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                className="border-red-500 text-red-600"
+                                                                disabled={removingPossessorPhoto || updatingPhoto}
+                                                                onClick={() => removePossessorPhoto()}
+                                                            >
+                                                                Remove Photo
+                                                            </Button>
+                                                        </div>
+                                                    </>
                                                 ) : (
-                                                    <div className="text-gray-500">No documents uploaded.</div>
-                                                )}
-                                                {newDocuments.map((doc, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-xl bg-gray-50 relative"
-                                                    >
-                                                        <div className="space-y-1">
-                                                            <Label>Document Name</Label>
-                                                            <Input
-                                                                type="text"
-                                                                placeholder="e.g. Sale Deed"
-                                                                value={doc.document_name}
-                                                                onChange={(e) => handleNewDocumentChange(index, "document_name", e.target.value)}
-                                                            />
-                                                        </div>
-
-                                                        <div className="space-y-1">
-                                                            <Label>Document No</Label>
-                                                            <Input
-                                                                type="text"
-                                                                placeholder="Document Number"
-                                                                value={doc.document_no}
-                                                                onChange={(e) => handleNewDocumentChange(index, "document_no", e.target.value)}
-                                                            />
-                                                        </div>
-
-                                                        <div className="space-y-1">
-                                                            <Label>Issuing Authority</Label>
-                                                            <Input
-                                                                type="text"
-                                                                placeholder="Authority Name"
-                                                                value={doc.issuing_authority}
-                                                                onChange={(e) => handleNewDocumentChange(index, "issuing_authority", e.target.value)}
-                                                            />
-                                                        </div>
-
-                                                        <div className="space-y-1">
-                                                            <Label>Issue Date</Label>
-                                                            <Input
-                                                                type="date"
-                                                                value={doc.document_issue_date}
-                                                                onChange={(e) => handleNewDocumentChange(index, "document_issue_date", e.target.value)}
-                                                            />
-                                                        </div>
-
-                                                        <div className="space-y-1">
-                                                            <Label>Upload</Label>
-                                                            <Input
-                                                                type="file"
-                                                                accept=".pdf,image/*"
-                                                                onChange={(e) =>
-                                                                    handleNewDocumentFileChange(index, e.target.files ? e.target.files[0] : null)
-                                                                }
-                                                            />
-                                                        </div>
-
-                                                        <button
-                                                            type="button"
-                                                            className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-                                                            onClick={() => removeNewDocument(index)}
-                                                            title="Remove Document"
-                                                        >
-                                                            ✕
-                                                        </button>
+                                                    <div className="w-40 h-40 border rounded-2xl overflow-hidden shadow-sm bg-gray-50 flex items-center justify-center text-gray-400">
+                                                        No Photo
                                                     </div>
-                                                ))}
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    onClick={() => addNewDocument()}
-                                                    className="mt-2 w-full md:w-auto"
-                                                >
-                                                    + Add New Document
-                                                </Button>
+                                                )}
                                             </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                                <div className="flex justify-end gap-3">
-                                    <button
-                                        onClick={() => updatePossessorDetails()}
-                                        className="px-4 py-2 my-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                                    >
-                                        Update
-                                    </button>
-                                    <button
-                                        onClick={() => setIsEditPosOpen(false)}
-                                        className="px-4 py-2 my-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
-                                    >
-                                        Close
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {finalPartDag && finalPartDag !== '' && isOpen && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                            <div className="bg-white rounded-lg shadow-lg w-full max-w-5xl md:max-w-7xl p-6 relative overflow-y-auto max-h-[90vh]">
-                                <button
-                                    onClick={() => closeAddPosModal()}
-                                    className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-                                >
-                                    ✕
-                                </button>
-
-                                <Card className="w-full my-4">
-                                    <CardHeader className="flex-row items-center justify-between">
-                                        <CardTitle className="w-full text-center">Add Possessor</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="possessor_name">Possessor Name <span className="text-red-500">*</span></Label>
-                                                <Input
-                                                    id="possessor_name"
-                                                    type="text"
-                                                    placeholder="Possessor Name"
-                                                    value={posName}
-                                                    onInput={(e: any) => setPosName(e.currentTarget.value)}
-                                                />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="possessor_guard_name">Possessor's Guardian Name <span className="text-red-500">*</span></Label>
-                                                <Input
-                                                    id="possessor_guard_name"
-                                                    type="text"
-                                                    placeholder="Possessor's Guardian Name"
-                                                    value={posGuardianName}
-                                                    onInput={(e: any) => setPosGuardianName(e.currentTarget.value)}
-                                                />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="possessor_guard_relation">Possessor's Guardian Relation <span className="text-red-500">*</span></Label>
-                                                <select
-                                                    id="possessor_guard_relation"
-                                                    className="w-full border rounded px-3 py-2 mt-1"
-                                                    value={posGuardianRelation}
-                                                    onChange={(e: any) => setPosGuardianRelation(e.currentTarget.value)}
-                                                >
-                                                    <option value="">Select Relation</option>
-                                                    <option value="f">পিতৃ</option>
-                                                    <option value="m">মাতৃ</option>
-                                                    <option value="h">পতি</option>
-                                                    <option value="w">পত্নী</option>
-                                                    <option value="u">অভিভাৱক</option>
-                                                </select>
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="mode_of_acquisition">Mode of Acquisition by possessor</Label>
-                                                <select
-                                                    id="mode_of_acquisition"
-                                                    className="w-full border rounded px-3 py-2 mt-1"
-                                                    value={posModeOfAcquisition}
-                                                    onChange={(e: any) => setPosModeOfAcquisition(e.currentTarget.value)}
-                                                >
-                                                    <option value="">Select Mode</option>
-                                                    {transferTypes.map((type) => (
-                                                        <option key={type.value} value={type.value}>
-                                                            {type.label}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="possessor_mut_name">Possessor Name for Mutation (Optional)</Label>
-                                                <Input
-                                                    id="possessor_mut_name"
-                                                    type="text"
-                                                    placeholder="Possessor Name for Mutation"
-                                                    value={posNameMut}
-                                                    onInput={(e: any) => setPosNameMut(e.currentTarget.value)}
-                                                />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="possessor_father_mut_name">Possessor Father's Name for Mutation (Optional)</Label>
-                                                <Input
-                                                    id="possessor_father_mut_name"
-                                                    type="text"
-                                                    placeholder="Possessor Father Name for Mutation"
-                                                    value={posFatherNameMut}
-                                                    onInput={(e: any) => setPosFatherNameMut(e.currentTarget.value)}
-                                                />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="possessor_address_mut">Possessor Address for Mutation (Optional)</Label>
-                                                <Input
-                                                    id="possessor_address_mut"
-                                                    type="text"
-                                                    placeholder="Possessor Address for Mutation"
-                                                    value={posAddressMut}
-                                                    onInput={(e: any) => setPosAddressMut(e.currentTarget.value)}
-                                                />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="possessor_gender">Gender <span className="text-red-500">*</span> </Label>
-                                                <select
-                                                    id="possessor_gender"
-                                                    value={posGender}
-                                                    onChange={(e) => setPosGender(e.currentTarget.value)}
-                                                    className="w-full border rounded px-3 py-2 mt-1"
-                                                >
-                                                    <option value="">--Select--</option>
-                                                    <option value="male">Male</option>
-                                                    <option value="female">Female</option>
-                                                    <option value="third gender">Third Gender</option>
-                                                    <option value="institute">Institute</option>
-                                                </select>
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="possessor_aadhaar">Aadhaar Number (optional)</Label>
-                                                <Input
-                                                    id="possessor_aadhaar"
-                                                    type="text"
-                                                    placeholder="Aadhaar Number"
-                                                    value={posAdhaar}
-                                                    onInput={(e: any) => setPosAdhaar(e.currentTarget.value)}
-                                                />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="possessor_mobile">Mobile Number <span className="text-red-500">*</span> </Label>
-                                                <Input
-                                                    id="possessor_mobile"
-                                                    type="text"
-                                                    placeholder="Mobile Number"
-                                                    value={posMobileNo}
-                                                    onInput={(e: any) => setPosMobileNo(e.currentTarget.value)}
-                                                />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="possessor_email">Email (optional)</Label>
-                                                <Input
-                                                    id="possessor_email"
-                                                    type="email"
-                                                    placeholder="Email"
-                                                    value={posEmail}
-                                                    onInput={(e: any) => setPosEmail(e.currentTarget.value)}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="possessor_dob">Date of Birth (optional)</Label>
-                                                <Input
-                                                    id="possessor_dob"
-                                                    type="date"
-                                                    value={posDob}
-                                                    onInput={(e: any) => setPosDob(e.currentTarget.value)}
-                                                />
-                                            </div>
-                                            <div className="space-y-3">
-                                                <Label htmlFor="possessor_photo" className="text-gray-700 font-medium">
-                                                    Possessor Photo (optional)
-                                                </Label>
-
-                                                {/* Custom file input box */}
+                                            {/* File Input */}
+                                            <div className="flex flex-col gap-2 w-full max-w-xs">
                                                 <label
-                                                    htmlFor="possessor_photo"
+                                                    htmlFor="edit_possessor_photo"
                                                     className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-2xl cursor-pointer hover:bg-gray-50 transition p-4 text-gray-500"
                                                 >
                                                     <svg
@@ -1694,148 +1592,187 @@ const PartDagEntryForm: React.FC<Props> = ({ dagNo, setDagNo, vill, mapdata, set
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4a1 1 0 011-1h8a1 1 0 011 1v12m-4 4h-4m0 0l-4-4m4 4l4-4" />
                                                     </svg>
                                                     <span className="text-sm">Click to upload or drag & drop</span>
-                                                    <span className="text-xs text-gray-400">PNG, JPG up to 5MB</span>
+                                                    <span className="text-xs text-gray-400">JPG/JPEG up to 5MB</span>
                                                     <Input
-                                                        id="possessor_photo"
+                                                        id="edit_possessor_photo"
                                                         type="file"
                                                         accept=".jpg,.jpeg"
                                                         className="hidden"
-                                                        onChange={handlePhotoChange}
+                                                        onChange={handleEditPhotoChange}
                                                     />
                                                 </label>
-
-                                                {posPhoto && (
-                                                    <div className="space-y-2">
-                                                        <Label className="text-gray-700 font-medium">Photo Preview:</Label>
-                                                        <div className="w-40 h-40 border rounded-2xl overflow-hidden shadow-sm">
-                                                            <img
-                                                                src={`data:image/jpeg;base64,${posPhoto}`}
-                                                                alt="Possessor Photo"
-                                                                className="w-full h-full object-cover"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                            </div>
-
-                                            <div className="space-y-2 md:col-span-2">
-                                                <Label htmlFor="possessor_remark">Remark (optional)</Label>
-                                                <Textarea
-                                                    id="possessor_remark"
-                                                    value={posRemark}
-                                                    onInput={(e: any) => setPosRemark(e.currentTarget.value)}
-                                                />
-
-                                            </div>
-
-                                            <div className="space-y-3 md:col-span-2">
-                                                <Label className="text-gray-700 font-medium">Ownership / Transfer Documents</Label>
-
-                                                {documents.map((doc, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-xl bg-gray-50 relative"
-                                                    >
-                                                        <div className="space-y-1">
-                                                            <Label>Document Name <span className="text-red-500">*</span></Label>
-                                                            <Input
-                                                                type="text"
-                                                                placeholder="e.g. Sale Deed"
-                                                                value={doc.document_name}
-                                                                onChange={(e) => handleDocumentChange(index, "document_name", e.target.value)}
-                                                            />
-                                                        </div>
-
-                                                        <div className="space-y-1">
-                                                            <Label>Document No</Label>
-                                                            <Input
-                                                                type="text"
-                                                                placeholder="Document Number"
-                                                                value={doc.document_no}
-                                                                onChange={(e) => handleDocumentChange(index, "document_no", e.target.value)}
-                                                            />
-                                                        </div>
-
-                                                        <div className="space-y-1">
-                                                            <Label>Issuing Authority</Label>
-                                                            <Input
-                                                                type="text"
-                                                                placeholder="Authority Name"
-                                                                value={doc.issuing_authority}
-                                                                onChange={(e) => handleDocumentChange(index, "issuing_authority", e.target.value)}
-                                                            />
-                                                        </div>
-
-                                                        <div className="space-y-1">
-                                                            <Label>Issue Date <span className="text-red-500">*</span></Label>
-                                                            <Input
-                                                                type="date"
-                                                                value={doc.document_issue_date}
-                                                                onChange={(e) => handleDocumentChange(index, "document_issue_date", e.target.value)}
-                                                            />
-                                                        </div>
-
-                                                        <div className="space-y-1">
-                                                            <Label>Upload <span className="text-red-500">*</span></Label>
-                                                            <Input
-                                                                type="file"
-                                                                accept=".pdf,image/*"
-                                                                onChange={(e) =>
-                                                                    handleDocumentFileChange(index, e.target.files ? e.target.files[0] : null)
-                                                                }
-                                                            />
-                                                        </div>
-
-                                                        <button
-                                                            type="button"
-                                                            className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-                                                            onClick={() => removeDocument(index)}
-                                                            title="Remove Document"
-                                                        >
-                                                            ✕
-                                                        </button>
-                                                    </div>
-                                                ))}
-
-                                                {/* Add More Button */}
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    onClick={() => addDocument()}
-                                                    className="mt-2 w-full md:w-auto"
-                                                >
-                                                    + Add Document
-                                                </Button>
+                                                <span className="text-xs text-gray-400">Only JPG/JPEG allowed</span>
                                             </div>
                                         </div>
-                                    </CardContent>
-                                </Card>
+                                    </div>
 
-                                <div className="flex justify-end gap-3">
-                                    <button
-                                        onClick={submitPossessor}
-                                        className="px-4 py-2 my-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                                    >
-                                        Submit
-                                    </button>
-                                    <button
-                                        onClick={() => closeAddPosModal()}
-                                        className="px-4 py-2 my-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
-                                    >
-                                        Close
-                                    </button>
+                                    {/* Edit Ownership / Transfer Documents */}
+                                    <div className="space-y-3 md:col-span-2">
+                                        <Label className="text-gray-700 font-medium">Ownership / Transfer Documents</Label>
+                                        {Array.isArray(selectedEditPossessor.ownership_documents) && selectedEditPossessor.ownership_documents.length > 0 ? (
+                                            selectedEditPossessor.ownership_documents.map((doc, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    className="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 border rounded-xl bg-gray-50 relative"
+                                                >
+                                                    <div className="space-y-1">
+                                                        <Label>Document Name</Label>
+                                                        <Input
+                                                            type="text"
+                                                            value={doc.document_name || ""}
+                                                            readOnly
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <Label>Document No</Label>
+                                                        <Input
+                                                            type="text"
+                                                            value={doc.document_no || ""}
+                                                            readOnly
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <Label>Issuing Authority</Label>
+                                                        <Input
+                                                            type="text"
+                                                            value={doc.issuing_authority || ""}
+                                                            readOnly
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <Label>Issue Date</Label>
+                                                        <Input
+                                                            type="date"
+                                                            value={doc.document_issue_date || ""}
+                                                            readOnly
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-1 flex flex-col justify-center">
+                                                        <Label>File</Label>
+                                                        {doc.file_path ? (
+                                                            <a
+                                                                href={`${Constants.API_BASE_URL_ASSET}${doc.file_path}`}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="text-blue-600 underline"
+                                                            >
+                                                                View
+                                                            </a>
+                                                        ) : (
+                                                            <span className="text-gray-400">No file</span>
+                                                        )}
+                                                    </div>
+                                                    <div className="space-y-1 flex flex-col justify-center">
+
+                                                        {/* Delete Document Button */}
+                                                        <button
+                                                            type="button"
+                                                            className="text-red-500 hover:text-red-700"
+                                                            onClick={() => deletePossessorDocument(doc.id)}
+                                                            title="Delete Document"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="text-gray-500">No documents uploaded.</div>
+                                        )}
+                                        {newDocuments.map((doc, index) => (
+                                            <div
+                                                key={index}
+                                                className="grid grid-cols-1 md:grid-cols-5 gap-4 p-4 border rounded-xl bg-gray-50 relative"
+                                            >
+                                                <div className="space-y-1">
+                                                    <Label>Document Name</Label>
+                                                    <Input
+                                                        type="text"
+                                                        placeholder="e.g. Sale Deed"
+                                                        value={doc.document_name}
+                                                        onChange={(e) => handleNewDocumentChange(index, "document_name", e.target.value)}
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-1">
+                                                    <Label>Document No</Label>
+                                                    <Input
+                                                        type="text"
+                                                        placeholder="Document Number"
+                                                        value={doc.document_no}
+                                                        onChange={(e) => handleNewDocumentChange(index, "document_no", e.target.value)}
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-1">
+                                                    <Label>Issuing Authority</Label>
+                                                    <Input
+                                                        type="text"
+                                                        placeholder="Authority Name"
+                                                        value={doc.issuing_authority}
+                                                        onChange={(e) => handleNewDocumentChange(index, "issuing_authority", e.target.value)}
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-1">
+                                                    <Label>Issue Date</Label>
+                                                    <Input
+                                                        type="date"
+                                                        value={doc.document_issue_date}
+                                                        onChange={(e) => handleNewDocumentChange(index, "document_issue_date", e.target.value)}
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-1">
+                                                    <Label>Upload</Label>
+                                                    <Input
+                                                        type="file"
+                                                        accept=".pdf,image/*"
+                                                        onChange={(e) =>
+                                                            handleNewDocumentFileChange(index, e.target.files ? e.target.files[0] : null)
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <button
+                                                    type="button"
+                                                    className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                                                    onClick={() => removeNewDocument(index)}
+                                                    title="Remove Document"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => addNewDocument()}
+                                            className="mt-2 w-full md:w-auto"
+                                        >
+                                            + Add New Document
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
+                            </CardContent>
+                        </Card>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => updatePossessorDetails()}
+                                className="px-4 py-2 my-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                            >
+                                Update
+                            </button>
+                            <button
+                                onClick={() => setIsEditPosOpen(false)}
+                                className="px-4 py-2 my-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
+                            >
+                                Close
+                            </button>
                         </div>
-                    )}
-
+                    </div>
                 </div>
-                ) : (<div className="flex items-center justify-center p-7">
-                    <p className="font-bold text-lg">No data available</p>
-                </div>)}
-            {/* <Toaster position="top-center" /> */}
-            <Loader loading={isLoading} />
+            )}
         </>
     );
 };
