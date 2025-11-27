@@ -15,6 +15,7 @@ type User = {
   email?: string;
   phone_no?: string;
   role?: string;
+  designation?: string;
   district?: any;
   circle?: any;
 };
@@ -189,6 +190,7 @@ export default function UserListView(): JSX.Element {
               <th className="py-3 px-4">Email</th>
               <th className="py-3 px-4">Phone</th>
               <th className="py-3 px-4">Role</th>
+              <th className="py-3 px-4">Designation</th>
               <th className="py-3 px-4">District - Circle</th>
               <th className="py-3 px-4">Actions</th>
             </tr>
@@ -235,6 +237,14 @@ export default function UserListView(): JSX.Element {
                       {u.role || "N/A"}
                     </span>
                   </td>
+
+
+                  <td className="py-3 px-4">
+                    <span className="px-2 py-1 text-xs rounded-full bg-gradient-to-r from-indigo-200 to-purple-200 text-indigo-800 font-medium">
+                      {u.designation || "N/A"}
+                    </span>
+                  </td>
+
 
                   <td className="py-3 px-4 text-sm text-gray-700">
                     {u?.district
