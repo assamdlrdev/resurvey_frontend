@@ -17,6 +17,7 @@ const VillageMap: React.FC = () => {
 
     useEffect(() => {
         if (location.pathname == '/village-map') {
+            setVillTownprtCode('');
             const params = new URLSearchParams(window.location.search);
             const loc = params.get('loc');
             getVillageMapData(loc);
@@ -283,7 +284,7 @@ const VillageMap: React.FC = () => {
                         >
                             <option value="">Select Village</option>
                             {
-                                villages && villages.length > 0 && villages.map((vdata, index) => <option key={index} value={`${vdata.dist_code}-${vdata.subdiv_code}-${vdata.cir_code}-${vdata.mouza_code}-${vdata.lot_no}-${vdata.village_code}`}>{`${vdata.loc_name} (${vdata.locname_eng})`}</option>)
+                                villages && villages.length > 0 && villages.map((vdata, index) => <option key={index} value={`${vdata.dist_code}-${vdata.subdiv_code}-${vdata.cir_code}-${vdata.mouza_code}-${vdata.lot_no}-${vdata.village_code}-${vdata.lgd_code}`}>{`${vdata.loc_name} (${vdata.locname_eng})`}</option>)
                             }
                         </select>
 
@@ -295,6 +296,7 @@ const VillageMap: React.FC = () => {
             {!loading && map_geojson &&
                 <MapViewCom mapdata={map_geojson} />
             }
+            {!villTownprtCode && !loading && <div>Please select a village to view the map.</div>}
         </div>
     );
 };

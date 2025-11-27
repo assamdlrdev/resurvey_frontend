@@ -105,8 +105,8 @@ export default function SelectFromMap({ mapdata, partDag, villCode, onSelect }: 
     );
     const convertedGeojson = reprojectGeojson(mapdata);
 
-    const handleSelect = (surveyNo: string) => {
-        onSelect(surveyNo);
+    const handleSelect = (feature: any) => {
+        onSelect(feature);
         setSelectedFeature(null);
         setOpen(false);
     };
@@ -177,7 +177,7 @@ export default function SelectFromMap({ mapdata, partDag, villCode, onSelect }: 
                         <div className="flex justify-end gap-2 mt-3">
                             <Button
                                 size="sm"
-                                onClick={() => handleSelect(selectedFeature.properties?.kide)}
+                                onClick={() => handleSelect(selectedFeature)}
                             >
                                 Select
                             </Button>

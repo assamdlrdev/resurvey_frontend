@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Trash2 } from "lucide-react";
+import { EyeIcon, PenIcon, Trash2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import Constants from "@/config/Constants";
 
@@ -26,118 +26,92 @@ export default function PossessorsList({
 
   return (
     <>
-      {/* Table View (md and up) */}
-      <div className="hidden md:block overflow-x-auto">
-        <table className="min-w-full border rounded-lg bg-white text-sm md:text-base text-gray-800">
-          <thead>
-            <tr className="bg-medical-50">
-              <th className="px-2 py-2 border text-start font-medium">Possessor Name</th>
-              <th className="px-2 py-2 border text-start font-medium">Mobile No</th>
-              <th className="px-2 py-2 border text-start font-medium">Guardian&apos;s Name</th>
-              <th className="px-2 py-2 border text-start font-medium">Remarks</th>
-              <th className="px-2 py-2 border text-end font-medium">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {possessors?.length ? (
-              possessors.map((p, i) => (
-                <tr key={i} className="hover:bg-medical-50 transition-colors">
-                  <td className="px-2 py-2 border text-start">{p.name || "N/A"}</td>
-                  <td className="px-2 py-2 border text-start">{p.mobile_no || "N/A"}</td>
-                  <td className="px-2 py-2 border text-start">{p.guard_name || "N/A"}</td>
-                  <td className="px-2 py-2 border text-start">{p.remarks || "N/A"}</td>
-                  <td className="px-2 py-2 border">
-                    <div className="flex justify-end gap-2">
-                      {/* Details Button */}
-                      <Button
-                        className="bg-blue-500 hover:bg-blue-600 text-white rounded-md px-3 py-1"
-                        type="button"
-                        onClick={() => handleDetails(p)}
-                      >
-                        Details
-                      </Button>
-
-                      {/* Delete Button with confirm */}
-                      <ConfirmDialog
-                        trigger={
-                          <Button type="button" className="bg-red-600 hover:bg-red-700 text-white">
-                            Delete
-                          </Button>
-                        }
-                        title="Delete Possessor"
-                        description="This will permanently delete the possessor record. Are you sure?"
-                        confirmText="Yes, delete"
-                        cancelText="No, keep it"
-                        onConfirm={() =>
-                          deletePossessor(
-                            `${p.dist_code}-${p.subdiv_code}-${p.cir_code}-${p.mouza_pargona_code}-${p.lot_no}-${p.vill_townprt_code}-${p.old_dag_no}-${p.part_dag}-${p.possessor_id}`
-                          )
-                        }
-                        buttonStyle="red"
-                      />
-                      <Button
-                        className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-md px-3 py-1"
-                        type="button"
-                        onClick={() => onEditPossessor(p)}
-                      >
-                        Edit
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={5} className="py-6 text-center text-medical-500">
-                  📭 No possessors found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Card View (Mobile) */}
-      <div className="md:hidden space-y-3">
+      {/* Grid View for Possessors (Mobile & Desktop) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {possessors?.length ? (
           possessors.map((p, i) => (
-            <div key={i} className="border rounded-lg p-3 shadow-sm bg-white space-y-1">
-              <p>
-                <span className="font-semibold">Possessor:</span> {p.name}
-              </p>
-              <p>
-                <span className="font-semibold">Guardian:</span> {p.guard_name}
-              </p>
-              <p>
-                <span className="font-semibold">Remarks:</span> {p.remarks || "N/A"}
-              </p>
+            <div
+              key={i}
+              className="bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow transform hover:scale-105 p-5 flex flex-col space-y-4"
+            >
+              {/* Possessor Photo or Avatar */}
+              <div className="flex justify-center mb-4">
+                {p.photo_path ? (
+                  <img
+                    src={`${Constants.API_BASE_URL_ASSET}${p.photo_path}`}
+                    alt={p.name}
+                    className="w-24 h-24 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-24 h-24 bg-gray-300 rounded-full flex items-center justify-center text-white text-xl">
+                    {p.name ? p.name.charAt(0) : "?"}
+                  </div>
+                )}
+              </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              {/* Possessor Info */}
+              <div className="text-gray-800 space-y-2">
+                <p className="text-2xl font-semibold">{p.name || "N/A"}</p>
+                <p className="text-sm">
+                  <span className="font-medium">Guardian:</span> {p.guard_name || "N/A"}
+                </p>
+                <p className="text-sm">
+                  <span className="font-medium">Mobile:</span> {p.mobile_no || "N/A"}
+                </p>
+                <p className="text-sm">
+                  <span className="font-medium">Remarks:</span> {p.remarks || "N/A"}
+                </p>
+              </div>
+
+              {/* Action Buttons (Always at the bottom) */}
+              <div className="flex justify-end gap-3 mt-auto">
                 {/* Details Button */}
                 <Button
-                  className="bg-blue-500 hover:bg-blue-600 text-white rounded-md px-3 py-1"
+                  className="bg-blue-600 hover:bg-blue-700 text-white rounded-md px-4 py-2 text-sm transform hover:scale-105 transition-transform"
                   type="button"
                   onClick={() => handleDetails(p)}
                 >
-                  Details
+                  <EyeIcon className="h-5 w-5" />
                 </Button>
 
-                {/* Delete Button */}
+                {/* Edit Button */}
                 <Button
-                  className="bg-red-500 hover:bg-red-600 text-white rounded-md px-3 py-1 flex items-center gap-1"
-                  value={`${p.dist_code}-${p.subdiv_code}-${p.cir_code}-${p.mouza_pargona_code}-${p.lot_no}-${p.vill_townprt_code}-${p.old_dag_no}-${p.part_dag}-${p.possessor_id}`}
-                  onClick={(e) => deletePossessor(e.currentTarget.value)}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-4 py-2 text-sm transform hover:scale-105 transition-transform"
+                  type="button"
+                  onClick={() => onEditPossessor(p)}
                 >
-                  <Trash2 className="h-4 w-4" />
-                  Delete
+                  <PenIcon className="h-5 w-5" />
                 </Button>
+
+                {/* Delete Button with Confirmation */}
+                <ConfirmDialog
+                  trigger={
+                    <Button
+                      className="bg-red-600 hover:bg-red-700 text-white rounded-md px-4 py-2 text-sm transform hover:scale-105 transition-transform"
+                      type="button"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </Button>
+                  }
+                  title="Delete Possessor"
+                  description="This will permanently delete the possessor record. Are you sure?"
+                  confirmText="Yes, delete"
+                  cancelText="No, keep it"
+                  onConfirm={() =>
+                    deletePossessor(
+                      `${p.dist_code}-${p.subdiv_code}-${p.cir_code}-${p.mouza_pargona_code}-${p.lot_no}-${p.vill_townprt_code}-${p.old_dag_no}-${p.part_dag}-${p.possessor_id}`
+                    )
+                  }
+                />
               </div>
             </div>
           ))
         ) : (
-          <p className="text-center text-gray-500">📭 No possessors found</p>
+          <p className="col-span-full text-center text-gray-500">📭 No possessors found</p>
         )}
       </div>
+
+
 
       {/* Details Modal */}
       <Dialog open={open} onOpenChange={setOpen}>
