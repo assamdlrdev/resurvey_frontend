@@ -147,7 +147,7 @@ export default function UserListView(): JSX.Element {
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.24 }}
-      className="max-w-6xl mx-auto p-6 rounded-2xl shadow-xl bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50"
+      className="max-w-7xl mt-5 mx-auto p-6 rounded-md shadow-md bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 min-h-[90vh]"
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
@@ -181,7 +181,7 @@ export default function UserListView(): JSX.Element {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl shadow-lg bg-white">
+      <div className="overflow-x-auto rounded-md shadow-md bg-white">
         <table className="w-full table-auto border-collapse">
           <thead>
             <tr className="text-left text-xs text-gray-700 bg-gradient-to-r from-purple-100 to-pink-100">

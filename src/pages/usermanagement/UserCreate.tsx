@@ -293,8 +293,8 @@ export default function UserCreateForm(): JSX.Element {
     <motion.div
       initial={{ opacity: 0, y: 70 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 4 }}
-      className="max-w-5xl mx-auto p-8 bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 shadow-2xl rounded-2xl border border-transparent mt-8"
+      transition={{ duration: 1 }}
+      className="max-w-5xl mx-auto p-8 bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50 shadow-md rounded-2xl border border-transparent mt-8"
     >
       <header className="flex items-start justify-between gap-6 mb-6">
         <div>
@@ -391,6 +391,8 @@ export default function UserCreateForm(): JSX.Element {
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="Enter full name"
+              type="text"
               className={cn(
                 "mt-2 px-3 py-2 rounded-lg border focus:outline-none focus:ring-4 focus:ring-cyan-100 transition",
                 errors.name ? "border-red-400" : "border-cyan-200"
@@ -441,6 +443,7 @@ export default function UserCreateForm(): JSX.Element {
                   const v = e.target.value.replace(/\D/g, "");
                   setForm({ ...form, phone_no: v });
                 }}
+                type="tel"
                 placeholder="10 digits"
                 maxLength={10}
                 className={cn(
@@ -460,6 +463,7 @@ export default function UserCreateForm(): JSX.Element {
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="you@example.com"
+              type="email"
               className={cn(
                 "mt-2 px-3 py-2 rounded-lg border focus:outline-none focus:ring-4 focus:ring-sky-100 transition",
                 errors.email ? "border-red-400" : "border-sky-200"
@@ -494,7 +498,24 @@ export default function UserCreateForm(): JSX.Element {
           <label className="flex flex-col">
             <span className="text-xs font-medium text-gray-700">Password</span>
             <div className="mt-2 relative">
+              {/* Hidden dummy fields to reduce browser autofill/autocomplete */}
               <input
+                name="fake-username"
+                autoComplete="username"
+                tabIndex={-1}
+                style={{ position: "absolute", opacity: 0, height: 0, width: 0, pointerEvents: "none" }}
+              />
+              <input
+                name="fake-password"
+                type="password"
+                autoComplete="current-password"
+                tabIndex={-1}
+                style={{ position: "absolute", opacity: 0, height: 0, width: 0, pointerEvents: "none" }}
+              />
+
+              <input
+                name="new-password"
+                autoComplete="new-password"
                 type={showPassword ? "text" : "password"}
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
