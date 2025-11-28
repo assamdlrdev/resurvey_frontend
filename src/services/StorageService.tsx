@@ -19,7 +19,6 @@ const StorageService = {
         }
         const decodedToken = jwtDecode(token);
 
-        console.log("decoded",decodedToken);
         return decodedToken;
     },
     jwtPayloadSave: async (data: any) => {
