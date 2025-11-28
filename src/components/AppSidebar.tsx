@@ -80,7 +80,7 @@ export function AppSidebar() {
       key: "analytics",
       title: "Reports",
       collapsible: false,
-      visible: () => ["1", "11", "14", "2", "9", "4", "3", "6", "7", "8"].includes(userData?.usertype),
+      visible: () => ["1", "11", "14", "2", "9", "4", "3", "6", "7", "8", "10"].includes(userData?.usertype),
       items: [
         { title: "Survey Reports", url: "/reports", icon: BarChart3 },
         { title: "Area Difference Report", url: "/area-difference-report", icon: Activity },

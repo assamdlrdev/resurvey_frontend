@@ -8,6 +8,8 @@ import PartDagEntryForm from "@/components/PartDagEntryForm";
 import { useDagStore } from "@/store/SurveyStore";
 import { useMasterDataStore } from "@/store/SurveyStore";
 import { FilterLocationStore } from "@/store/SurveyStore";
+import StorageService from "@/services/StorageService";
+import { set } from "date-fns";
 
 interface DagType {
   dag_no: string
@@ -38,11 +40,23 @@ export default function SurveyData() {
   const navigate = useNavigate();
   const [originalDagInfo, setOriginalDagInfo] = useState<any[]>([]);
   const [mapGeoJson, setMapGeoJson] = useState<string>('');
+  const [userData, setUserData] = useState<any>(null);
+
 
   useEffect(() => {
     if (location.pathname == '/survey-form' || location.pathname == '/resurvey/survey-form') {
       resetDagData();
       getDistricts();
+      const user = StorageService.getJwtCookie();
+      const userData: any = StorageService.getJwtCookieData(user);
+
+      if(userData){
+        console.log(userData);
+        setUserData(userData);
+        setDistCode(userData.dcode);
+        setSubdivCode(userData.dcode+'-'+userData.subdiv_code);
+        setCirCode(userData.dcode+'-'+userData.subdiv_code+'-'+userData.cir_code);
+      }
     }
   }, []);
   useEffect(() => {
@@ -280,6 +294,7 @@ export default function SurveyData() {
                 className="w-full border rounded px-3 py-2 mt-1"
                 value={distCode}
                 onChange={(e: any) => setDistCode(e.currentTarget.value)}
+                disabled={userData && (userData.usertype == '14' || userData.usertype == '15') ? true : false}
               >
                 <option value="">Select District</option>
                 {
@@ -296,6 +311,7 @@ export default function SurveyData() {
                 className="w-full border rounded px-3 py-2 mt-1"
                 value={cirCode}
                 onChange={(e: any) => setCirCode(e.currentTarget.value)}
+                disabled={userData && (userData.usertype == '14' || userData.usertype == '15') ? true : false}
               >
                 <option value="">Select Circle</option>
                 {circles && circles.length > 0 && circles.map((cdata, index) => <option key={index} value={`${cdata.dist_code}-${cdata.subdiv_code}-${cdata.cir_code}`}>{`${cdata.loc_name} (${cdata.locname_eng})`}</option>)}
