@@ -53,7 +53,7 @@ export default function UserCreateForm(): JSX.Element {
     password: "",
     confirm_password: "",
     name: "",
-    phone_no: "",
+    mobile_no: "",
     email: "",
   });
 
@@ -204,8 +204,8 @@ export default function UserCreateForm(): JSX.Element {
 
     if (!form.name) e.name = "Required";
 
-    if (!form.phone_no) e.phone_no = "Required";
-    else if (!PHONE_RE.test(form.phone_no)) e.phone_no = "10 digits";
+    if (!form.mobile_no) e.mobile_no = "Required";
+    else if (!PHONE_RE.test(form.mobile_no)) e.mobile_no = "10 digits";
 
     if (!form.email) e.email = "Required";
     else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email)) e.email = "Invalid email";
@@ -238,7 +238,7 @@ export default function UserCreateForm(): JSX.Element {
         username: form.username,
         password: form.password,
         name: form.name,
-        phone_no: form.phone_no,
+        mobile_no: form.mobile_no,
         email: form.email,
       };
 
@@ -274,7 +274,7 @@ export default function UserCreateForm(): JSX.Element {
         password: "",
         confirm_password: "",
         name: "",
-        phone_no: "",
+        mobile_no: "",
         email: "",
       });
       setCircles([]);
@@ -438,22 +438,22 @@ export default function UserCreateForm(): JSX.Element {
             <label className="text-xs font-medium text-gray-700">Phone number</label>
             <div className="mt-2 relative">
               <input
-                value={form.phone_no}
+                value={form.mobile_no}
                 onChange={(e) => {
                   const v = e.target.value.replace(/\D/g, "");
-                  setForm({ ...form, phone_no: v });
+                  setForm({ ...form, mobile_no: v });
                 }}
                 type="tel"
                 placeholder="10 digits"
                 maxLength={10}
                 className={cn(
                   "w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-4 focus:ring-lime-100 transition pr-10",
-                  errors.phone_no ? "border-red-400" : "border-lime-200"
+                  errors.mobile_no ? "border-red-400" : "border-lime-200"
                 )}
               />
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">10</div>
             </div>
-            {errors.phone_no && <span className="text-red-500 text-xs mt-1">{errors.phone_no}</span>}
+            {errors.mobile_no && <span className="text-red-500 text-xs mt-1">{errors.mobile_no}</span>}
           </div>
 
           {/* Email */}
@@ -586,7 +586,7 @@ export default function UserCreateForm(): JSX.Element {
           <button
             type="button"
             onClick={() => {
-              setForm({ district: "", circle: "", role: "", designation: "", username: "", password: "", confirm_password: "", name: "", phone_no: "", email: "" });
+              setForm({ district: "", circle: "", role: "", designation: "", username: "", password: "", confirm_password: "", name: "", mobile_no: "", email: "" });
               setErrors({});
               setSubmitError(null);
               setSuccess(null);

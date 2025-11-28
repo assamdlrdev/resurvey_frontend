@@ -13,7 +13,7 @@ type User = {
   username: string;
   name: string;
   email?: string;
-  phone_no?: string;
+  mobile_no?: string;
   role?: string;
   designation?: string;
   district?: any;
@@ -230,7 +230,7 @@ export default function UserListView(): JSX.Element {
                   <td className="py-3 px-4 font-medium text-gray-800">{u.username}</td>
                   <td className="py-3 px-4">{u.name || "—"}</td>
                   <td className="py-3 px-4">{u.email || "—"}</td>
-                  <td className="py-3 px-4">{u.phone_no || "—"}</td>
+                  <td className="py-3 px-4">{u.mobile_no || "—"}</td>
 
                   <td className="py-3 px-4">
                     <span className="px-2 py-1 text-xs rounded-full bg-gradient-to-r from-indigo-200 to-purple-200 text-indigo-800 font-medium">
