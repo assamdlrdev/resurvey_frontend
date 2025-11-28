@@ -80,7 +80,7 @@ export default function ResurveyReports() {
         <div className="text-center">
           <h1 className="text-3xl font-bold text-medical-900 mb-2">Resurvey Report (Latest Entry)</h1>
           <p className="text-medical-600">Survey DAGs grouped by district</p>
-          <p className="text-medical-600">Total DAGs Entered : {Object.values(districts).reduce((acc, district) => acc + district.total_count, 0)}</p>
+          <p className="text-medical-600">Total DAGs Entered : {Object.values(districts).reduce((acc, district) => Number(acc) + Number(district.total_count), 0)}</p>
         </div>
         {isLoading ? (
           <div className="text-center py-10 text-lg text-medical-600">Loading...</div>
