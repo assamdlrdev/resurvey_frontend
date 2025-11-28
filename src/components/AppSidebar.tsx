@@ -63,6 +63,7 @@ export function AppSidebar() {
       visible: () => ["1", "11", "14", "2"].includes(userData?.usertype),
       items: [
         { title: "Survey Form", url: "/survey-form", icon: FileTextIcon },
+        { title: "Survey Dashboard", url: "/my-reports", icon: Home },
       ],
     },
     // {
@@ -235,7 +236,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar className={cn("border-r border-indigo-200 bg-white shadow-sm transition-all duration-300", isCollapsed ? "w-16" : "w-64")}>
-      <SidebarContent className="py-4 bg-white">
+      <SidebarContent className="pb-4 bg-white">
         {/* Logo/Brand Section */}
         <div className={cn("px-4 pb-4 mb-4 border-b border-indigo-100", isCollapsed && "px-2")}>
           {!isCollapsed ? (
@@ -259,7 +260,7 @@ export function AppSidebar() {
             <SidebarGroup key={group.key}>
               {group.collapsible === false ? (
                 <>
-                  <SidebarGroupLabel className={cn("px-3 py-2 text-xs font-semibold tracking-wider uppercase", "text-indigo-600")}>
+                  <SidebarGroupLabel className={cn("px-3 py-2 text-xs font-semibold tracking-wider uppercase", "text-black")}>
                     {!isCollapsed ? group.title : group.title.charAt(0)}
                   </SidebarGroupLabel>
                   <SidebarGroupContent className="mt-2">

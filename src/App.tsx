@@ -33,6 +33,7 @@ import UserUpdate from "./pages/usermanagement/UserUpdate";
 import AreaReport from "./pages/reports/AreaDiffReport";
 import VillageMap from "./pages/VillageMap";
 import ProtectedRoute from "./components/auth/ProtectedRoutes";
+import ResurveyReports from "./pages/reports/ResurveyReports";
 
 function App() {
   const queryClient = new QueryClient();
@@ -70,6 +71,7 @@ function App() {
                     } />
                   <Route path="/area-difference-report" element={<AreaReport />} />
                   <Route path="/village-map" element={<VillageMap />} />
+                  <Route path="/my-reports" element={<ResurveyReports />} />
                 </Route>
               </Route>
 
