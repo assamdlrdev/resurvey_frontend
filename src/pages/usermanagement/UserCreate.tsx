@@ -11,11 +11,11 @@ function cn(...parts: Array<string | false | null | undefined>) {
 
 type Role = { id: string; name: string };
 type Designation = { id: string | number; title: string };
+type userData = { cir_code: string, dcode: string, is_password_changed: boolean, loggedin: boolean, role_code: string, role_name: string, subdiv_code: string, usercode: string, usertype: string };
 
 export default function UserCreateForm(): JSX.Element {
   // --- user & role handling moved inside component ---
-  const [userData, setUserData] = useState<any | null>(null);
-
+  const [userData, setUserData] = useState<userData | null>(null);
   // derive roles from userData (memoized)
   const derivedRoles = useMemo<Role[]>(() => {
     const ud = userData;
@@ -76,10 +76,14 @@ export default function UserCreateForm(): JSX.Element {
   useEffect(() => {
     try {
       const token = StorageService.getJwtCookie();
-      const data = StorageService.getJwtCookieData(token);
-      setUserData(data ?? null);
+      const data: any = StorageService.getJwtCookieData(token);
+      if (data) {
+        setUserData(data);
+        if (data.usertype === "10") {
+          setForm((s) => ({ ...s, district: data.dcode || "", circle: data.cir_code ? `${data.dcode}-${data.subdiv_code}-${data.cir_code}` : "" }));
+        }
+      }
     } catch (err) {
-      console.warn("UserCreateForm: failed to read userData", err);
       setUserData(null);
     }
   }, []);
@@ -95,17 +99,15 @@ export default function UserCreateForm(): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // when district changes, load circles
-  useEffect(() => {
+  const onDistChanged = (distCode: string) => {
     if (!form.district) {
       setCircles([]);
       setForm((s) => ({ ...s, circle: "" }));
       return;
     }
-    getCircles(form.district);
+    getCircles(distCode);
     setForm((s) => ({ ...s, circle: "" }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.district]);
+  };
 
   // --- NEW: fetch designations when role changes ---
   useEffect(() => {
@@ -231,8 +233,6 @@ export default function UserCreateForm(): JSX.Element {
 
     try {
       const payload = {
-        dist_code: form.district,
-        cir_code: form.circle,
         user_role: form.role,
         designation: form.designation, // include designation if backend expects it
         username: form.username,
@@ -241,6 +241,10 @@ export default function UserCreateForm(): JSX.Element {
         mobile_no: form.mobile_no,
         email: form.email,
       };
+      if( form.role !== "15") {
+        payload["district"] = form.district;
+        payload["circle"] = form.circle;
+      }
 
       const res = await fetch(`${Constants.API_BASE_URL}/api/users/create`, {
         method: "POST",
@@ -304,56 +308,6 @@ export default function UserCreateForm(): JSX.Element {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* District */}
-          <label className="flex flex-col">
-            <span className="text-xs font-medium text-gray-700 flex items-center gap-2">
-              <MapPin size={14} /> District
-            </span>
-            <select
-              className={cn(
-                "mt-2 px-3 py-2 rounded-lg border focus:outline-none focus:ring-4 focus:ring-pink-100 transition",
-                errors.district ? "border-red-400" : "border-pink-200"
-              )}
-              value={form.district}
-              onChange={(e) => setForm({ ...form, district: e.target.value })}
-            >
-              <option value="">Select district</option>
-              {districts && districts.map((d: any) => (
-                <option key={d.key ?? d.id ?? d.code} value={d.key ?? d.id ?? d.code}>
-                  {d.value ?? d.name}
-                </option>
-              ))}
-            </select>
-            {errors.district && <span className="text-red-500 text-xs mt-1">{errors.district}</span>}
-          </label>
-
-          {/* Circle */}
-          <label className="flex flex-col">
-            <span className="text-xs font-medium text-gray-700 flex items-center gap-2">
-              <Grid size={14} /> Circle
-            </span>
-            <select
-              className={cn(
-                "mt-2 px-3 py-2 rounded-lg border focus:outline-none focus:ring-4 focus:ring-purple-100 transition",
-                errors.circle ? "border-red-400" : "border-purple-200"
-              )}
-              value={form.circle}
-              onChange={(e) => setForm({ ...form, circle: e.target.value })}
-              disabled={!form.district}
-            >
-              <option value="">{form.district ? "Select circle" : "Select district first"}</option>
-              {circles && circles.map((c: any) => (
-                <option
-                  key={c.cir_code ?? c.id ?? c.key}
-                  value={c.cir_code ? `${c.dist_code}-${c.subdiv_code}-${c.cir_code}` : c.id ?? c.key}
-                >
-                  {c.loc_name ?? c.name}{c.locname_eng ? ` (${c.locname_eng})` : ""}
-                </option>
-              ))}
-            </select>
-            {errors.circle && <span className="text-red-500 text-xs mt-1">{errors.circle}</span>}
-          </label>
-
           {/* Role */}
           <label className="flex flex-col">
             <span className="text-xs font-medium text-gray-700 flex items-center gap-2">
@@ -380,6 +334,59 @@ export default function UserCreateForm(): JSX.Element {
             </select>
             {errors.role && <span className="text-red-500 text-xs mt-1">{errors.role}</span>}
           </label>
+          {/* District */}
+          {form.role !== "15" && (
+            <>
+              <label className="flex flex-col">
+                <span className="text-xs font-medium text-gray-700 flex items-center gap-2">
+                  <MapPin size={14} /> District
+                </span>
+                <select
+                  className={cn(
+                    "mt-2 px-3 py-2 rounded-lg border focus:outline-none focus:ring-4 focus:ring-pink-100 transition",
+                    errors.district ? "border-red-400" : "border-pink-200"
+                  )}
+                  value={form.district}
+                  onChange={(e) => onDistChanged(e.target.value)}
+                  disabled={userData?.usertype === "10"}
+                >
+                  <option value="">Select district</option>
+                  {districts && districts.map((d: any) => (
+                    <option key={d.key ?? d.id ?? d.code} value={d.key ?? d.id ?? d.code}>
+                      {d.value ?? d.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.district && <span className="text-red-500 text-xs mt-1">{errors.district}</span>}
+              </label>
+              <label className="flex flex-col">
+                <span className="text-xs font-medium text-gray-700 flex items-center gap-2">
+                  <Grid size={14} /> Circle
+                </span>
+                <select
+                  className={cn(
+                    "mt-2 px-3 py-2 rounded-lg border focus:outline-none focus:ring-4 focus:ring-purple-100 transition",
+                    errors.circle ? "border-red-400" : "border-purple-200"
+                  )}
+                  value={form.circle}
+                  onChange={(e) => setForm({ ...form, circle: e.target.value })}
+                  disabled={!form.district || userData?.usertype === "10"}
+                >
+                  <option value="">{form.district ? "Select circle" : "Select district first"}</option>
+                  {circles && circles.map((c: any) => (
+                    <option
+                      key={c.cir_code ?? c.id ?? c.key}
+                      value={c.cir_code ? `${c.dist_code}-${c.subdiv_code}-${c.cir_code}` : c.id ?? c.key}
+                    >
+                      {c.loc_name ?? c.name}{c.locname_eng ? ` (${c.locname_eng})` : ""}
+                    </option>
+                  ))}
+                </select>
+                {errors.circle && <span className="text-red-500 text-xs mt-1">{errors.circle}</span>}
+              </label>
+            </>
+          )}
+
         </div>
 
         {/* Full name + Designation + Phone + Email in a single row */}
