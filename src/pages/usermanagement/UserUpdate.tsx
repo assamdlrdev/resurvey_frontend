@@ -12,12 +12,17 @@ type Props = {
   onCancel?: () => void;
 };
 
+type userData = { cir_code: string, dcode: string, is_password_changed: boolean, loggedin: boolean, role_code: string, role_name: string, subdiv_code: string, usercode: string, usertype: string };
+
+
 function cn(...parts: Array<string | false | null | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
 export default function UpdateUserForm({ userId: propUserId, onSaved, onCancel }: Props) {
   const { districts, circles, getDistricts, getCircles, setCircles } = FilterLocationStore();
+  const [userData, setUserData] = useState<userData | null>(null);
+
 
   const params = useParams<{ id?: string }>();
   const id = propUserId ?? params.id;
@@ -35,6 +40,7 @@ export default function UpdateUserForm({ userId: propUserId, onSaved, onCancel }
     district: "",
     circle: "",
     role: "",
+    role_name: "",
     username: "",
     name: "",
     email: "",
@@ -42,6 +48,21 @@ export default function UpdateUserForm({ userId: propUserId, onSaved, onCancel }
     password: "",
     confirm_password: "",
   });
+
+  useEffect(() => {
+    try {
+      const token = StorageService.getJwtCookie();
+      const data: any = StorageService.getJwtCookieData(token);
+      if (data) {
+        setUserData(data);
+        if (data.usertype === "10") {
+          setForm((s) => ({ ...s, district: data.dcode || "", circle: data.cir_code ? `${data.dcode}-${data.subdiv_code}-${data.cir_code}` : "" }));
+        }
+      }
+    } catch (err) {
+      setUserData(null);
+    }
+  }, []);
 
   const PHONE_RE = /^\d{10}$/;
 
@@ -117,6 +138,7 @@ export default function UpdateUserForm({ userId: propUserId, onSaved, onCancel }
         district: dist_code,
         circle: cir_code,
         role: payload.role ?? payload.role_name ?? payload.roleId ?? "",
+        role_name: payload.role_name ?? payload.role ?? "",
         username: payload.username ?? payload.user_name ?? "",
         name: payload.name ?? payload.fullname ?? "",
         email: payload.email ?? "",
@@ -162,18 +184,18 @@ export default function UpdateUserForm({ userId: propUserId, onSaved, onCancel }
         email: form.email,
         mobile_no: form.mobile_no,
       };
-      if(user.district && form.district !== user.district.dist_code) {
+      if (user.district && form.district !== user.district.dist_code) {
         payload.district = form.district;
       }
-      if(user.circle) {
+      if (user.circle) {
         var circle_code = "";
         var subdiv_code = "";
-        if(form.circle) {
+        if (form.circle) {
           const parts = form.circle.split("-");
           circle_code = parts.length === 3 ? parts[2] : "";
           subdiv_code = parts.length === 3 ? parts[1] : "";
         }
-        if(form.district !== user.district.dist_code || circle_code !== user.circle.cir_code) {
+        if (form.district !== user.district.dist_code || circle_code !== user.circle.cir_code) {
           payload.circle = circle_code;
           payload.subdivision = subdiv_code;
         }
@@ -219,7 +241,7 @@ export default function UpdateUserForm({ userId: propUserId, onSaved, onCancel }
   const onDistChange = (distCode: string) => {
     setCircles([]);
     getCircles(distCode);
-    setForm((s) => ({ ...s,district: distCode, circle: "" }));
+    setForm((s) => ({ ...s, district: distCode, circle: "" }));
   }
 
 
@@ -264,7 +286,7 @@ export default function UpdateUserForm({ userId: propUserId, onSaved, onCancel }
 
           <div className="p-3 rounded-lg bg-gradient-to-r from-amber-50 to-rose-50 border">
             <div className="text-xs text-gray-600 flex items-center gap-2"><User size={14} /> Role</div>
-            <div className="mt-2 text-sm font-medium text-gray-800">{form.role || "N/A"}</div>
+            <div className="mt-2 text-sm font-medium text-gray-800">{form.role_name || "N/A"}</div>
           </div>
 
           <div className="p-3 rounded-lg bg-gradient-to-r from-sky-50 to-indigo-50 border">
@@ -275,54 +297,59 @@ export default function UpdateUserForm({ userId: propUserId, onSaved, onCancel }
 
         {/* editable */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <label className="flex flex-col">
-            <span className="text-xs font-medium text-gray-700 flex items-center gap-2">
-              <MapPin size={14} /> District {form.district}
-            </span>
-            <select
-              className={cn(
-                "mt-2 px-3 py-2 rounded-lg border focus:outline-none focus:ring-4 focus:ring-pink-100 transition",
-                errors.district ? "border-red-400" : "border-pink-200"
-              )}
-              value={form.district}
-              onChange={(e) => onDistChange(e.target.value)}
-            >
-              <option value="">Select district</option>
-              {districts && districts.map((d: any) => (
-                <option key={d.key ?? d.id ?? d.code} value={d.key ?? d.id ?? d.code}>
-                  {d.value ?? d.name}
-                </option>
-              ))}
-            </select>
-            {errors.district && <span className="text-red-500 text-xs mt-1">{errors.district}</span>}
-          </label>
+          {form.role !== "15" && (
+            <>
+              <label className="flex flex-col">
+                <span className="text-xs font-medium text-gray-700 flex items-center gap-2">
+                  <MapPin size={14} /> District {form.district}
+                </span>
+                <select
+                  className={cn(
+                    "mt-2 px-3 py-2 rounded-lg border focus:outline-none focus:ring-4 focus:ring-pink-100 transition",
+                    errors.district ? "border-red-400" : "border-pink-200"
+                  )}
+                  value={form.district}
+                  onChange={(e) => onDistChange(e.target.value)}
+                  disabled={userData?.usertype === "10"}
 
-          {/* Circle */}
-          <label className="flex flex-col">
-            <span className="text-xs font-medium text-gray-700 flex items-center gap-2">
-              <Grid size={14} /> Circle {form.circle}
-            </span>
-            <select
-              className={cn(
-                "mt-2 px-3 py-2 rounded-lg border focus:outline-none focus:ring-4 focus:ring-purple-100 transition",
-                errors.circle ? "border-red-400" : "border-purple-200"
-              )}
-              value={form.circle}
-              onChange={(e) => setForm({ ...form, circle: e.target.value })}
-              disabled={!form.district}
-            >
-              <option value="">{form.district ? "Select circle" : "Select district first"}</option>
-              {circles && circles.map((c: any) => (
-                <option
-                  key={c.cir_code ?? c.id ?? c.key}
-                  value={c.cir_code ? `${c.dist_code}-${c.subdiv_code}-${c.cir_code}` : c.id ?? c.key}
                 >
-                  {c.loc_name ?? c.name}{c.locname_eng ? ` (${c.locname_eng})` : ""}
-                </option>
-              ))}
-            </select>
-            {errors.circle && <span className="text-red-500 text-xs mt-1">{errors.circle}</span>}
-          </label>
+                  <option value="">Select district</option>
+                  {districts && districts.map((d: any) => (
+                    <option key={d.key ?? d.id ?? d.code} value={d.key ?? d.id ?? d.code}>
+                      {d.value ?? d.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.district && <span className="text-red-500 text-xs mt-1">{errors.district}</span>}
+              </label>
+              {/* Circle */}
+              <label className="flex flex-col">
+                <span className="text-xs font-medium text-gray-700 flex items-center gap-2">
+                  <Grid size={14} /> Circle {form.circle}
+                </span>
+                <select
+                  className={cn(
+                    "mt-2 px-3 py-2 rounded-lg border focus:outline-none focus:ring-4 focus:ring-purple-100 transition",
+                    errors.circle ? "border-red-400" : "border-purple-200"
+                  )}
+                  value={form.circle}
+                  onChange={(e) => setForm({ ...form, circle: e.target.value })}
+                  disabled={!form.district || userData?.usertype === "10"}
+                >
+                  <option value="">{form.district ? "Select circle" : "Select district first"}</option>
+                  {circles && circles.map((c: any) => (
+                    <option
+                      key={c.cir_code ?? c.id ?? c.key}
+                      value={c.cir_code ? `${c.dist_code}-${c.subdiv_code}-${c.cir_code}` : c.id ?? c.key}
+                    >
+                      {c.loc_name ?? c.name}{c.locname_eng ? ` (${c.locname_eng})` : ""}
+                    </option>
+                  ))}
+                </select>
+                {errors.circle && <span className="text-red-500 text-xs mt-1">{errors.circle}</span>}
+              </label>
+            </>
+          )}
           <label className="flex flex-col">
             <span className="text-xs text-gray-700">Full name</span>
             <input value={form.name ?? ""} onChange={(e) => setForm({ ...form, name: e.target.value })} className={`mt-2 px-3 py-2 rounded-lg border ${errors.name ? "border-red-400" : "border-gray-200"}`} />
@@ -337,7 +364,7 @@ export default function UpdateUserForm({ userId: propUserId, onSaved, onCancel }
 
           <label className="flex flex-col">
             <span className="text-xs text-gray-700">Email</span>
-            <input value={form.email ?? ""} type="email"  onChange={(e) => setForm({ ...form, email: e.target.value })} className={`mt-2 px-3 py-2 rounded-lg border ${errors.email ? "border-red-400" : "border-gray-200"}`} />
+            <input value={form.email ?? ""} type="email" onChange={(e) => setForm({ ...form, email: e.target.value })} className={`mt-2 px-3 py-2 rounded-lg border ${errors.email ? "border-red-400" : "border-gray-200"}`} />
             {errors.email && <div className="text-red-500 text-xs mt-1">{errors.email}</div>}
           </label>
         </div>
@@ -349,7 +376,7 @@ export default function UpdateUserForm({ userId: propUserId, onSaved, onCancel }
             <div className="relative mt-2">
               <input type={showPassword ? "text" : "password"} value={form.password ?? ""} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Leave empty to keep current" autoComplete="new-password" className={`w-full px-3 py-2 rounded-lg border ${errors.password ? "border-red-400" : "border-gray-200"}`} />
               <button type="button" onClick={() => setShowPassword(s => !s)} className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1">
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
             {errors.password && <div className="text-red-500 text-xs mt-1">{errors.password}</div>}
