@@ -78,6 +78,9 @@ export default function UserCreateForm(): JSX.Element {
       const token = StorageService.getJwtCookie();
       const data: any = StorageService.getJwtCookieData(token);
       if (data) {
+        if(data.dcode){
+          getCircles(data.dcode);
+        }
         setUserData(data);
         if (data.usertype === "10") {
           setForm((s) => ({ ...s, district: data.dcode || "", circle: data.cir_code ? `${data.dcode}-${data.subdiv_code}-${data.cir_code}` : "" }));
@@ -242,8 +245,8 @@ export default function UserCreateForm(): JSX.Element {
         email: form.email,
       };
       if( form.role !== "15") {
-        payload["district"] = form.district;
-        payload["circle"] = form.circle;
+        payload["dist_code"] = form.district;
+        payload["cir_code"] = form.circle;
       }
 
       const res = await fetch(`${Constants.API_BASE_URL}/api/users/create`, {
