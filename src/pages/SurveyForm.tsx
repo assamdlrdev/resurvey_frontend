@@ -50,12 +50,11 @@ export default function SurveyData() {
       const user = StorageService.getJwtCookie();
       const userData: any = StorageService.getJwtCookieData(user);
 
-      if(userData){
-        console.log(userData);
+      if (userData) {
         setUserData(userData);
         setDistCode(userData.dcode);
-        setSubdivCode(userData.dcode+'-'+userData.subdiv_code);
-        setCirCode(userData.dcode+'-'+userData.subdiv_code+'-'+userData.cir_code);
+        setSubdivCode(userData.dcode + '-' + userData.subdiv_code);
+        setCirCode(userData.dcode + '-' + userData.subdiv_code + '-' + userData.cir_code);
       }
     }
   }, []);
@@ -69,7 +68,7 @@ export default function SurveyData() {
     }
   }, [location]);
 
-  useEffect(() => {
+  const onDistChange = (distCode) => {
     if (distCode != '') {
       getMasterData(distCode);
       if (circles.length == 0) {
@@ -86,7 +85,9 @@ export default function SurveyData() {
       setCircles([]);
       resetField('circle');
     }
-  }, [distCode]);
+  }
+
+
 
   useEffect(() => {
     if (cirCode != '') {
@@ -293,7 +294,7 @@ export default function SurveyData() {
                 id="district"
                 className="w-full border rounded px-3 py-2 mt-1"
                 value={distCode}
-                onChange={(e: any) => setDistCode(e.currentTarget.value)}
+                onChange={(e: any) => onDistChange(e.currentTarget.value)}
                 disabled={userData && (userData.usertype == '14' || userData.usertype == '15') ? true : false}
               >
                 <option value="">Select District</option>
