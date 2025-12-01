@@ -63,6 +63,7 @@ export function AppSidebar() {
       visible: () => ["1", "11", "14", "2"].includes(userData?.usertype),
       items: [
         { title: "Survey Form", url: "/survey-form", icon: FileTextIcon },
+        { title: "Survey Dashboard", url: "/my-reports", icon: Home },
       ],
     },
     // {
@@ -80,10 +81,20 @@ export function AppSidebar() {
       key: "analytics",
       title: "Reports",
       collapsible: false,
-      visible: () => ["1", "11", "14", "2", "9", "4", "3", "6", "7", "8"].includes(userData?.usertype),
+      visible: () => ["1", "11", "14", "2", "9", "4", "3", "6", "7", "8", "10"].includes(userData?.usertype),
       items: [
         { title: "Survey Reports", url: "/reports", icon: BarChart3 },
         { title: "Area Difference Report", url: "/area-difference-report", icon: Activity },
+      ],
+    },
+    {
+      key: "User Management",
+      title: "User Management",
+      collapsible: false,
+      visible: () => ["1", "2", "10"].includes(userData?.usertype),
+      items: [
+        { title: "User Create", url: "/user-create", icon: Users },
+        { title: "User List", url: "/user-list", icon: Users },
       ],
     },
     
@@ -259,7 +270,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar className={cn("border-r border-indigo-200 bg-white shadow-sm transition-all duration-300", isCollapsed ? "w-16" : "w-64")}>
-      <SidebarContent className="py-4 bg-white">
+      <SidebarContent className="pb-4 bg-white">
         {/* Logo/Brand Section */}
         <div className={cn("px-4 pb-4 mb-4 border-b border-indigo-100", isCollapsed && "px-2")}>
           {!isCollapsed ? (
@@ -283,7 +294,7 @@ export function AppSidebar() {
             <SidebarGroup key={group.key}>
               {group.collapsible === false ? (
                 <>
-                  <SidebarGroupLabel className={cn("px-3 py-2 text-xs font-semibold tracking-wider uppercase", "text-indigo-600")}>
+                  <SidebarGroupLabel className={cn("px-3 py-2 text-xs font-semibold tracking-wider uppercase", "text-black")}>
                     {!isCollapsed ? group.title : group.title.charAt(0)}
                   </SidebarGroupLabel>
                   <SidebarGroupContent className="mt-2">

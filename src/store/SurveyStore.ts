@@ -302,7 +302,7 @@ export const FilterLocationStore = create<FilterLocationState>()(
             mouzas: [],
             lots: [],
             villages: [],
-            surveyFormMode: 'reference',
+            surveyFormMode: 'input',
             setDistCode: (code: string) => set({ distCode: code }),
             setSubdivCode: (code: string) => set({ subdivCode: code }),
             setCirCode: (code: string) => set({ cirCode: code }),
