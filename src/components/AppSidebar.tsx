@@ -117,6 +117,26 @@ export function AppSidebar() {
       ],
     },
     {
+      key: "strikeoutname",
+      title: "Strike Out Name",
+      collapsible: false,
+      visible: () => ["3"].includes(userData?.usertype),
+      items: [
+        {
+          title: "Strike Out Name",
+          url: "/lm-strikeout",
+          icon: Settings,
+          // onClick: logout,
+        },
+        {
+          title: "Strike Out Cases",
+          url: "/lm-strikeout-cases",
+          icon: Settings,
+          // onClick: logout,
+        },
+      ],
+    },
+    {
       key: "comutation",
       title: "Mutation",
       collapsible: false,
@@ -125,6 +145,20 @@ export function AppSidebar() {
         {
           title: "Mutation Cases",
           url: "/co-mutation",
+          icon: Settings,
+          // onClick: logout,
+        },
+      ],
+    },
+    {
+      key: "costrikeout",
+      title: "Strike Out Name",
+      collapsible: false,
+      visible: () => ["4"].includes(userData?.usertype),
+      items: [
+        {
+          title: "Strikeout Name Cases",
+          url: "/co-strikeout",
           icon: Settings,
           // onClick: logout,
         },
