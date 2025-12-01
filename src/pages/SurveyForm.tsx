@@ -51,6 +51,9 @@ export default function SurveyData() {
       const userData: any = StorageService.getJwtCookieData(user);
 
       if (userData) {
+        if(userData.dcode){
+          getCircles(userData.dcode);
+        }
         setUserData(userData);
         setDistCode(userData.dcode);
         setSubdivCode(userData.dcode + '-' + userData.subdiv_code);
