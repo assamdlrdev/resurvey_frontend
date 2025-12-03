@@ -32,6 +32,10 @@ import UserList from "./pages/usermanagement/UserList";
 import UserUpdate from "./pages/usermanagement/UserUpdate";
 import AreaReport from "./pages/reports/AreaDiffReport";
 import VillageMap from "./pages/VillageMap";
+import LMStrikeout from "./pages/lm/LMStrikeout";
+import LMStrikeoutCases from "./pages/lm/LMStrikeoutCases";
+import COStrikeout from "./pages/co/COStrikeout";
+import COStrikeoutDetails from "./pages/co/COStrikeoutDetails";
 import ProtectedRoute from "./components/auth/ProtectedRoutes";
 import ResurveyReports from "./pages/reports/ResurveyReports";
 
@@ -81,6 +85,8 @@ function App() {
                   <Route path="/co-survey-reports" element={<CoSurveyReport />} />
                   <Route path="/co-mutation" element={<CoMutation />} />
                   <Route path="/co-mut-details" element={<CoMutDetails />} />
+                  <Route path="/co-strikeout" element={<COStrikeout />} />
+                  <Route path="/co-strikeout-details" element={<COStrikeoutDetails />} />
                 </Route>
               </Route>
               <Route element={<LMLayout />}>
@@ -88,6 +94,8 @@ function App() {
                   <Route path="/lm-dashboard" element={<LMDashboard />} />
                   <Route path="/lm-mutation" element={<LMMutation />} />
                   <Route path="/lm-mutation-cases" element={<LMMutationCases />} />
+                  <Route path="/lm-strikeout" element={<LMStrikeout />} />
+                  <Route path="/lm-strikeout-cases" element={<LMStrikeoutCases />} />
                   <Route path="/part-dag-view" element={<PartDagView />} />
                 </Route>
               </Route>
