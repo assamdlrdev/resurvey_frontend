@@ -19,7 +19,6 @@ const StorageService = {
         }
         const decodedToken = jwtDecode(token);
 
-        // console.log(decodedToken.role_id);
         return decodedToken;
     },
     jwtPayloadSave: async (data: any) => {

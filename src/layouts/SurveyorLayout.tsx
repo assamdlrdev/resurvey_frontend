@@ -18,7 +18,8 @@ export default function SurveyorLayout() {
     const SURVEYOR_CODE = '11';           // 11 =  (Surveyor)
     const SPMU_CODE = '12';               // 12 =  (SPMU)
     const SURVEY_SUPER_ADMIN_CODE = '13'; // 13 =  (Survey Super Admin)
-    const SURVEY_GIS_ASSISTANT_CODE = '14'; // 14 = GIS Assistant for Survey Operations
+    const SURVEY_GIS_ASSISTANT_CODE = '14'; // 14 = Circle GIS Assistant for Survey Operations
+    const STATE_GIS_ASSISTANT_CODE = '15'; // 15 = State GIS Assistant for Survey Operations
 
     const user = StorageService.getJwtCookie();
     if (!user) {
@@ -27,13 +28,11 @@ export default function SurveyorLayout() {
 
     const userData: any = StorageService.getJwtCookieData(user);
 
-
-
     if (!userData) {
         return <Navigate to="/login" replace />;
     }
 
-    const allowedUserTypes = [SURVEYOR_CODE, ADMIN_CODE, SURVEY_GIS_ASSISTANT_CODE, SUPERADMIN_CODE, GUEST_CODE, LM_CODE, ADC_CODE, DC_CODE, CO_CODE, SDO_CODE];
+    const allowedUserTypes = [SURVEYOR_CODE, ADMIN_CODE, SURVEY_GIS_ASSISTANT_CODE, SUPERADMIN_CODE, GUEST_CODE, LM_CODE, ADC_CODE, DC_CODE, CO_CODE, SDO_CODE,SUPERVISOR_CODE,STATE_GIS_ASSISTANT_CODE];
 
 
     if (!allowedUserTypes.includes(userData.usertype)) {

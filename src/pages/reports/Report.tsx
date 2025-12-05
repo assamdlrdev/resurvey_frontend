@@ -444,7 +444,7 @@ const AreaReport: React.FC = () => {
                                             <td className="px-4 py-3 border-b">{r.dag_no}</td>
                                             <td className="px-4 py-3 border-b">{r.bhunaksha_survey_no}</td>
                                             <td className="px-4 py-3 border-b">{Number(r.area_sqm).toFixed(2)}</td>
-                                            <td className="px-4 py-3 border-b">{r.current_land_class.land_class_name}</td>
+                                            <td className="px-4 py-3 border-b">{r.current_land_class?.land_class_name ?? ''}</td>
                                             <td className="px-4 py-3 border-b">{r.user_code}</td>
                                             <td className="px-4 py-3 border-b">
                                                 {r.created_on ? (() => {

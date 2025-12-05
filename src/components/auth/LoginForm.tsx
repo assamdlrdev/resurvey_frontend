@@ -71,9 +71,16 @@ export default function LoginForm() {
 
     const user = StorageService.getJwtCookie();
     const userData: any = StorageService.getJwtCookieData(user);
-    if(userData.usertype == '14'){
+    if(userData.usertype == '14' || userData.usertype == '15'){
       goTo('/survey-form');
-    }else{
+    }
+    else if(userData.usertype == '1' || userData.usertype == '2' ){
+      goTo('/user-create');
+    }
+    else if(userData.usertype == '10'){
+      goTo('/user-create')
+    }
+    else{
       goTo('/reports');
     }
   };

@@ -27,12 +27,21 @@ import CoMutation from "./pages/co/CoMutation";
 import CoMutDetails from "./pages/co/CoMutDetails";
 import PartDagView from "./pages/reports/PartDagView";
 import Report from "./pages/reports/Report";
+import UserCreate from "./pages/usermanagement/UserCreate";
+import UserList from "./pages/usermanagement/UserList";
+import UserUpdate from "./pages/usermanagement/UserUpdate";
 import AreaReport from "./pages/reports/AreaDiffReport";
 import VillageMap from "./pages/VillageMap";
 import LmPartition from "./pages/lm/LmPartition";
 import CoPartition from "./pages/co/CoPartition";
 import CoPartitionProceed from "./pages/co/CoPartitionProceed";
 
+import LMStrikeout from "./pages/lm/LMStrikeout";
+import LMStrikeoutCases from "./pages/lm/LMStrikeoutCases";
+import COStrikeout from "./pages/co/COStrikeout";
+import COStrikeoutDetails from "./pages/co/COStrikeoutDetails";
+import ProtectedRoute from "./components/auth/ProtectedRoutes";
+import ResurveyReports from "./pages/reports/ResurveyReports";
 
 function App() {
   const queryClient = new QueryClient();
@@ -59,8 +68,18 @@ function App() {
                   <Route path="/part-dag-view" element={<PartDagView />} />
                   <Route path="/deedDoc" element={<DeedDocument />} />
                   <Route path="/reports" element={<Report />} />
+                  <Route path="/user-create" element={
+                    <ProtectedRoute><UserCreate /></ProtectedRoute>
+                  }/>
+                  <Route path="/user-list" element={
+                     <ProtectedRoute><UserList /></ProtectedRoute>
+                    } />
+                  <Route path="/user-update/:id" element={
+                    <ProtectedRoute><UserUpdate /></ProtectedRoute>
+                    } />
                   <Route path="/area-difference-report" element={<AreaReport />} />
                   <Route path="/village-map" element={<VillageMap />} />
+                  <Route path="/my-reports" element={<ResurveyReports />} />
                 </Route>
               </Route>
 
@@ -72,6 +91,8 @@ function App() {
                   <Route path="/co-mut-details" element={<CoMutDetails />} />
                   <Route path="/co-partition-form" element={<CoPartition />} />
                   <Route path="/co-partition-form-proceed" element={<CoPartitionProceed />} />
+                  <Route path="/co-strikeout" element={<COStrikeout />} />
+                  <Route path="/co-strikeout-details" element={<COStrikeoutDetails />} />
                 </Route>
               </Route>
               <Route element={<LMLayout />}>
@@ -80,6 +101,8 @@ function App() {
                   <Route path="/lm-partition-form" element={<LmPartition />} />
                   <Route path="/lm-mutation" element={<LMMutation />} />
                   <Route path="/lm-mutation-cases" element={<LMMutationCases />} />
+                  <Route path="/lm-strikeout" element={<LMStrikeout />} />
+                  <Route path="/lm-strikeout-cases" element={<LMStrikeoutCases />} />
                   <Route path="/part-dag-view" element={<PartDagView />} />
                 </Route>
               </Route>

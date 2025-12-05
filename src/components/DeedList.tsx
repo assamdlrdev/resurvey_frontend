@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
+import { CardContent } from "./ui/card";
+import { File, Users } from "lucide-react";
 
 interface DeedType {
     unique_id: string;
@@ -23,72 +25,57 @@ interface DeedType {
     // stampfee: number | string;
 };
 
-// $row_deeds['from_epanjeeyan_ngdrs'] = 'ngdrs';
-//                 $row_deeds['unique_id'] = $deed->documentRegistrationNumber . ' & ' . $deed->id;
-//                 $row_deeds['deed_type'] = '';
-//                 $row_deeds['registration_date'] = $deed->documentRegistrationDate;
-//                 $row_deeds['dbname'] = strtolower($deed->district);
-//                 $row_deeds['fcaseno'] = $deed->documentRegistrationNumber;
-//                 $row_deeds['comcaseno'] = $deed->id;
-//                 $row_deeds['dag_no'] = $deed->dagNo;
 
 interface DeedProps {
     deeds: DeedType[];
     viewDoc: (e: any) => void
 };
 
-const DeedList: React.FC<DeedProps> = ({deeds, viewDoc}) => {
-
-    // const navigate = useNavigate();
-
-    // const viewDoc = (e: any) => {
-    //     navigate(`/deedDoc?id=${e.currentTarget.id}`);
-    // };
+const DeedList: React.FC<DeedProps> = ({ deeds, viewDoc }) => {
 
     return (
-        <div className="w-full">
-            {/* Table View for md+ */}
-            <div className="hidden md:block overflow-x-auto">
-                <table className="min-w-full border rounded-lg bg-white text-sm md:text-base text-gray-800">
-                    <thead>
-                        <tr className="bg-medical-50">
-                        <th className="px-2 py-2 border text-start">Document Unique Id </th>
-                        <th className="px-2 py-2 border text-center">Date</th>
-                        <th className="px-2 py-2 border text-center">Deed Type</th>
-                        <th className="px-2 py-2 border text-center">From Epanjeeyan / NGDRS</th>
-                        <th className="px-2 py-2 border text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {deeds?.length ? (
-                            deeds.map((d, index) => (<tr key={index} className="hover:bg-medical-50">
-                                <td className="px-2 py-2 border text-start">{d.unique_id || "N/A"}</td>
-                                <td className="px-2 py-2 border text-center">{d.registration_date}</td>
-                                <td className="px-2 py-2 border text-center">{d.deed_type}</td>
-                                <td className="px-2 py-2 border text-center">{d.from_epanjeeyan_ngdrs}</td>
-                                <td className="px-2 py-2 border text-center">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        id={`${d.comcaseno}-${d.dbname}-${d.from_epanjeeyan_ngdrs}`}
-                                        className="mt-2 w-full md:w-auto"
-                                        onClick={viewDoc}
-                                    >
-                                        View Document
-                                    </Button>
-                                </td>
-                            </tr>))
-                        ) : (
-                            <tr>
-                                <td colSpan={5} className="py-6 text-center text-medical-500">
-                                📭 No Deeds Available
-                                </td>
-                            </tr>
-                        ) }
-                    </tbody>
-                </table>
+        <CardContent className="p-4 sm:p-6 border-t border-gray-200">
+            <div className="flex items-center gap-2 mb-3">
+                <File className="h-5 w-5 text-indigo-500" />
+                <p className="text-sm font-semibold text-medical-700">Documents</p>
             </div>
-      </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                {deeds?.length ? (
+                    deeds.map((d, index) => (
+                        <div
+                            key={index}
+                            className="p-3 border rounded-lg bg-white/60 shadow-sm hover:shadow transition"
+                        >
+                            <p className="text-sm font-medium text-medical-600">Unique Id:</p>
+                            <p className="text-base text-medical-900">{d.unique_id || "N/A"}</p>
+
+                            <p className="text-sm font-medium text-medical-600 mt-2">Date:</p>
+                            <p className="text-base text-medical-900">{d.registration_date || "N/A"}</p>
+
+                            <p className="text-sm font-medium text-medical-600 mt-2">Deed Type:</p>
+                            <p className="text-base text-medical-900">{d.deed_type || "N/A"}</p>
+
+                            <p className="text-sm font-medium text-medical-600 mt-2">From Epanjeeyan / NGDRS:</p>
+                            <p className="text-base text-medical-900">{d.from_epanjeeyan_ngdrs || "N/A"}</p>
+
+                            <div className="mt-3">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    id={`${d.comcaseno}-${d.dbname}-${d.from_epanjeeyan_ngdrs}`}
+                                    className="w-full"
+                                    onClick={viewDoc}
+                                >
+                                    View Document
+                                </Button>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <p className="text-gray-600 text-sm italic">No Documents Available in NGDRS for this Dag</p>
+                )}
+            </div>
+        </CardContent>
     );
 };
 
