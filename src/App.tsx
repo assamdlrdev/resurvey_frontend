@@ -29,7 +29,10 @@ import PartDagView from "./pages/reports/PartDagView";
 import Report from "./pages/reports/Report";
 import AreaReport from "./pages/reports/AreaDiffReport";
 import VillageMap from "./pages/VillageMap";
-import Partition from "./pages/lm/Partition";
+import LmPartition from "./pages/lm/LmPartition";
+import CoPartition from "./pages/co/CoPartition";
+import CoPartitionProceed from "./pages/co/CoPartitionProceed";
+
 
 function App() {
   const queryClient = new QueryClient();
@@ -67,12 +70,14 @@ function App() {
                   <Route path="/co-survey-reports" element={<CoSurveyReport />} />
                   <Route path="/co-mutation" element={<CoMutation />} />
                   <Route path="/co-mut-details" element={<CoMutDetails />} />
+                  <Route path="/co-partition-form" element={<CoPartition />} />
+                  <Route path="/co-partition-form-proceed" element={<CoPartitionProceed />} />
                 </Route>
               </Route>
               <Route element={<LMLayout />}>
                 <Route element={<DashboardLayout />}>
                   <Route path="/lm-dashboard" element={<LMDashboard />} />
-                  <Route path="/partition-form" element={<Partition />} />
+                  <Route path="/lm-partition-form" element={<LmPartition />} />
                   <Route path="/lm-mutation" element={<LMMutation />} />
                   <Route path="/lm-mutation-cases" element={<LMMutationCases />} />
                   <Route path="/part-dag-view" element={<PartDagView />} />

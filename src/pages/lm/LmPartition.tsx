@@ -7,7 +7,7 @@ import Loader from "@/components/Loader";
 // -------------------------------------------------------------
 // Main Component: Partition
 // -------------------------------------------------------------
-export default function Partition() {
+export default function LmPartition() {
     // ----------------------------
     //  State Definitions
     // ----------------------------
@@ -181,14 +181,26 @@ export default function Partition() {
         { length: Number(landAreaInfo.totalBigha) + 1 },
         (_, i) => i
     );
-    const kathaOptions = Array.from(
-        { length: Number(landAreaInfo.totalKatha) + 1 },
-        (_, i) => i
-    );
-    const lessaOptions = Array.from(
-        { length: Number(landAreaInfo.totalLessa) + 1 },
-        (_, i) => i
-    );
+
+    // If there are Katha values, we generate Katha options. Otherwise, we show Katha as 0 to 5.
+    let kathaOptions = [];
+    if (landAreaInfo.totalBigha > 1) {
+        // If Bigha is > 1 but Katha is 0, show options from 0 to 5 (based on 1 Bigha = 5 Katha)
+        kathaOptions = Array.from({ length: 6 }, (_, i) => i);
+    }
+    else {
+        kathaOptions = Array.from({ length: landAreaInfo.totalKatha + 1 }, (_, i) => i);
+    }
+
+    // If there are Lessa values, we generate Lessa options. Otherwise, show Lessa as 0 to 20.
+    let lessaOptions = [];
+    if (landAreaInfo.totalKatha > 0 || landAreaInfo.totalBigha > 0) {
+        // If Katha is > 1 but Lessa is 0, show options from 0 to 20 (based on 1 Katha = 20 Lessa)
+        lessaOptions = Array.from({ length: 21 }, (_, i) => i);
+    }
+    else {
+        lessaOptions = Array.from({ length: landAreaInfo.totalLessa + 1 }, (_, i) => i);
+    }
 
     // ----------------------------
     //  API Calls
@@ -317,7 +329,7 @@ export default function Partition() {
     //  Lifecycle Effects
     // ----------------------------
     useEffect(() => {
-        if (location.pathname === "/partition-form") {
+        if (location.pathname === "/lm-partition-form") {
             getVillages();
             getPattaTypes();
         }

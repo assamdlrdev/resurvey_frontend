@@ -114,9 +114,31 @@ export function AppSidebar() {
           icon: Settings,
           // onClick: logout,
         },
+      ],
+    },
+     {
+      key: "partition",
+      title: "Partition",
+      collapsible: false,
+      visible: () => ["3"].includes(userData?.usertype),
+      items: [
         {
           title: "Partition",
-          url: "/partition-form",
+          url: "/lm-partition-form",
+          icon: Settings,
+          // onClick: logout,
+        },
+      ],
+    },
+    {
+      key: "partition",
+      title: "Partition",
+      collapsible: false,
+      visible: () => ["4"].includes(userData?.usertype),
+      items: [
+        {
+          title: "Partition Cases",
+          url: "/co-partition-form",
           icon: Settings,
           // onClick: logout,
         },
